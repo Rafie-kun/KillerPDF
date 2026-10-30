@@ -46,6 +46,13 @@ public sealed class PdfParagraphEditorTests
     }
 
     [Fact]
+    public void ADocumentWideRefusalIsReportedOnceRatherThanForEveryParagraph()
+    {
+        PdfDocument rotated = Raw("BT /F1 10 Tf 30 250 Td (One) Tj ET BT /F1 10 Tf 30 100 Td (Two) Tj ET", "/Rotate 90");
+        Assert.Single(PdfParagraphEditor.InspectCandidates(rotated, 0).Refusals);
+    }
+
+    [Fact]
     public void CandidateInspectionRetainsRotationRefusalAndSupportedCandidates()
     {
         PdfDocument ordinary = Raw("BT /F1 10 Tf 30 250 Td (OLD) Tj ET");

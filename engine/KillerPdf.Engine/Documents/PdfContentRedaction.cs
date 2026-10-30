@@ -1575,7 +1575,7 @@ public static partial class PdfContentRedaction
                     if (covered)
                     {
                         if (state.Size == 0) Reasons.Add("ZeroSizeText");
-                        insertion?.Observe(state, text, BarredFromParagraphs());
+                        insertion?.Observe(state, text, BarredFromParagraphs(), bounds);
                         Flush();
                         double displacement = font.IsVertical
                             ? vertical.Advance + (state.Size == 0 ? 0 : spacing * 1000 / state.Size)

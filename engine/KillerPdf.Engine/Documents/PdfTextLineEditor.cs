@@ -242,9 +242,16 @@ public static partial class PdfContentRedaction
             new Dictionary<PdfDictionary, PdfExtractionFont?>(ReferenceEqualityComparer.Instance),
             cancellationToken, glyphsOnly: true, insertion: insertion, usedCodes: used);
         rewriter.RewritePage(page, geometry);
+        return Summarize(insertion, Unreadable(rewriter), tree, geometry);
+    }
+
+    private static bool Unreadable(ContentRewriter rewriter) =>
+        rewriter.Reasons.Contains("UnreadableFont") || rewriter.Reasons.Contains("UndecodableText");
+
+    private static LineProbe Summarize(LineInsertion insertion, bool unreadable, PdfPageTree tree, PageGeometry geometry)
+    {
         PdfTextLineBlocker blocker = insertion.Glyphs == 0
-            ? rewriter.Reasons.Contains("UnreadableFont") || rewriter.Reasons.Contains("UndecodableText")
-                ? PdfTextLineBlocker.UnreadableText : PdfTextLineBlocker.NoText
+            ? unreadable ? PdfTextLineBlocker.UnreadableText : PdfTextLineBlocker.NoText
             : insertion.Invisible ? PdfTextLineBlocker.InvisibleText
             : insertion.ZeroSize ? PdfTextLineBlocker.ZeroSizeText
             : PdfTextLineBlocker.None;
@@ -256,6 +263,43 @@ public static partial class PdfContentRedaction
             size = Math.Abs(state.Size) * Math.Sqrt(device.C * device.C + device.D * device.D);
         }
         return new LineProbe(new PdfTextLineInspection(insertion.Glyphs, blocker, fontName, size), insertion, tree, geometry);
+    }
+
+    private sealed record ParagraphGlyph(PdfContentBounds Bounds, TextState State, Matrix Glyph, bool Barred);
+
+    /// <summary>One pass over a page's text, so a page with hundreds of paragraphs is walked once
+    /// instead of once per paragraph.</summary>
+    internal sealed class ParagraphPaintMap
+    {
+        private readonly PdfDocument _document;
+        private readonly PdfPageTree _tree;
+        private readonly PageGeometry _geometry;
+        private readonly List<ParagraphGlyph> _glyphs;
+        private readonly bool _unreadable;
+
+        internal ParagraphPaintMap(PdfDocument document, int pageIndex)
+        {
+            _document = document;
+            _tree = PdfPageTree.Read(document);
+            PdfPageTreeEntry page = _tree.Pages[pageIndex];
+            _geometry = Geometry(document, page);
+            _glyphs = [];
+            var rewriter = new ContentRewriter(document, null,
+                [new PdfContentBounds(0, 0, _geometry.Width, _geometry.Height)], false,
+                new Dictionary<PdfDictionary, PdfExtractionFont?>(ReferenceEqualityComparer.Instance),
+                default, glyphsOnly: true, insertion: new LineInsertion { Recording = _glyphs });
+            rewriter.RewritePage(page, _geometry);
+            _unreadable = Unreadable(rewriter);
+        }
+
+        internal (PdfRgbColor Color, PdfContentBounds Clip) Inspect(PdfContentBounds region)
+        {
+            var insertion = new LineInsertion { InspectParagraph = true };
+            foreach (ParagraphGlyph glyph in _glyphs)
+                if (ContainsCenter(glyph.Bounds, region))
+                    insertion.Observe(glyph.State, glyph.Glyph, glyph.Barred, glyph.Bounds);
+            return ParagraphPaint(_document, Summarize(insertion, _unreadable, _tree, _geometry));
+        }
     }
 
     private static string[] ReplacementLines(string text) =>
@@ -434,6 +478,7 @@ public static partial class PdfContentRedaction
         private bool _pending;
 
         internal bool InspectParagraph { get; init; }
+        internal List<ParagraphGlyph>? Recording { get; init; }
         internal LineWriter? Writer { get; init; }
         internal TextState? State { get; private set; }
         internal Matrix Glyph { get; private set; }
@@ -445,8 +490,13 @@ public static partial class PdfContentRedaction
         internal List<PdfContentInstruction>? AfterText { get; set; }
         internal int AfterTextDepth { get; private set; }
 
-        internal void Observe(TextState state, Matrix glyph, bool barredFromParagraphs)
+        internal void Observe(TextState state, Matrix glyph, bool barredFromParagraphs, PdfContentBounds bounds)
         {
+            if (Recording is { } recording)
+            {
+                recording.Add(new ParagraphGlyph(bounds, state, glyph, barredFromParagraphs));
+                return;
+            }
             Glyphs++;
             if (state.RenderMode is 3 or 7) Invisible = true;
             if (state.Size == 0) ZeroSize = true;

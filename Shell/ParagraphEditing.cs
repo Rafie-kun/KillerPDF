@@ -26,12 +26,6 @@ public partial class MainWindow
             {
                 KillerDialog.Show(this, ParagraphEditDialog.RefusalText(PdfParagraphRefusalCode.RotatedPage)); return;
             }
-            PdfParagraphCandidateInspection inspection = PdfParagraphEditor.InspectCandidates(session.Document, pageIndex);
-            if (inspection.Candidates.Count == 0)
-            {
-                KillerDialog.Show(this, string.Join("\n", inspection.Refusals.Select(item =>
-                    ParagraphEditDialog.RefusalText(item.RefusalCode)).Distinct())); return;
-            }
             // Capture the working model before opening the modal editor. Editable overlays remain
             // in their existing side state and survive the normal reload path.
             serialized = App.MakeTempFile("paragraphsource");
@@ -40,6 +34,12 @@ public partial class MainWindow
             PdfEngineIntegration.RepairHarmlessSaveArtifacts(serialized);
             PdfEngineIntegration.CreateZeroRotationCopy(serialized, snapshot);
             PdfDocument document = PdfDocument.Open(File.ReadAllBytes(snapshot));
+            PdfParagraphCandidateInspection inspection = PdfParagraphEditor.InspectCandidates(document, pageIndex);
+            if (inspection.Candidates.Count == 0)
+            {
+                KillerDialog.Show(this, string.Join("\n", inspection.Refusals.Select(item =>
+                    ParagraphEditDialog.RefusalText(item.RefusalCode)).Distinct())); return;
+            }
             Point? point = null;
             if (canvasPoint is Point position && _renderDims.TryGetValue(pageIndex, out var dimensions))
             {
@@ -47,7 +47,7 @@ public partial class MainWindow
                     page.Width, page.Height, dimensions.w, dimensions.h, rotation);
                 point = new Point(bounds.Left, bounds.Bottom);
             }
-            var dialog = new ParagraphEditDialog(this, document, pageIndex, _appScale, point);
+            var dialog = new ParagraphEditDialog(this, document, pageIndex, _appScale, point, inspection);
             dialog.ShowDialog();
             if (dialog.Result is not { } plan) return;
             if (!sourceCurrent() || !File.Exists(sourcePath)

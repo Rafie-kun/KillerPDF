@@ -115,11 +115,19 @@ public static class PdfParagraphEditor
     public static PdfParagraphCandidateInspection InspectCandidates(PdfDocument document, int pageIndex)
     {
         ArgumentNullException.ThrowIfNull(document);
-        PdfPageContent page = new PdfPageContentReader(document).Read(pageIndex);
+        // One read of the page serves every group. A busy page has hundreds of them, and a reason
+        // that covers the whole document is one refusal, not one per group.
+        ParagraphPage? context = null;
+        PdfParagraphInspection? blocked;
+        try { context = ReadParagraphPage(document, pageIndex, out blocked); }
+        catch (Exception error) when (IsRefusal(error)) { blocked = new PdfParagraphInspection(false, error.Message, null); }
+        if (blocked is not null || context is null)
+            return new([], Array.AsReadOnly(new[] { blocked! }));
+        PdfPageContent page = context.Content;
         var result = new List<PdfParagraphCandidate>();
         var refusals = new List<PdfParagraphInspection>();
         var group = new List<PdfExtractedLine>();
-        bool tagged = IsTagged(PdfPageTree.Read(document));
+        bool tagged = IsTagged(context.Tree);
         foreach (PdfExtractedLine line in page.Lines)
         {
             if (line.Runs.Count == 0 || line.Runs.Any(run => run.Letters.Count == 0)) { Flush(); continue; }
@@ -150,7 +158,9 @@ public static class PdfParagraphEditor
             var bounds = new PdfContentBounds(group.Min(line => line.BoundingBox.Left),
                 group.Min(line => line.BoundingBox.Bottom), group.Max(line => line.BoundingBox.Right),
                 group.Max(line => line.BoundingBox.Top));
-            PdfParagraphInspection inspection = Inspect(document, pageIndex, bounds);
+            PdfParagraphInspection inspection;
+            try { inspection = InspectRegion(document, pageIndex, bounds, context); }
+            catch (Exception error) when (IsRefusal(error)) { inspection = new PdfParagraphInspection(false, error.Message, null); }
             if (inspection.Candidate is { } candidate) result.Add(candidate);
             else refusals.Add(inspection);
             group.Clear();
@@ -161,14 +171,24 @@ public static class PdfParagraphEditor
     public static PdfParagraphInspection Inspect(PdfDocument document, int pageIndex, PdfContentBounds sourceRegion)
     {
         ArgumentNullException.ThrowIfNull(document);
-        try { return InspectCore(document, pageIndex, sourceRegion); }
-        catch (Exception error) when (error is NotSupportedException or FormatException or InvalidOperationException
-            or ArgumentException)
+        try
+        {
+            ParagraphPage page = ReadParagraphPage(document, pageIndex, out PdfParagraphInspection? blocked);
+            return blocked ?? InspectRegion(document, pageIndex, sourceRegion, page);
+        }
+        catch (Exception error) when (IsRefusal(error))
         { return new PdfParagraphInspection(false, error.Message, null); }
     }
 
-    private static PdfParagraphInspection InspectCore(PdfDocument document, int pageIndex, PdfContentBounds region)
+    private sealed record ParagraphPage(PdfPageTree Tree, PdfPageContent Content, PdfContentRedaction.ParagraphPaintMap Paint);
+
+    private static bool IsRefusal(Exception error) =>
+        error is NotSupportedException or FormatException or InvalidOperationException or ArgumentException;
+
+    // Checks everything that holds for the whole page, so each region only pays for its own.
+    private static ParagraphPage ReadParagraphPage(PdfDocument document, int pageIndex, out PdfParagraphInspection? blocked)
     {
+        blocked = null;
         PdfPageTree tree = PdfPageTree.Read(document);
         if (pageIndex < 0 || pageIndex >= tree.Pages.Count) throw new ArgumentOutOfRangeException(nameof(pageIndex));
         if (document.IsEncrypted)
@@ -180,12 +200,22 @@ public static class PdfParagraphEditor
         PdfPageTreeEntry entry = tree.Pages[pageIndex];
         if (entry.InheritedValues.TryGetValue(Name("Rotate"), out PdfObject? rotation)
             && Number(document, rotation) % 360 != 0)
-            return new PdfParagraphInspection(false, "Paragraph editing is not supported on rotated pages.", null)
+        {
+            blocked = new PdfParagraphInspection(false, "Paragraph editing is not supported on rotated pages.", null)
                 { RefusalCode = PdfParagraphRefusalCode.RotatedPage };
-        PdfPageContent page = new PdfPageContentReader(document).Read(pageIndex);
-        ValidateBounds(region, page.Width, page.Height);
-        if (page.Diagnostics.Count != 0)
+            return new ParagraphPage(tree, null!, null!);
+        }
+        PdfPageContent content = new PdfPageContentReader(document).Read(pageIndex);
+        if (content.Diagnostics.Count != 0)
             throw new NotSupportedException("The page has extraction diagnostics and cannot be edited as a paragraph.");
+        return new ParagraphPage(tree, content, new PdfContentRedaction.ParagraphPaintMap(document, pageIndex));
+    }
+
+    private static PdfParagraphInspection InspectRegion(PdfDocument document, int pageIndex, PdfContentBounds region,
+        ParagraphPage context)
+    {
+        (PdfPageTree tree, PdfPageContent page, _) = context;
+        ValidateBounds(region, page.Width, page.Height);
         var selected = page.Letters.Where(letter => CenterInside(letter.BoundingBox, region)).ToArray();
         if (selected.Length == 0) throw new NotSupportedException("Select a complete paragraph of readable text.");
         if (selected.Length > 100_000) throw new NotSupportedException("The source paragraph exceeds the size limit.");
@@ -219,7 +249,7 @@ public static class PdfParagraphEditor
         var bounds = new PdfContentBounds(selected.Min(letter => letter.BoundingBox.Left),
             selected.Min(letter => letter.BoundingBox.Bottom), selected.Max(letter => letter.BoundingBox.Right),
             selected.Max(letter => letter.BoundingBox.Top));
-        var (color, clip) = PdfContentRedaction.InspectParagraphPaint(document, pageIndex, region);
+        var (color, clip) = context.Paint.Inspect(region);
         if (!PdfContentRedaction.ClipHolds(clip, bounds)) throw new NotSupportedException("The paragraph is clipped.");
         if (page.Letters.Any(letter => CenterInside(letter.BoundingBox, bounds) && !selectedSet.Contains(letter)))
             throw new NotSupportedException("The source bounds overlap other text and cannot identify one paragraph safely.");
@@ -358,9 +388,10 @@ public static partial class PdfContentRedaction
         && area.Right <= clip.Right + 0.01 && area.Top <= clip.Top + 0.01;
 
     internal static (PdfRgbColor Color, PdfContentBounds Clip) InspectParagraphPaint(PdfDocument document, int pageIndex,
-        PdfContentBounds region)
+        PdfContentBounds region) => ParagraphPaint(document, Probe(document, pageIndex, region, null, default, paragraph: true));
+
+    private static (PdfRgbColor Color, PdfContentBounds Clip) ParagraphPaint(PdfDocument document, LineProbe probe)
     {
-        LineProbe probe = Probe(document, pageIndex, region, null, default, paragraph: true);
         if (!probe.Inspection.CanEdit || probe.Insertion.ParagraphUnsafe)
             throw new NotSupportedException("The paragraph has unsupported transformations, rendering, or mixed styles.");
         TextState state = probe.Insertion.State!;

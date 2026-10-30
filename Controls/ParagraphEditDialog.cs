@@ -43,11 +43,14 @@ internal sealed class ParagraphEditDialog : Window
     internal PdfParagraphPlan? Result { get; private set; }
 
     internal ParagraphEditDialog(Window owner, PdfDocument document, int pageIndex, double scale, Point? pagePoint = null)
+        : this(owner, document, pageIndex, scale, pagePoint, PdfParagraphEditor.InspectCandidates(document, pageIndex)) { }
+
+    internal ParagraphEditDialog(Window owner, PdfDocument document, int pageIndex, double scale, Point? pagePoint,
+        PdfParagraphCandidateInspection inspection)
     {
         _document = document; _pageIndex = pageIndex;
         _page = PdfPageInformation.Read(document)[pageIndex];
         _pixelsPerPoint = Math.Min(1000 / _page.Width, 1000 / _page.Height);
-        PdfParagraphCandidateInspection inspection = PdfParagraphEditor.InspectCandidates(document, pageIndex);
         _candidates = inspection.Candidates;
         Title = "KillerPDF: " + L("Str_Paragraph_Title");
         scale = Math.Clamp(scale, .7, 2.5);
