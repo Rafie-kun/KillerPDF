@@ -10,6 +10,35 @@ namespace KillerPdf.Engine.Tests.Documents;
 public sealed class PdfDocumentInformationTests
 {
     [Theory]
+    // ISO 32000 defines a zero zoom as null: keep the viewer's current zoom.
+    [InlineData("/XYZ null null 0", PdfDestinationKind.Xyz)]
+    [InlineData("/XYZ 10 20 -1", PdfDestinationKind.Xyz)]
+    [InlineData("/FitR 200 200 100 100", null)]
+    public void AnOpenActionWithAMalformedViewDoesNotStopTheDocumentBeingRead(string view, PdfDestinationKind? kind)
+    {
+        string[] objects = [$"<< /Type /Catalog /Pages 2 0 R /OpenAction [3 0 R {view}] >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>", "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 300] >>"];
+        var pdf = new System.Text.StringBuilder("%PDF-1.7\n");
+        var offsets = new List<int>();
+        for (int index = 0; index < objects.Length; index++)
+        {
+            offsets.Add(pdf.Length);
+            pdf.Append($"{index + 1} 0 obj\n{objects[index]}\nendobj\n");
+        }
+        int xref = pdf.Length;
+        pdf.Append($"xref\n0 {objects.Length + 1}\n0000000000 65535 f \n");
+        foreach (int offset in offsets) pdf.Append($"{offset:0000000000} 00000 n \n");
+        pdf.Append($"trailer\n<< /Size {objects.Length + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
+
+        PdfInitialView view2 = PdfDocumentInformation.Read(
+            PdfDocument.Open(System.Text.Encoding.ASCII.GetBytes(pdf.ToString()))).InitialView;
+
+        Assert.Equal(0, view2.PageIndex);
+        Assert.Equal(kind, view2.Destination?.Kind);
+        if (kind is not null) Assert.Null(view2.Destination!.Values[2]);
+    }
+
+    [Theory]
     [InlineData("FlateDecode")]
     [InlineData("UnsupportedFilter")]
     public void Read_PreservesInfoAndPagesWhenOptionalXmpCannotBeDecoded(string filter)

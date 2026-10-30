@@ -122,12 +122,14 @@ public sealed record PdfInitialView
         };
         PdfDestination? destination = kindName.ValueAsLatin1() switch
         {
-            "XYZ" => PdfDestination.At(Number(2), Number(3), Number(4)),
+            // ISO 32000 defines a zero zoom as null. A malformed view is advisory and must not
+            // stop the document being read, so anything else invalid is treated the same way.
+            "XYZ" => PdfDestination.At(Number(2), Number(3), Number(4) is > 0 and var zoom ? zoom : null),
             "Fit" => PdfDestination.FitPage(),
             "FitH" => PdfDestination.FitWidth(Number(2)),
             "FitV" => PdfDestination.FitHeight(Number(2)),
             "FitR" when Number(2) is double left && Number(3) is double bottom
-                && Number(4) is double right && Number(5) is double top
+                && Number(4) is double right && Number(5) is double top && right > left && top > bottom
                 => PdfDestination.FitRectangle(left, bottom, right, top),
             "FitB" => PdfDestination.FitBoundingBox(),
             "FitBH" => PdfDestination.FitBoundingBoxWidth(Number(2)),

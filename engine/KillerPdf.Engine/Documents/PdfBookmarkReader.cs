@@ -156,12 +156,12 @@ public static class PdfBookmarkReader
             // viewer's current zoom. Typst emits the explicit zero form. Normalize it
             // before constructing the authoring model, whose non-null zoom is positive.
             "XYZ" when values.Length == 3 => PdfDestination.At(
-                values[0], values[1], values[2] == 0 ? null : values[2]),
+                values[0], values[1], values[2] > 0 ? values[2] : null),
             "Fit" when values.Length == 0 => PdfDestination.FitPage(),
             "FitH" when values.Length == 1 => PdfDestination.FitWidth(values[0]),
             "FitV" when values.Length == 1 => PdfDestination.FitHeight(values[0]),
-            "FitR" when values is [double left, double bottom, double right, double top] =>
-                PdfDestination.FitRectangle(left, bottom, right, top),
+            "FitR" when values is [double left, double bottom, double right, double top]
+                && right > left && top > bottom => PdfDestination.FitRectangle(left, bottom, right, top),
             "FitB" when values.Length == 0 => PdfDestination.FitBoundingBox(),
             "FitBH" when values.Length == 1 => PdfDestination.FitBoundingBoxWidth(values[0]),
             "FitBV" when values.Length == 1 => PdfDestination.FitBoundingBoxHeight(values[0]),
