@@ -241,6 +241,22 @@ public sealed class PdfParagraphEditorTests
         Assert.Contains("Footer", page.Text, StringComparison.Ordinal);
     }
 
+    // Word justifies text with word and character spacing, which changes from line to line.
+    [Fact]
+    public void EditsJustifiedLinesAndLeavesLaterTextSpacedAsItWas()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 2 Tw 1 Tc 1 0 0 1 30 250 Tm (OLD line) Tj " +
+            "0.5 Tw 0.2 Tc 1 0 0 1 30 238 Tm (OLD next) Tj 1 0 0 1 200 30 Tm (Tail text) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0),
+            item => item.Text.Contains("OLD", StringComparison.Ordinal));
+        var target = new PdfContentBounds(30, 200, 200, 262);
+        var plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion, target, "AAAA", Font(), 10, 12, PdfParagraphAlignment.Left);
+        PdfDocument changed = PdfDocument.Open(PdfParagraphEditor.Apply(source, plan));
+        PdfExtractedLetter[] letters = [.. new PdfPageContentReader(changed).Read(0).Letters.Where(letter => letter.Value == "A")];
+        Assert.Equal(letters[0].EndBaseLine.X, letters[1].StartBaseLine.X, 5);
+        Assert.Equal(Unselected(source, candidate.SourceRegion), Unselected(changed, target));
+    }
+
     [Fact]
     public void PageGraphicsStatesAndFormsElsewhereDoNotBlockTheParagraph()
     {

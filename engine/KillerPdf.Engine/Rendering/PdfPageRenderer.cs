@@ -1401,18 +1401,16 @@ public sealed partial class PdfPageRenderer
                 Point[] patternBounds = [.. paintPath.SelectMany(points => points).Select(point => pageToPattern.Apply(point.X, point.Y))];
                 if (patternBounds.Length == 0) return;
                 double stepX = Math.Abs(xStep), stepY = Math.Abs(yStep);
-                int firstX = checked((int)Math.Floor(
-                    (patternBounds.Min(point => point.X) - right) / stepX));
-                int lastX = checked((int)Math.Ceiling(
-                    (patternBounds.Max(point => point.X) - left) / stepX));
-                int firstY = checked((int)Math.Floor(
-                    (patternBounds.Min(point => point.Y) - top) / stepY));
-                int lastY = checked((int)Math.Ceiling(
-                    (patternBounds.Max(point => point.Y) - bottom) / stepY));
-                long cellCount = checked((long)(lastX - firstX + 1)
-                    * (lastY - firstY + 1));
-                if (cellCount > 100_000)
+                // Doubles until the limit is checked, since a tiny step can exceed the integer range.
+                double firstCellX = Math.Floor((patternBounds.Min(point => point.X) - right) / stepX);
+                double lastCellX = Math.Ceiling((patternBounds.Max(point => point.X) - left) / stepX);
+                double firstCellY = Math.Floor((patternBounds.Min(point => point.Y) - top) / stepY);
+                double lastCellY = Math.Ceiling((patternBounds.Max(point => point.Y) - bottom) / stepY);
+                if (!((lastCellX - firstCellX + 1) * (lastCellY - firstCellY + 1) <= 100_000)
+                    || Math.Abs(firstCellX) > int.MaxValue / 2 || Math.Abs(firstCellY) > int.MaxValue / 2)
                     throw new FormatException("A tiling pattern requires too many cells.");
+                int firstX = (int)firstCellX, lastX = (int)lastCellX;
+                int firstY = (int)firstCellY, lastY = (int)lastCellY;
                 PdfDictionary patternResources = pattern.Dictionary.TryGetValue(Name("Resources"),
                     out PdfObject? resourcesValue)
                     ? Resolve(resourcesValue) as PdfDictionary

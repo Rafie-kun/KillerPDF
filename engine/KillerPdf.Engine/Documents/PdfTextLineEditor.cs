@@ -503,7 +503,6 @@ public static partial class PdfContentRedaction
             if (InspectParagraph)
             {
                 if (barredFromParagraphs || state.SoftMasked || state.Size <= 0 || state.RenderMode != 0
-                    || state.CharacterSpacing != 0 || state.WordSpacing != 0
                     || state.Scale != 1 || state.Rise != 0 || state.Font?.IsVertical == true
                     || Math.Abs(glyph.A - 1) > 1e-8 || Math.Abs(glyph.B) > 1e-8 || Math.Abs(glyph.C) > 1e-8
                     || Math.Abs(glyph.D - 1) > 1e-8 || Math.Abs(state.Ctm.A - 1) > 1e-8
@@ -540,6 +539,9 @@ public static partial class PdfContentRedaction
                 output.Add(new PdfContentInstruction("Tf", 0, [original!, new PdfReal(size)]));
             if (writer.Fill is PdfRgbColor fill) output.Add(Op("rg", fill.Red, fill.Green, fill.Blue));
             if (writer.CharacterSpacing is double spacing) output.Add(Op("Tc", spacing));
+            // Justified source lines carry their own spacing, which must not stretch the replacement.
+            bool clearSpacing = writer.ParagraphLines is not null;
+            if (clearSpacing) { output.Add(Op("Tc", 0)); output.Add(Op("Tw", 0)); }
             output.Add(Op("Tm", Glyph.A, Glyph.B, Glyph.C, Glyph.D, Glyph.E, Glyph.F));
             double leading = state.Leading > 0 ? state.Leading * factor : Math.Abs(size) * 1.2;
             for (int index = 0; index < writer.Lines.Count; index++)
@@ -554,7 +556,8 @@ public static partial class PdfContentRedaction
 
             if (fontChange) output.Add(new PdfContentInstruction("Tf", 0, [original!, new PdfReal(size0)]));
             if (writer.Fill is not null) output.AddRange(state.Fill.Length > 0 ? state.Fill : [Op("g", 0)]);
-            if (writer.CharacterSpacing is not null) output.Add(Op("Tc", state.CharacterSpacing));
+            if (writer.CharacterSpacing is not null || clearSpacing) output.Add(Op("Tc", state.CharacterSpacing));
+            if (clearSpacing) output.Add(Op("Tw", state.WordSpacing));
             output.Add(Op("Tm", line.A, line.B, line.C, line.D, line.E, line.F));
             bool vertical = state.Font?.IsVertical == true;
             double axisX = vertical ? line.C : line.A, axisY = vertical ? line.D : line.B;

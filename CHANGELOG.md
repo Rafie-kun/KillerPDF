@@ -10,8 +10,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Fixed
 
-- Edit paragraph no longer refuses a whole page because of a clip, graphics state, marked content or form somewhere on it, and it edits paragraphs written one line at a time, as Word exports them. Tagged documents can be edited too, with the new text kept in the paragraph's own element. It still refuses a paragraph that is clipped, soft masked, on a layer, inside a form, or painted in mixed styles.
+- Edit paragraph no longer refuses a whole page because of a clip, graphics state, marked content or form somewhere on it, and it edits justified paragraphs and paragraphs written one line at a time, as Word exports them. Tagged documents can be edited too, with the new text kept in the paragraph's own element. It still refuses a paragraph that is clipped, soft masked, on a layer, inside a form, or painted in mixed styles.
 - Document Info, Initial View, Page Labels and metadata repair no longer fail on a PDF whose opening view has a zoom of zero, which the PDF standard allows, or another malformed view.
+- A page whose tiling pattern needs an impossibly large number of cells reports that instead of failing with an arithmetic error.
 - Importing or drawing a signature closes the picker, so the next click on the page places it. The picker used to reopen over the page with the signature already waiting.
 
 ## [1.9.0] - 2026-10-29
