@@ -263,18 +263,31 @@ public static class PdfPermanentRedaction
                     $"The document no longer contains reviewed attachment '{match.Id}'.");
             targets.Add((match, current[index]));
         }
-        if (targets.Count == 0)
+        // A review is made from the name tree, so with every listed file chosen, a file that only an
+        // /AF entry or an action names goes too. A stream that a kept file still uses is never removed.
+        Dictionary<string, HashSet<int>> listed = PdfEmbeddedFileReach.ListedStreams(document);
+        HashSet<string> chosen = [.. targets.Select(item => item.Attachment.NameTreeKey
+            ?? throw new InvalidOperationException("A reviewed attachment has no name-tree key."))];
+        HashSet<int> removedStreams = [.. listed.Where(file => chosen.Contains(file.Key))
+            .SelectMany(file => file.Value)];
+        if (targets.Count == current.Length)
+            removedStreams.UnionWith(PdfEmbeddedFileReach.Reachable(document).Keys);
+        removedStreams.ExceptWith(listed.Where(file => !chosen.Contains(file.Key))
+            .SelectMany(file => file.Value));
+        if (targets.Count == 0 && removedStreams.Count == 0)
             return new PdfAttachmentRedactionResult(document.Source, [],
                 Array.AsReadOnly(current.Select(item => item.FileName).ToArray()));
 
         (PdfDocument editingSource, IReadOnlyList<PdfReferenceRepair> preflightRepairs) =
             PrepareRemoval(document, allowSignatureInvalidation);
-        var editor = new PdfIncrementalPageEditor(editingSource);
-        foreach (var (Match, Attachment) in targets)
-            editor.RemoveAttachmentByKey(Attachment.NameTreeKey
-                ?? throw new InvalidOperationException(
-                    "A reviewed attachment has no name-tree key."));
-        PdfDocumentWriteResult written = PdfDocumentWriter.WriteWithReport(PdfDocument.Open(editor.Build()),
+        if (chosen.Count > 0)
+        {
+            var editor = new PdfIncrementalPageEditor(editingSource);
+            foreach (string key in chosen) editor.RemoveAttachmentByKey(key);
+            editingSource = PdfDocument.Open(editor.Build());
+        }
+        PdfDocumentWriteResult written = PdfDocumentWriter.WriteWithReport(
+            PdfEmbeddedFileReach.Strip(editingSource, removedStreams),
             new PdfDocumentWriteOptions
             {
                 PruneUnreachableObjects = true,
@@ -294,6 +307,11 @@ public static class PdfPermanentRedaction
             || reopened.CrossReferences.Sections.Count != 1)
             throw new InvalidOperationException(
                 "The saved document did not preserve the reviewed attachment-removal result.");
+        HashSet<int> keptStreams = [.. PdfEmbeddedFileReach.ListedStreams(reopened).Values
+            .SelectMany(streams => streams)];
+        if (PdfEmbeddedFileReach.Reachable(reopened).Keys.Any(stream => !keptStreams.Contains(stream)))
+            throw new InvalidOperationException(
+                "The saved document still holds an embedded file the review did not keep.");
         return new PdfAttachmentRedactionResult(output,
             Array.AsReadOnly(selected.Select(match => match.Id).ToArray()),
             Array.AsReadOnly(remaining))
@@ -586,4 +604,237 @@ public static class PdfPermanentRedaction
     }
 
     private static PdfName Name(string value) => new(System.Text.Encoding.ASCII.GetBytes(value));
+}
+
+/// <summary>
+/// Finds and removes embedded files wherever a document reaches them. The name tree is only one way:
+/// /AF arrays on the catalog, pages, annotations, forms and structure elements, FileAttachment
+/// annotations, and the file specifications in actions and media clips all hold them too. A stream is
+/// known by its object number, so a file reached several ways counts once.
+/// </summary>
+internal static class PdfEmbeddedFileReach
+{
+    private static readonly PdfName EncryptName = Name("Encrypt");
+    private static readonly PdfName AssociatedFilesName = Name("AF");
+    private static readonly PdfName EmbeddedFilesName = Name("EF");
+    private static readonly PdfName RelatedFilesName = Name("RF");
+    private static readonly PdfName TypeName = Name("Type");
+    private static readonly PdfName FormPacketsName = Name("XFA");
+
+    /// <summary>
+    /// Lists every embedded-file stream reachable from the trailer, with the name its file
+    /// specification gives it, or null for a stream no specification owns.
+    /// </summary>
+    internal static Dictionary<int, string?> Reachable(PdfDocument document)
+    {
+        var found = new Dictionary<int, string?>();
+        var visited = new HashSet<(int ObjectNumber, int Generation)>();
+        var pending = new Stack<PdfObject>(StartingPoints(document));
+        // An explicit stack, because a long chain of pages or actions must not become a deep call chain.
+        while (pending.Count > 0)
+        {
+            PdfObject value = pending.Pop();
+            int? objectNumber = null;
+            if (value is PdfIndirectReference reference)
+            {
+                if (!visited.Add((reference.ObjectNumber, reference.Generation))) continue;
+                objectNumber = reference.ObjectNumber;
+                try { value = document.Resolve(reference); }
+                catch (Exception error) when (PdfReaderDamage.Is(error)) { continue; }
+            }
+            switch (value)
+            {
+                case PdfStream stream:
+                    if (objectNumber is int number && IsEmbeddedFile(document, stream))
+                        found.TryAdd(number, null);
+                    foreach (PdfObject item in stream.Dictionary.Values) pending.Push(item);
+                    break;
+                case PdfDictionary dictionary:
+                    foreach (int file in Payloads(document, dictionary))
+                        found[file] = FileName(document, dictionary) ?? found.GetValueOrDefault(file);
+                    // XFA writers type their packet streams as embedded files, but a packet is form data.
+                    foreach ((PdfName key, PdfObject item) in dictionary)
+                        if (!key.Equals(FormPacketsName)) pending.Push(item);
+                    break;
+                case PdfArray array:
+                    foreach (PdfObject item in array) pending.Push(item);
+                    break;
+                case PdfIndirectReference next:
+                    pending.Push(next);
+                    break;
+            }
+        }
+        return found;
+    }
+
+    /// <summary>Gets the payload streams of each file in the embedded-files name tree, by key.</summary>
+    internal static Dictionary<string, HashSet<int>> ListedStreams(PdfDocument document)
+    {
+        var listed = new Dictionary<string, HashSet<int>>(StringComparer.Ordinal);
+        PdfDictionary catalog = PdfPageTree.Read(document).Catalog;
+        if (!catalog.TryGetValue(Name("Names"), out PdfObject? namesValue)
+            || ReadOrNull(document, namesValue) is not PdfDictionary names
+            || !names.TryGetValue(Name("EmbeddedFiles"), out PdfObject? filesValue)) return listed;
+        foreach (PdfNameTreeEntry entry in PdfNameTree.Read(document, filesValue))
+        {
+            string key = PdfUnicodeEncoding.DecodeTextString(entry.Key.Bytes.Span, "An embedded-file name");
+            if (!listed.TryGetValue(key, out HashSet<int>? streams)) listed[key] = streams = [];
+            if (ReadOrNull(document, entry.Value) is PdfDictionary specification)
+                streams.UnionWith(Payloads(document, specification));
+        }
+        return listed;
+    }
+
+    /// <summary>
+    /// Removes the FileAttachment annotations and /AF entries that name the given streams, or every
+    /// embedded file when none are given, and takes the payload out of any other file specification
+    /// that still holds one, such as the target of an action. A stream no specification owns stays,
+    /// so that verification reports it.
+    /// </summary>
+    internal static PdfDocument Strip(PdfDocument document, IReadOnlySet<int>? streams = null)
+    {
+        document = RemoveFileAnnotations(document, streams);
+        var update = new PdfIncrementalUpdateBuilder(document);
+        var visited = new HashSet<(int ObjectNumber, int Generation)>();
+        var pending = new Stack<PdfIndirectReference>();
+        foreach (PdfIndirectReference start in StartingPoints(document).OfType<PdfIndirectReference>())
+            Visit(start);
+        bool changed = false;
+        while (pending.Count > 0)
+        {
+            PdfIndirectReference reference = pending.Pop();
+            PdfObject resolved = ReadOrNull(document, reference);
+            PdfObject sanitized = Sanitize(resolved);
+            if (ReferenceEquals(resolved, sanitized)) continue;
+            update.ReplaceObject(reference.ObjectNumber, sanitized);
+            changed = true;
+        }
+        return changed ? PdfOptimizer.Reopen(document, update.Build()) : document;
+
+        void Visit(PdfObject value)
+        {
+            if (value is PdfIndirectReference reference
+                && visited.Add((reference.ObjectNumber, reference.Generation)))
+                pending.Push(reference);
+        }
+
+        PdfObject Sanitize(PdfObject value)
+        {
+            Visit(value);
+            switch (value)
+            {
+                case PdfStream stream:
+                    var dictionary = (PdfDictionary)Sanitize(stream.Dictionary);
+                    return ReferenceEquals(dictionary, stream.Dictionary) ? stream
+                        : new PdfStream(dictionary, stream.EncodedData.Span);
+                case PdfArray array:
+                    PdfObject[] items = [.. array.Select(Sanitize)];
+                    return items.Where((item, index) => !ReferenceEquals(item, array[index])).Any()
+                        ? new PdfArray(items) : array;
+                case PdfDictionary source:
+                    bool removesFile = Removes(document, source, streams);
+                    var entries = new List<KeyValuePair<PdfName, PdfObject>>(source.Count);
+                    bool localChange = false;
+                    foreach ((PdfName key, PdfObject item) in source)
+                    {
+                        PdfObject? kept = item;
+                        if (removesFile && (key.Equals(EmbeddedFilesName) || key.Equals(RelatedFilesName)))
+                            kept = null;
+                        else if (key.Equals(AssociatedFilesName)) kept = KeptAssociation(document, item, streams);
+                        if (kept is null) { localChange = true; continue; }
+                        PdfObject sanitized = Sanitize(kept);
+                        entries.Add(new KeyValuePair<PdfName, PdfObject>(key, sanitized));
+                        localChange |= !ReferenceEquals(item, sanitized);
+                    }
+                    return localChange ? new PdfDictionary(entries) : source;
+                default:
+                    return value;
+            }
+        }
+    }
+
+    // An /AF value is an array of file specifications, or in older files a single one.
+    private static PdfObject? KeptAssociation(PdfDocument document, PdfObject value, IReadOnlySet<int>? streams)
+    {
+        PdfObject resolved = ReadOrNull(document, value);
+        if (resolved is PdfDictionary single) return Removes(document, single, streams) ? null : value;
+        if (resolved is not PdfArray associated) return value;
+        PdfObject[] kept = [.. associated.Where(item => ReadOrNull(document, item) is not PdfDictionary file
+            || !Removes(document, file, streams))];
+        if (kept.Length == associated.Count) return value;
+        return kept.Length == 0 ? null : new PdfArray(kept);
+    }
+
+    private static PdfDocument RemoveFileAnnotations(PdfDocument document, IReadOnlySet<int>? streams)
+    {
+        PdfIncrementalAnnotationEditor? editor = null;
+        foreach (PdfPageTreeEntry page in PdfPageTree.Read(document).Pages)
+        {
+            if (!page.Dictionary.TryGetValue(Name("Annots"), out PdfObject? annotationsValue)
+                || ReadOrNull(document, annotationsValue) is not PdfArray annotations) continue;
+            for (int index = annotations.Count - 1; index >= 0; index--)
+                if (ReadOrNull(document, annotations[index]) is PdfDictionary annotation
+                    && annotation.TryGetValue(Name("Subtype"), out PdfObject? subtype)
+                    && ReadOrNull(document, subtype) is PdfName name && name.ValueAsLatin1() == "FileAttachment"
+                    && annotation.TryGetValue(Name("FS"), out PdfObject? fileValue)
+                    && ReadOrNull(document, fileValue) is PdfDictionary file
+                    && Removes(document, file, streams))
+                    (editor ??= new PdfIncrementalAnnotationEditor(document)).RemoveAnnotationAt(page.Index, index);
+        }
+        return editor is null ? document : PdfOptimizer.Reopen(document, editor.Build());
+    }
+
+    private static bool Removes(PdfDocument document, PdfDictionary specification, IReadOnlySet<int>? streams)
+    {
+        int[] payloads = [.. Payloads(document, specification)];
+        return payloads.Length > 0 && (streams is null || payloads.Any(streams.Contains));
+    }
+
+    // The streams a file specification holds in /EF, under the keys for each platform's file name.
+    private static IEnumerable<int> Payloads(PdfDocument document, PdfDictionary specification)
+    {
+        if (!specification.TryGetValue(EmbeddedFilesName, out PdfObject? value)
+            || ReadOrNull(document, value) is not PdfDictionary files) yield break;
+        foreach (PdfObject file in files.Values)
+        {
+            PdfObject current = file;
+            for (int depth = 0; current is PdfIndirectReference reference && depth < 32; depth++)
+            {
+                PdfObject next = ReadOrNull(document, reference);
+                if (next is PdfStream) yield return reference.ObjectNumber;
+                current = next;
+            }
+        }
+    }
+
+    private static string? FileName(PdfDocument document, PdfDictionary specification)
+    {
+        foreach (string key in new[] { "UF", "F" })
+            if (specification.TryGetValue(Name(key), out PdfObject? value)
+                && ReadOrNull(document, value) is PdfString text)
+                try { return PdfUnicodeEncoding.DecodeTextString(text.Bytes.Span, "An embedded-file name"); }
+                catch (Exception error) when (PdfReaderDamage.Is(error)) { return null; }
+        return null;
+    }
+
+    private static bool IsEmbeddedFile(PdfDocument document, PdfStream stream) =>
+        stream.Dictionary.TryGetValue(TypeName, out PdfObject? type)
+        && ReadOrNull(document, type) is PdfName name && name.ValueAsLatin1() == "EmbeddedFile";
+
+    private static IEnumerable<PdfObject> StartingPoints(PdfDocument document) =>
+        document.Trailer.Where(entry => !entry.Key.Equals(EncryptName)).Select(entry => entry.Value);
+
+    // An object that cannot be read holds nothing that can be listed or removed.
+    private static PdfObject ReadOrNull(PdfDocument document, PdfObject value)
+    {
+        try
+        {
+            for (int depth = 0; value is PdfIndirectReference reference && depth < 32; depth++)
+                value = document.Resolve(reference);
+            return value;
+        }
+        catch (Exception error) when (PdfReaderDamage.Is(error)) { return PdfNull.Instance; }
+    }
+
+    private static PdfName Name(string value) => new(Encoding.ASCII.GetBytes(value));
 }

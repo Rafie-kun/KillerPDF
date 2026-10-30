@@ -67,6 +67,130 @@ public sealed class PdfPermanentRedactionTests
         }
     }
 
+    [Theory]
+    [InlineData("page-af")]
+    [InlineData("annotation-af")]
+    [InlineData("form-af")]
+    [InlineData("catalog-af")]
+    [InlineData("file-annotation")]
+    [InlineData("go-to-action")]
+    public void SanitizeRemovesAFileWhereverTheDocumentReachesIt(string route)
+    {
+        PdfDocument document = PdfDocument.Open(ReachedFile(route, listed: false));
+
+        PdfOptimizationPlan plan = PdfOptimizer.CreatePlan(document, new PdfOptimizationOptions
+        {
+            RemoveAttachments = true,
+            PackObjects = false,
+            CompressStructure = false
+        });
+        PdfOptimizationResult result = plan.Apply();
+
+        Assert.Contains("a.txt", plan.AttachmentNames);
+        Assert.Contains(PdfOptimizationChangeKind.RemoveAttachments, result.VerifiedRemovals);
+        Assert.DoesNotContain(Payload, Encoding.Latin1.GetString(result.Data.Span));
+    }
+
+    [Theory]
+    [InlineData("page-af")]
+    [InlineData("annotation-af")]
+    [InlineData("form-af")]
+    [InlineData("catalog-af")]
+    [InlineData("file-annotation")]
+    [InlineData("go-to-action")]
+    public void ReviewedRemovalFollowsTheFileToEveryPlaceThatNamesIt(string route)
+    {
+        PdfDocument document = PdfDocument.Open(ReachedFile(route, listed: true));
+
+        PdfAttachmentRedactionResult result = PdfPermanentRedaction.ApplyReviewedAttachments(
+            document, PdfRedactionReview.FromAttachments(document));
+
+        Assert.Empty(result.RemainingAttachmentNames);
+        Assert.DoesNotContain(Payload, Encoding.Latin1.GetString(result.Document.Span));
+    }
+
+    [Fact]
+    public void ReviewedRemovalWithEveryFileChosenTakesOneTheListCannotShow()
+    {
+        PdfDocument document = PdfDocument.Open(ReachedFile("page-af", listed: false));
+        Assert.Empty(PdfAttachmentReader.Read(document));
+
+        PdfAttachmentRedactionResult result = PdfPermanentRedaction.ApplyReviewedAttachments(
+            document, PdfRedactionReview.FromAttachments(document));
+
+        Assert.DoesNotContain(Payload, Encoding.Latin1.GetString(result.Document.Span));
+    }
+
+    [Fact]
+    public void ReviewedRemovalKeepsAFileTheReviewExcluded()
+    {
+        PdfDocument document = PdfDocument.Open(RawPdf(
+            "<< /Type /Catalog /Pages 2 0 R /Names << /EmbeddedFiles << /Names [(a.txt) 6 0 R (b.txt) 8 0 R] >> >> /AF [6 0 R 8 0 R] >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] /AF [6 0 R 8 0 R] /Contents 4 0 R >>",
+            RawStream("0 0 m"), "null",
+            "<< /Type /Filespec /F (a.txt) /UF (a.txt) /EF << /F 7 0 R >> >>",
+            RawStream(Payload, "/Type /EmbeddedFile"),
+            "<< /Type /Filespec /F (b.txt) /UF (b.txt) /EF << /F 9 0 R >> >>",
+            RawStream("KEPTPAYLOAD", "/Type /EmbeddedFile")));
+        PdfRedactionReview all = PdfRedactionReview.FromAttachments(document);
+
+        PdfAttachmentRedactionResult result = PdfPermanentRedaction.ApplyReviewedAttachments(
+            document, all.Exclude(Assert.Single(all.Matches, match => match.Text == "b.txt").Id));
+
+        Assert.Equal(["b.txt"], result.RemainingAttachmentNames);
+        string output = Encoding.Latin1.GetString(result.Document.Span);
+        Assert.DoesNotContain(Payload, output);
+        Assert.Contains("KEPTPAYLOAD", output);
+    }
+
+    // XFA writers mark their packet streams as embedded files, but a packet is form data.
+    [Fact]
+    public void AnXfaPacketIsNotAnAttachment()
+    {
+        PdfDocument document = PdfDocument.Open(RawPdf(
+            "<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields [] /XFA [(template) 5 0 R] >> >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] /Contents 4 0 R >>",
+            RawStream("0 0 m"), RawStream("<template/>", "/Type /EmbeddedFile")));
+
+        PdfOptimizationPlan plan = PdfOptimizer.CreatePlan(document, new PdfOptimizationOptions
+        {
+            RemoveAttachments = true,
+            PackObjects = false,
+            CompressStructure = false
+        });
+        PdfOptimizationResult result = plan.Apply();
+
+        Assert.DoesNotContain(PdfOptimizationChangeKind.RemoveAttachments, plan.Changes);
+        Assert.Contains("<template/>", Encoding.Latin1.GetString(result.Data.Span));
+    }
+
+    [Fact]
+    public void AnEmbeddedFileLeftReachableFailsSanitizeVerification()
+    {
+        PdfDocument document = PdfDocument.Open(PlantedFile());
+
+        PdfOptimizationPlan plan = PdfOptimizer.CreatePlan(document, new PdfOptimizationOptions
+        {
+            RemoveAttachments = true,
+            PackObjects = false,
+            CompressStructure = false
+        });
+
+        Assert.Contains(PdfOptimizationChangeKind.RemoveAttachments, plan.Changes);
+        Assert.Throws<InvalidOperationException>(plan.Apply);
+    }
+
+    [Fact]
+    public void AnEmbeddedFileLeftReachableFailsReviewedRemoval()
+    {
+        PdfDocument document = PdfDocument.Open(PlantedFile());
+
+        Assert.Throws<InvalidOperationException>(() => PdfPermanentRedaction.ApplyReviewedAttachments(
+            document, PdfRedactionReview.FromAttachments(document)));
+    }
+
     [Fact]
     public void ReviewedCommentsArePermanentlyRemovedAndVerified()
     {
@@ -264,6 +388,62 @@ public sealed class PdfPermanentRedactionTests
         Assert.True(results[2].Succeeded);
         Assert.True(results[2].Document.Length > 0);
         Assert.NotNull(PdfDocument.Open(results[2].Document));
+    }
+
+    private const string Payload = "TOPSECRETPAYLOAD";
+
+    // One file reached through a single route, and through the name tree as well when it is listed.
+    private static byte[] ReachedFile(string route, bool listed)
+    {
+        string names = listed ? "/Names << /EmbeddedFiles << /Names [(a.txt) 6 0 R] >> >>" : "";
+        string catalog = route switch
+        {
+            "catalog-af" => "/AF [6 0 R]",
+            "go-to-action" => "/OpenAction << /S /GoToE /F 6 0 R /D [0 /Fit] /NewWindow true >>",
+            _ => ""
+        };
+        string page = route switch
+        {
+            "page-af" => "/AF [6 0 R]",
+            "annotation-af" => "/Annots [8 0 R]",
+            "file-annotation" => "/Annots [9 0 R]",
+            "form-af" => "/Resources << /XObject << /Fm 10 0 R >> >>",
+            _ => ""
+        };
+        return RawPdf($"<< /Type /Catalog /Pages 2 0 R {names} {catalog} >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            $"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] {page} /Contents 4 0 R >>",
+            RawStream(route == "form-af" ? "/Fm Do" : "0 0 m"), "null",
+            "<< /Type /Filespec /F (a.txt) /UF (a.txt) /AFRelationship /Data /EF << /F 7 0 R >> >>",
+            RawStream(Payload, "/Type /EmbeddedFile"),
+            "<< /Type /Annot /Subtype /Stamp /Rect [0 0 10 10] /AF [6 0 R] >>",
+            "<< /Type /Annot /Subtype /FileAttachment /Rect [0 0 10 10] /FS 6 0 R >>",
+            RawStream("0 0 m", "/Type /XObject /Subtype /Form /BBox [0 0 10 10] /AF [6 0 R]"));
+    }
+
+    // A payload no file specification owns, so nothing tells the removal how to take it out.
+    private static byte[] PlantedFile() => RawPdf("<< /Type /Catalog /Pages 2 0 R /PrivateData 5 0 R >>",
+        "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] /Contents 4 0 R >>",
+        RawStream("0 0 m"), RawStream(Payload, "/Type /EmbeddedFile"));
+
+    private static string RawStream(string data, string entries = "") =>
+        $"<< {entries} /Length {data.Length} >>\nstream\n{data}\nendstream";
+
+    private static byte[] RawPdf(params string[] objects)
+    {
+        var pdf = new StringBuilder("%PDF-1.7\n");
+        var offsets = new List<int>();
+        foreach (string value in objects)
+        {
+            offsets.Add(pdf.Length);
+            pdf.Append($"{offsets.Count} 0 obj\n{value}\nendobj\n");
+        }
+        int xref = pdf.Length;
+        pdf.Append($"xref\n0 {objects.Length + 1}\n0000000000 65535 f \n");
+        foreach (int offset in offsets) pdf.Append($"{offset:0000000000} 00000 n \n");
+        pdf.Append($"trailer << /Size {objects.Length + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
+        return Encoding.Latin1.GetBytes(pdf.ToString());
     }
 
     private static PdfName Name(string value) =>

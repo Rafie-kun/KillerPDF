@@ -31,7 +31,7 @@ internal static class PdfInheritedResources
                 || Category(document, resources, "Pattern").Any(pattern => pattern is PdfStream stream && !HasOwnResources(document, stream.Dictionary))
                 || page is not null && AppearanceConsumes(document, page);
         }
-        catch (Exception error) when (error is FormatException or InvalidOperationException or NotSupportedException)
+        catch (Exception error) when (PdfReaderDamage.Is(error))
         {
             return true;
         }

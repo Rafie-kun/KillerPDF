@@ -60,12 +60,19 @@ public static class PdfDocumentWriter
     internal static IReadOnlyList<PdfReferenceRepair> FindReferenceRepairs(PdfDocument document)
     {
         document.PreparePageStructureForWriting();
-        return Array.AsReadOnly(new RewriteContext(document).Repairs.ToArray());
+        return Array.AsReadOnly(new RewriteContext(document, dropUnreadable: true).Repairs.ToArray());
     }
 
     /// <summary>Rewrites a document and returns its reference normalization records.</summary>
     public static PdfDocumentWriteResult WriteWithReport(
-        PdfDocument document, PdfDocumentWriteOptions? options = null)
+        PdfDocument document, PdfDocumentWriteOptions? options = null) =>
+        WriteWithReport(document, options, dropUnreadable: false);
+
+    // The optimizer normalizes a document as the viewer read it before planning, so there an entry that
+    // cannot be read is a repair. Anywhere else the write may be reading a reopened revision in a stricter
+    // mode than the source, where content the viewer showed can look unreadable, so it stays a refusal.
+    internal static PdfDocumentWriteResult WriteWithReport(
+        PdfDocument document, PdfDocumentWriteOptions? options, bool dropUnreadable)
     {
         ArgumentNullException.ThrowIfNull(document);
         document.PreparePageStructureForWriting();
@@ -107,24 +114,31 @@ public static class PdfDocumentWriter
             PdfSignatureReader.ReadCertificationPermission(document).HasValue;
         bool hasSignedFields =
             PdfSignatureReader.Read(document).Any(signature => signature.IsSigned);
+        bool hasUsageRights = HasUsageRights(document, rootCatalog);
+        // Removing encryption writes the copy a protected form opens from, not a stand-in for it, so
+        // usage rights do not stop that write. A save from the copy still meets them.
+        string? rewriteRefusal = hasCertification || hasSignedFields
+            ? "A full rewrite invalidates existing signatures. Set AllowSignatureInvalidation explicitly to proceed."
+            : hasUsageRights && !options.RemoveEncryption
+                ? "A full rewrite invalidates existing signatures and Reader usage rights, so this PDF was not rewritten."
+                : null;
         Dictionary<int, PdfObject>? signatureReplacements = null;
-        if (options.AllowSignatureInvalidation && (hasCertification || hasSignedFields))
+        if (options.AllowSignatureInvalidation && (hasCertification || hasSignedFields || hasUsageRights))
         {
             if (!options.ReplaceDanglingReferences)
             {
                 byte[] cleared = PdfSignatureInvalidationWriter.ClearSignatureValues(document);
-                return WriteWithReport(PdfDocument.Open(cleared), options);
+                return WriteWithReport(PdfDocument.Open(cleared), options, dropUnreadable);
             }
             signatureReplacements = [];
             PdfSignatureInvalidationWriter.RewriteSignatureValues(document,
                 (number, value) => signatureReplacements[number] = value);
         }
         if (options.ReplaceDanglingReferences && !options.AllowSignatureInvalidation
-            && (hasCertification || hasSignedFields))
-            throw new InvalidOperationException(
-                "A full rewrite invalidates existing signatures. Set AllowSignatureInvalidation explicitly to proceed.");
+            && rewriteRefusal is not null)
+            throw new InvalidOperationException(rewriteRefusal);
         RewriteContext? context = options.ReplaceDanglingReferences
-            ? new RewriteContext(document, signatureReplacements) : null;
+            ? new RewriteContext(document, signatureReplacements, dropUnreadable) : null;
         PdfDictionary sourceTrailer = context?.Trailer ?? document.CrossReferences.MergedTrailer;
         if (options.MetadataPolicy == PdfMetadataPolicy.Preserve
             && sourceTrailer.TryGetValue(InfoName, out PdfObject info))
@@ -150,12 +164,8 @@ public static class PdfDocumentWriter
             throw new InvalidOperationException(
                 "An encrypted full rewrite requires trailer /ID document identifiers.");
         ValidateApplicationTrailerGraphs(document, context);
-        if (!options.AllowSignatureInvalidation)
-        {
-            if (hasCertification || hasSignedFields)
-                throw new InvalidOperationException(
-                    "A full rewrite invalidates existing signatures. Set AllowSignatureInvalidation explicitly to proceed.");
-        }
+        if (!options.AllowSignatureInvalidation && rewriteRefusal is not null)
+            throw new InvalidOperationException(rewriteRefusal);
         PdfVersion effectiveOutputVersion = EffectiveVersion(document, root, outputVersion);
         if (options.UseObjectStreams && options.CrossReferenceFormat != PdfCrossReferenceFormat.Stream)
             throw new InvalidOperationException("Object streams require the cross-reference-stream format.");
@@ -268,6 +278,15 @@ public static class PdfDocumentWriter
         WriteAscii(output, xrefOffset.ToString(CultureInfo.InvariantCulture));
         output.Write("\n%%EOF\n"u8);
         return new PdfDocumentWriteResult(output.ToArray(), context?.Repairs ?? []);
+    }
+
+    // Any entry in the catalog's /Perms is a certification or Reader usage rights. Each is a signature
+    // over the file's bytes, so a rewrite ends it as it ends a signature in a form field.
+    private static bool HasUsageRights(PdfDocument document, PdfDictionary catalog)
+    {
+        if (!catalog.TryGetValue(new PdfName("Perms"u8), out PdfObject permissions)) return false;
+        try { return ResolveValue(document, permissions, "The catalog /Perms value") is PdfDictionary { Count: > 0 }; }
+        catch (Exception error) when (PdfReaderDamage.Is(error)) { return false; }
     }
 
     private static void WriteClassicCrossReferenceTable(
@@ -485,8 +504,8 @@ public static class PdfDocumentWriter
             return high;
         if (entry.Type is PdfCrossReferenceEntryType.Free or PdfCrossReferenceEntryType.Null)
             return high;
-        PdfObject value = document.Resolve(high);
-        return IsObsoleteStructuralObject(document, value) ? 0 : high;
+        try { return IsObsoleteStructuralObject(document, document.Resolve(high)) ? 0 : high; }
+        catch (Exception error) when (PdfReaderDamage.Is(error)) { return high; }
     }
 
     private static List<WritableObject> ReadCurrentObjects(PdfDocument document)
@@ -577,29 +596,40 @@ public static class PdfDocumentWriter
         }
     }
 
-    internal static int CountDuplicatePageResourceObjects(PdfDocument document)
+    internal static int CountDuplicatePageResourceObjects(
+        PdfDocument document, PdfResourceFingerprints? fingerprints = null)
     {
         ArgumentNullException.ThrowIfNull(document);
         List<WritableObject> objects = ReadCurrentObjects(document);
         int originalCount = objects.Count;
-        DeduplicatePageResources(document, objects);
+        DeduplicatePageResources(document, objects, fingerprints: fingerprints);
         return originalCount - objects.Count;
     }
+
+    // An optional-content group is known by its object: /OCProperties lists and switches it by
+    // reference, so two with the same dictionary are still two layers. A membership dictionary is
+    // kept apart with them.
+    internal static bool IsOptionalContent(PdfObject value, Func<PdfObject, PdfObject> resolve) =>
+        value is PdfDictionary dictionary && dictionary.TryGetValue(TypeName, out PdfObject type)
+        && resolve(type) is PdfName name && name.ValueAsLatin1() is "OCG" or "OCMD";
 
     // Merging two resources can make the resources that name them identical in turn, such as images
     // that differ only in which copy of a color space they use, so this repeats until a pass finds
     // nothing. Each pass removes at least one object, so it ends.
     private static void DeduplicatePageResources(
-        PdfDocument document, List<WritableObject> objects, RewriteContext? context = null)
+        PdfDocument document, List<WritableObject> objects, RewriteContext? context = null,
+        PdfResourceFingerprints? fingerprints = null)
     {
+        fingerprints ??= new PdfResourceFingerprints();
         var merged = new Dictionary<(int ObjectNumber, int Generation),
             (int ObjectNumber, int Generation)>();
-        while (DeduplicatePageResourcesOnce(document, objects, context, merged)) { }
+        while (DeduplicatePageResourcesOnce(document, objects, context, merged, fingerprints)) { }
     }
 
     private static bool DeduplicatePageResourcesOnce(
         PdfDocument document, List<WritableObject> objects, RewriteContext? context,
-        Dictionary<(int ObjectNumber, int Generation), (int ObjectNumber, int Generation)> merged)
+        Dictionary<(int ObjectNumber, int Generation), (int ObjectNumber, int Generation)> merged,
+        PdfResourceFingerprints fingerprints)
     {
         string[] categories =
         [
@@ -634,9 +664,15 @@ public static class PdfDocumentWriter
                     var identity = (reference.ObjectNumber, reference.Generation);
                     while (merged.TryGetValue(identity, out var survivor)) identity = survivor;
                     if (replacements.ContainsKey(identity)) continue;
-                    string key = category + ":" + ResourceFingerprint(
-                        current.TryGetValue(identity, out PdfObject? rewritten) ? rewritten
-                            : context?.Resolve(reference) ?? document.Resolve(reference));
+                    PdfObject resource = current.TryGetValue(identity, out PdfObject? rewritten) ? rewritten
+                        : context?.Resolve(reference) ?? document.Resolve(reference);
+                    if (IsOptionalContent(resource, item =>
+                            ResolveValue(document, item, "A page /Resources /Type value", context)))
+                        continue;
+                    // The key is the object's bytes alone. One object can be listed under several
+                    // categories, and a key per category would let it survive in one and merge away
+                    // in another, leaving what merged into it pointing at a removed object.
+                    string key = fingerprints.Of(resource);
                     if (canonical.TryGetValue(key, out var retained)
                         && retained != identity)
                         replacements[identity] = retained;
@@ -1190,29 +1226,43 @@ public static class PdfDocumentWriter
         internal PdfDictionary Trailer { get; }
 
         internal RewriteContext(PdfDocument document,
-            IReadOnlyDictionary<int, PdfObject>? replacements = null)
+            IReadOnlyDictionary<int, PdfObject>? replacements = null, bool dropUnreadable = false)
         {
+            // An entry that points at the wrong place still reads as in use, so every entry is read
+            // before any reference is normalized. One that cannot be read leaves the output as a
+            // recorded repair, and what names it is repaired like any other reference to nothing.
+            var unreadable = new HashSet<int>();
+            var readable = new List<(int ObjectNumber, int Generation, PdfObject Original)>();
             foreach (PdfCrossReferenceEntry entry in document.CrossReferences.Values
                 .Where(entry => entry.Type is PdfCrossReferenceEntryType.InUse or PdfCrossReferenceEntryType.Compressed)
                 .OrderBy(entry => entry.ObjectNumber))
             {
                 int generation = entry.Type == PdfCrossReferenceEntryType.InUse ? entry.Field2 : 0;
-                PdfObject original = document.Resolve(entry.ObjectNumber);
+                try { readable.Add((entry.ObjectNumber, generation, document.Resolve(entry.ObjectNumber))); }
+                catch (Exception error) when (dropUnreadable && PdfReaderDamage.Is(error))
+                {
+                    unreadable.Add(entry.ObjectNumber);
+                    Repairs.Add(new(entry.ObjectNumber, generation, "", entry.ObjectNumber, generation,
+                        PdfReferenceRepairReason.Missing, PdfReferenceRepairAction.ReplaceWithNull));
+                }
+            }
+            foreach ((int objectNumber, int generation, PdfObject original) in readable)
+            {
                 if (IsObsoleteStructuralObject(document, original))
                 {
-                    _source.Add((entry.ObjectNumber, generation), original);
+                    _source.Add((objectNumber, generation), original);
                     continue;
                 }
-                PdfObject replacement = replacements?.GetValueOrDefault(entry.ObjectNumber) ?? original;
+                PdfObject replacement = replacements?.GetValueOrDefault(objectNumber) ?? original;
                 // Normalize builds a repair path for every key and index it visits. Almost no object
                 // holds a dangling reference, so a cheap scan decides first and the paths are only
                 // built for objects that will record a repair.
                 PdfObject normalized = ContainsNullReference(replacement, 0)
-                    ? Normalize(replacement, entry.ObjectNumber, generation, "", 0)
+                    ? Normalize(replacement, objectNumber, generation, "", 0)
                     : replacement;
                 if (!ReferenceEquals(original, normalized)) _containers[original] = normalized;
-                _source.Add((entry.ObjectNumber, generation), normalized);
-                Objects.Add(new WritableObject(entry.ObjectNumber, generation, normalized));
+                _source.Add((objectNumber, generation), normalized);
+                Objects.Add(new WritableObject(objectNumber, generation, normalized));
             }
             var trailer = new List<KeyValuePair<PdfName, PdfObject>>();
             foreach (var entry in document.CrossReferences.MergedTrailer)
@@ -1309,6 +1359,7 @@ public static class PdfDocumentWriter
             {
                 reason = PdfReferenceRepairReason.Missing;
                 if (value is not PdfIndirectReference reference) return false;
+                if (unreadable.Contains(reference.ObjectNumber)) return true;
                 if (document.CrossReferences.TryGetValue(reference.ObjectNumber, out PdfCrossReferenceEntry entry))
                 {
                     if (entry.Type is PdfCrossReferenceEntryType.InUse or PdfCrossReferenceEntryType.Compressed)
@@ -1347,4 +1398,21 @@ public static class PdfDocumentWriter
         PdfObject Value,
         IReadOnlyList<(int ObjectNumber, int Generation)> Identities,
         PdfIndirectReference? FinalReference);
+}
+
+/// <summary>Remembers resource fingerprints by object, so a resource many pages list is read only once.</summary>
+internal sealed class PdfResourceFingerprints
+{
+    private readonly Dictionary<PdfObject, string> _known = new(ReferenceEqualityComparer.Instance);
+
+    /// <summary>Gets how many fingerprints were worked out rather than remembered.</summary>
+    internal int Computed => _known.Count;
+
+    /// <summary>Gets the fingerprint of a resolved resource.</summary>
+    internal string Of(PdfObject value)
+    {
+        if (!_known.TryGetValue(value, out string? fingerprint))
+            _known[value] = fingerprint = PdfDocumentWriter.ResourceFingerprint(value);
+        return fingerprint;
+    }
 }

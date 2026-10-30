@@ -372,7 +372,7 @@ public sealed partial class PdfOptimizationPlan
     {
         int pageCount = PdfPageTree.Read(_document).Pages.Count;
         PdfDocument source = _repairs.Length == 0 ? _document
-            : PdfDocument.Open(PdfSaveSanitizer.ApplyPlan(_document, _repairs));
+            : PdfOptimizer.Reopen(_document, PdfSaveSanitizer.ApplyPlan(_document, _repairs));
         source = ApplySelectiveSanitization(source);
         if (Changes.Contains(PdfOptimizationChangeKind.RemoveDocumentJavaScript))
             source = PdfOptimizer.RemoveJavaScriptActions(source);
@@ -384,7 +384,9 @@ public sealed partial class PdfOptimizationPlan
                 ? PdfCrossReferenceFormat.Stream : PdfCrossReferenceFormat.Table,
             UseObjectStreams = _options.PackObjects,
             CompressStructuralStreams = _options.CompressStructure,
-            PruneUnreachableObjects = _options.PruneUnreachableObjects,
+            // A removed attachment that stays in the file as an unused object is still in the file.
+            PruneUnreachableObjects = _options.PruneUnreachableObjects
+                || Changes.Contains(PdfOptimizationChangeKind.RemoveAttachments),
             CompressUnfilteredStreams = _options.CompressUnfilteredStreams,
             DeduplicatePageResources = _options.PruneUnusedPageResources,
             AllowSignatureInvalidation = _options.AllowSignatureInvalidation,
@@ -416,49 +418,51 @@ public sealed partial class PdfOptimizationPlan
     {
         PdfPageTree tree = PdfPageTree.Read(document);
         var verified = new List<PdfOptimizationChangeKind>();
-        Verify(PdfOptimizationChangeKind.RemoveMetadata,
+        Verify(PdfOptimizationChangeKind.RemoveMetadata, () =>
             !document.Trailer.ContainsKey(new PdfName("Info"u8))
             && !tree.Catalog.ContainsKey(new PdfName("Metadata"u8)));
-        Verify(PdfOptimizationChangeKind.RemoveAttachments,
+        Verify(PdfOptimizationChangeKind.RemoveAttachments, () =>
             PdfAttachmentReader.Read(document).Count == 0
             && tree.Pages.SelectMany((_, pageIndex) =>
-                PdfAttachmentReader.ReadPageAnnotations(document, pageIndex)).Any() == false);
-        Verify(PdfOptimizationChangeKind.RemoveOpenAction,
+                PdfAttachmentReader.ReadPageAnnotations(document, pageIndex)).Any() == false
+            && PdfEmbeddedFileReach.Reachable(document).Count == 0);
+        Verify(PdfOptimizationChangeKind.RemoveOpenAction, () =>
             !tree.Catalog.ContainsKey(new PdfName("OpenAction"u8)));
-        Verify(PdfOptimizationChangeKind.RemoveBookmarks,
+        Verify(PdfOptimizationChangeKind.RemoveBookmarks, () =>
             !tree.Catalog.ContainsKey(new PdfName("Outlines"u8)));
-        Verify(PdfOptimizationChangeKind.RemoveFormFields,
+        Verify(PdfOptimizationChangeKind.RemoveFormFields, () =>
             tree.Pages.SelectMany((_, pageIndex) =>
                 PdfFormWidgetReader.ReadPage(document, pageIndex)).Any() == false);
-        Verify(PdfOptimizationChangeKind.RemoveXfaData,
+        Verify(PdfOptimizationChangeKind.RemoveXfaData, () =>
             PdfXfaReader.Read(document) is null);
-        Verify(PdfOptimizationChangeKind.RemoveComments,
+        Verify(PdfOptimizationChangeKind.RemoveComments, () =>
             PdfCommentReader.Read(document).Count == 0);
-        bool hasJavaScript = tree.Catalog.TryGetValue(new PdfName("Names"u8),
-            out PdfObject? namesValue)
-            && Resolve(document, namesValue) is PdfDictionary names
-            && names.ContainsKey(new PdfName("JavaScript"u8));
-        Verify(PdfOptimizationChangeKind.RemoveDocumentJavaScript,
-            !hasJavaScript && !PdfOptimizer.HasJavaScriptActions(document));
-        Verify(PdfOptimizationChangeKind.RemovePageThumbnails,
+        Verify(PdfOptimizationChangeKind.RemoveDocumentJavaScript, () =>
+            !(tree.Catalog.TryGetValue(new PdfName("Names"u8), out PdfObject? namesValue)
+                && Resolve(document, namesValue) is PdfDictionary names
+                && names.ContainsKey(new PdfName("JavaScript"u8)))
+            && !PdfOptimizer.HasJavaScriptActions(document));
+        Verify(PdfOptimizationChangeKind.RemovePageThumbnails, () =>
             tree.Pages.All(page => !page.Dictionary.ContainsKey(new PdfName("Thumb"u8))));
-        Verify(PdfOptimizationChangeKind.FlattenOptionalContent,
+        Verify(PdfOptimizationChangeKind.FlattenOptionalContent, () =>
             PdfOptionalContentReader.Read(document).Groups.Count == 0);
         // Writing merges identical objects after their names were consolidated, so a page can end
         // with two names for one object, which costs nothing and is not content that was left behind.
-        Verify(PdfOptimizationChangeKind.PruneUnusedPageResources,
+        Verify(PdfOptimizationChangeKind.PruneUnusedPageResources, () =>
             PdfOptimizer.UnusedResourcePages(document, includeAliases: false).Count == 0
             && PdfDocumentWriter.CountDuplicatePageResourceObjects(document) == 0);
-        Verify(PdfOptimizationChangeKind.PruneUnreachableObjects,
+        Verify(PdfOptimizationChangeKind.PruneUnreachableObjects, () =>
             PdfDocumentWriter.CountUnreachableObjects(document) == 0);
-        Verify(PdfOptimizationChangeKind.CompressUnfilteredStreams,
+        Verify(PdfOptimizationChangeKind.CompressUnfilteredStreams, () =>
             PdfDocumentWriter.CountCompressibleStreams(document) == 0);
         return Array.AsReadOnly(verified.ToArray());
 
-        void Verify(PdfOptimizationChangeKind kind, bool absent)
+        // Each check reads only for a change that was made, so a damaged part of the document that a
+        // Reduce never touched cannot stop it.
+        void Verify(PdfOptimizationChangeKind kind, Func<bool> absent)
         {
             if (!Changes.Contains(kind)) return;
-            if (!absent)
+            if (!absent())
                 throw new InvalidOperationException(
                     $"The optimized document still contains content reported as {kind}.");
             verified.Add(kind);
@@ -500,21 +504,33 @@ public sealed partial class PdfOptimizationPlan
             && !prunesUnusedResources)
             return document;
         PdfDocument formSanitized = flattensOptionalContent
-            ? PdfDocument.Open(PdfOptionalContentEditor.FlattenPageContent(document))
+            ? PdfOptimizer.Reopen(document, PdfOptionalContentEditor.FlattenPageContent(document))
             : document;
-        if (_attachmentNames.Length > 0 || removesOpenAction || removesBookmarks || removesFormFields
+        if (_attachmentKeys.Length > 0 || removesOpenAction || removesBookmarks || removesFormFields
             || removesXfaData
             || removesDocumentJavaScript || removesPageThumbnails || prunesUnusedResources)
         {
             var editor = new PdfIncrementalPageEditor(formSanitized);
             if (prunesUnusedResources)
             {
+                // A tagged document refuses replaced content without matching structure, so its pages
+                // keep their operators and only their /Resources change.
+                bool tagged = PdfOptimizer.IsTagged(formSanitized);
                 var content = new PdfPageContentReader(formSanitized);
+                var fingerprints = new PdfResourceFingerprints();
                 foreach (int pageIndex in _resourcePages)
-                    editor.SetPageContentAndPruneResources(
-                        pageIndex, PdfOptimizer.ConsolidateResourceAliases(
-                            formSanitized, pageIndex,
-                            content.ReadInstructions(pageIndex)));
+                {
+                    IReadOnlyList<KillerPdf.Engine.Parsing.PdfContentInstruction> instructions =
+                        content.ReadInstructions(pageIndex);
+                    if (!tagged)
+                    {
+                        instructions = PdfOptimizer.ConsolidateResourceAliases(
+                            formSanitized, pageIndex, instructions, fingerprints);
+                        editor.SetPageContent(pageIndex, instructions);
+                    }
+                    editor.PrunePageResources(pageIndex,
+                        PdfOptimizer.NamingDefaultColorSpaces(formSanitized, pageIndex, instructions));
+                }
             }
             if (removesAttachments)
                 foreach (string key in _attachmentKeys) editor.RemoveAttachmentByKey(key);
@@ -527,7 +543,7 @@ public sealed partial class PdfOptimizationPlan
             if (removesPageThumbnails)
                 for (int pageIndex = 0; pageIndex < PdfPageTree.Read(formSanitized).Pages.Count; pageIndex++)
                     editor.ClearPageThumbnail(pageIndex);
-            formSanitized = PdfDocument.Open(editor.Build());
+            formSanitized = PdfOptimizer.Reopen(formSanitized, editor.Build());
         }
         if (!removesAttachments && !removesComments) return formSanitized;
         var annotationEditor = new PdfIncrementalAnnotationEditor(formSanitized);
@@ -546,10 +562,11 @@ public sealed partial class PdfOptimizationPlan
             .Distinct()
             .OrderByDescending(comment => comment.PageIndex)
             .ThenByDescending(comment => comment.AnnotationIndex)];
-        if (removalTargets.Length == 0) return formSanitized;
         foreach ((int pageIndex, int annotationIndex) in removalTargets)
             annotationEditor.RemoveAnnotationAt(pageIndex, annotationIndex);
-        return PdfDocument.Open(annotationEditor.Build());
+        PdfDocument annotationsRemoved = removalTargets.Length == 0
+            ? formSanitized : PdfOptimizer.Reopen(formSanitized, annotationEditor.Build());
+        return removesAttachments ? PdfEmbeddedFileReach.Strip(annotationsRemoved) : annotationsRemoved;
     }
 }
 
@@ -580,7 +597,7 @@ public static class PdfOptimizer
                 {
                     ReplaceDanglingReferences = true,
                     AllowSignatureInvalidation = options.AllowSignatureInvalidation
-                });
+                }, dropUnreadable: true);
             referenceRepairs = normalized.ReferenceRepairs;
             document = PdfDocument.Open(normalized.Data);
         }
@@ -592,8 +609,16 @@ public static class PdfOptimizer
         PdfPageTree tree = PdfPageTree.Read(document);
         PdfAttachmentInfo[] attachments = options.RemoveAttachments
             ? [.. PdfAttachmentReader.Read(document)] : [];
-        string[] attachmentNames = [.. attachments.Select(attachment => attachment.FileName)];
         string[] attachmentKeys = [.. attachments.Select(attachment => attachment.NameTreeKey!)];
+        // The name tree is one way to reach a file, so a file only an /AF entry or an action names
+        // is found by walking the document, and the preview lists it with the others.
+        IReadOnlyDictionary<int, string?> reachableFiles = options.RemoveAttachments
+            ? PdfEmbeddedFileReach.Reachable(document) : new Dictionary<int, string?>();
+        HashSet<int> listedStreams = options.RemoveAttachments
+            ? [.. PdfEmbeddedFileReach.ListedStreams(document).Values.SelectMany(streams => streams)] : [];
+        string[] attachmentNames = [.. attachments.Select(attachment => attachment.FileName)
+            .Concat(reachableFiles.Where(file => !listedStreams.Contains(file.Key) && file.Value is not null)
+                .Select(file => file.Value!).Distinct(StringComparer.Ordinal))];
         bool hasAttachmentAnnotations = options.RemoveAttachments
             && tree.Pages.SelectMany((_, pageIndex) =>
                 PdfAttachmentReader.ReadPageAnnotations(document, pageIndex)).Any();
@@ -606,7 +631,7 @@ public static class PdfOptimizer
         if (options.RemoveMetadata && (document.Trailer.ContainsKey(InformationName)
             || tree.Catalog.ContainsKey(MetadataName)))
             changes.Add(PdfOptimizationChangeKind.RemoveMetadata);
-        if (attachmentNames.Length > 0 || hasAttachmentAnnotations)
+        if (attachmentNames.Length > 0 || hasAttachmentAnnotations || reachableFiles.Count > 0)
             changes.Add(PdfOptimizationChangeKind.RemoveAttachments);
         if (options.RemoveOpenAction && tree.Catalog.ContainsKey(OpenActionName))
             changes.Add(PdfOptimizationChangeKind.RemoveOpenAction);
@@ -637,7 +662,7 @@ public static class PdfOptimizer
         if (optionalContentGroups.Length > 0)
             changes.Add(PdfOptimizationChangeKind.FlattenOptionalContent);
         int[] resourcePages = options.PruneUnusedPageResources
-            ? [.. UnusedResourcePages(document)] : [];
+            ? [.. UnusedResourcePages(document, includeAliases: !IsTagged(document))] : [];
         if (resourcePages.Length > 0 || options.PruneUnusedPageResources
             && PdfDocumentWriter.CountDuplicatePageResourceObjects(document) > 0)
             changes.Add(PdfOptimizationChangeKind.PruneUnusedPageResources);
@@ -660,8 +685,19 @@ public static class PdfOptimizer
             compressedStreamObjectNumbers, original, referenceRepairs, attachmentKeys);
     }
 
-    internal static IReadOnlyList<int> UnusedResourcePages(PdfDocument document, bool includeAliases = true)
+    // A revision built from a document is read the way that document was, so what recovery read from
+    // the source stays readable through every step.
+    internal static PdfDocument Reopen(PdfDocument source, ReadOnlyMemory<byte> revision) =>
+        source.UsesCompatibilityRecovery
+            ? PdfDocument.OpenWithCompatibilityRecovery(revision) : PdfDocument.Open(revision);
+
+    internal static bool IsTagged(PdfDocument document) =>
+        PdfPageTree.Read(document).Catalog.ContainsKey(Name("StructTreeRoot"));
+
+    internal static IReadOnlyList<int> UnusedResourcePages(PdfDocument document, bool includeAliases = true,
+        PdfResourceFingerprints? fingerprints = null)
     {
+        fingerprints ??= new PdfResourceFingerprints();
         PdfPageTree tree = PdfPageTree.Read(document);
         var reader = new PdfPageContentReader(document);
         var result = new List<int>();
@@ -670,9 +706,11 @@ public static class PdfOptimizer
             if (!page.InheritedValues.TryGetValue(Name("Resources"), out PdfObject? value)
                 || Resolve(document, value) is not PdfDictionary resources)
                 continue;
-            IReadOnlyList<KillerPdf.Engine.Parsing.PdfContentInstruction> instructions =
-                reader.ReadInstructions(page.Index);
-            if (HasIndirectResourceConsumers(document, resources, instructions)) continue;
+            IReadOnlyList<KillerPdf.Engine.Parsing.PdfContentInstruction> instructions;
+            // Content that cannot be read proves nothing about which names it uses.
+            try { instructions = NamingDefaultColorSpaces(document, resources, reader.ReadInstructions(page.Index)); }
+            catch (Exception error) when (PdfReaderDamage.Is(error)) { continue; }
+            if (HasIndirectResourceConsumers(document, resources, instructions, page.Dictionary)) continue;
             HashSet<PdfName> fonts = [.. instructions
                 .Where(item => item.Operator == "Tf" && item.Operands.Count > 0)
                 .Select(item => item.Operands[0]).OfType<PdfName>()];
@@ -703,18 +741,49 @@ public static class PdfOptimizer
                 resources.TryGetValue(Name(category), out PdfObject? categoryValue)
                 && Resolve(document, categoryValue) is PdfDictionary dictionary
                 && (dictionary.Keys.Any(key => !used.Contains(key))
-                    || includeAliases && DuplicateAliases(document, dictionary).Count > 0);
+                    || includeAliases && DuplicateAliases(document, dictionary, fingerprints).Count > 0);
         }
         return Array.AsReadOnly(result.ToArray());
     }
 
-    internal static bool HasIndirectResourceConsumers(PdfDocument document,
-        PdfDictionary resources,
+    // Device color operators paint through a default color space and no operator names it, so the
+    // cleanup is handed a use of each one to keep. These instructions are never written to the page.
+    internal static IReadOnlyList<KillerPdf.Engine.Parsing.PdfContentInstruction> NamingDefaultColorSpaces(
+        PdfDocument document, int pageIndex,
+        IReadOnlyList<KillerPdf.Engine.Parsing.PdfContentInstruction> instructions) =>
+        PdfPageTree.Read(document).Pages[pageIndex].InheritedValues.TryGetValue(Name("Resources"), out PdfObject? value)
+            && Resolve(document, value) is PdfDictionary resources
+            ? NamingDefaultColorSpaces(document, resources, instructions) : instructions;
+
+    private static IReadOnlyList<KillerPdf.Engine.Parsing.PdfContentInstruction> NamingDefaultColorSpaces(
+        PdfDocument document, PdfDictionary resources,
         IReadOnlyList<KillerPdf.Engine.Parsing.PdfContentInstruction> instructions)
     {
-        // Forms can inherit page resources, and inline image dictionaries can name
-        // them without a separate cs operator. Preserve names the page-only scan
-        // and alias rewriter cannot track, including those used in nested forms.
+        PdfName[] defaults = [.. DefaultColorSpaces(document, resources)];
+        return defaults.Length == 0 ? instructions : Array.AsReadOnly(instructions.Concat(defaults.Select(
+            space => new KillerPdf.Engine.Parsing.PdfContentInstruction("cs", 0, [space]))).ToArray());
+    }
+
+    private static IEnumerable<PdfName> DefaultColorSpaces(PdfDocument document, PdfDictionary resources) =>
+        resources.TryGetValue(Name("ColorSpace"), out PdfObject? value)
+        && Resolve(document, value) is PdfDictionary spaces
+            ? spaces.Keys.Where(key => key.ValueAsLatin1() is "DefaultGray" or "DefaultRGB" or "DefaultCMYK") : [];
+
+    internal static bool HasIndirectResourceConsumers(PdfDocument document,
+        PdfDictionary resources,
+        IReadOnlyList<KillerPdf.Engine.Parsing.PdfContentInstruction> instructions,
+        PdfDictionary? page = null)
+    {
+        // Forms, Type 3 fonts, tiling patterns, soft masks and annotation appearances can
+        // inherit page resources, and inline image dictionaries can name them without a
+        // separate cs operator. Preserve names the page-only scan and alias rewriter cannot
+        // track, including those used in nested forms. A default color space keeps the page
+        // whole too unless the caller has named it, as NamingDefaultColorSpaces does.
+        if (PdfInheritedResources.ConsumesPageResources(document, resources, page)
+            || DefaultColorSpaces(document, resources).Any(space => !instructions.Any(instruction =>
+                instruction.Operator == "cs" && instruction.Operands.Count > 0
+                && space.Equals(instruction.Operands[0]))))
+            return true;
         return instructions.Any(instruction => UsesNamedInlineColorSpace(instruction)
             || instruction.Operator == "Do"
             && instruction.Operands.Count > 0
@@ -789,7 +858,7 @@ public static class PdfOptimizer
                 changed = true;
             }
         }
-        return changed ? PdfDocument.Open(update.Build()) : document;
+        return changed ? Reopen(document, update.Build()) : document;
 
         PdfObject Visit(PdfObject value)
         {
@@ -865,7 +934,8 @@ public static class PdfOptimizer
 
     internal static IReadOnlyList<KillerPdf.Engine.Parsing.PdfContentInstruction>
         ConsolidateResourceAliases(PdfDocument document, int pageIndex,
-            IReadOnlyList<KillerPdf.Engine.Parsing.PdfContentInstruction> instructions)
+            IReadOnlyList<KillerPdf.Engine.Parsing.PdfContentInstruction> instructions,
+            PdfResourceFingerprints fingerprints)
     {
         PdfPageTreeEntry page = PdfPageTree.Read(document).Pages[pageIndex];
         if (!page.InheritedValues.TryGetValue(Name("Resources"), out PdfObject? value)
@@ -908,7 +978,7 @@ public static class PdfOptimizer
             if (!resources.TryGetValue(Name(category), out PdfObject? categoryValue)
                 || Resolve(document, categoryValue) is not PdfDictionary dictionary)
                 return [];
-            return DuplicateAliases(document, dictionary);
+            return DuplicateAliases(document, dictionary, fingerprints);
         }
     }
 
@@ -920,13 +990,15 @@ public static class PdfOptimizer
             .Select(item => item.Operands[operandIndex]).OfType<PdfName>()];
 
     private static Dictionary<PdfName, PdfName> DuplicateAliases(
-        PdfDocument document, PdfDictionary dictionary)
+        PdfDocument document, PdfDictionary dictionary, PdfResourceFingerprints fingerprints)
     {
         var canonical = new Dictionary<string, PdfName>(StringComparer.Ordinal);
         var aliases = new Dictionary<PdfName, PdfName>();
         foreach ((PdfName name, PdfObject value) in dictionary)
         {
-            string identity = PdfDocumentWriter.ResourceFingerprint(Resolve(document, value));
+            PdfObject resource = Resolve(document, value);
+            if (PdfDocumentWriter.IsOptionalContent(resource, item => Resolve(document, item))) continue;
+            string identity = fingerprints.Of(resource);
             if (canonical.TryGetValue(identity, out PdfName? first))
                 aliases[name] = first;
             else
