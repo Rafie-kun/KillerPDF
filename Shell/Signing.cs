@@ -572,11 +572,11 @@ namespace KillerPDF.Shell
                 var createBtn = UiKit.Make(Loc("Str_Sig_Create"), accent: true);
                 createBtn.HorizontalAlignment = HorizontalAlignment.Stretch;
                 createBtn.Margin = new Thickness(0, 0, 3, 0);
-                createBtn.Click += (s, e) => { HideSignaturePopup(cancelPendingField: false); OpenSignatureCreator(kind); ShowSignaturePopup(); };
+                createBtn.Click += (s, e) => AddSignatureFromPicker(() => OpenSignatureCreator(kind));
                 var importBtn = UiKit.Make(Loc("Str_Sig_Import"), accent: false);
                 importBtn.HorizontalAlignment = HorizontalAlignment.Stretch;
                 importBtn.Margin = new Thickness(3, 0, 0, 0);
-                importBtn.Click += (s, e) => { HideSignaturePopup(cancelPendingField: false); ImportImageSignature(kind); ShowSignaturePopup(); };
+                importBtn.Click += (s, e) => AddSignatureFromPicker(() => ImportImageSignature(kind));
                 Grid.SetColumn(createBtn, 0);
                 Grid.SetColumn(importBtn, 1);
                 rowBtns.Children.Add(createBtn);
@@ -879,6 +879,16 @@ namespace KillerPDF.Shell
 
             win.Content = DialogFrame.Frame(win, this, "KillerPDF - " + Loc("Str_Sig_Create"), () => win.Close(), contentArea);
             win.ShowDialog();
+        }
+
+        // A new signature is armed for placing, so the picker stays out of the way of the page. It
+        // returns when nothing was added, or when a form field is still waiting for a pick.
+        private void AddSignatureFromPicker(Action add)
+        {
+            SavedSignature? armed = _pendingSignature;
+            HideSignaturePopup(cancelPendingField: false);
+            add();
+            if (_pendingSignField is not null || ReferenceEquals(armed, _pendingSignature)) ShowSignaturePopup();
         }
 
         private void ImportImageSignature(SignatureKind kind = SignatureKind.Signature)
