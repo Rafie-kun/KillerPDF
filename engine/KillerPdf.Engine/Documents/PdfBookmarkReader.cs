@@ -72,17 +72,8 @@ public static class PdfBookmarkReader
                     throw new InvalidOperationException("A bookmark /F value contains unsupported flags.");
                 PdfRgbColor? color = ReadColor(document, item);
 
-                PdfObject? rawDestination = null;
-                if (item.TryGetValue(DestinationName, out PdfObject? direct)) rawDestination = direct;
-                else if (item.TryGetValue(ActionName, out PdfObject? actionValue)
-                    && Resolve(document, actionValue, "A bookmark action") is PdfDictionary action
-                    && action.TryGetValue(ActionTypeName, out PdfObject? typeValue)
-                    && Resolve(document, typeValue, "A bookmark action type") is PdfName type
-                    && type.Equals(GoToName)
-                    && action.TryGetValue(ActionDestinationName, out PdfObject? actionDestination))
-                    rawDestination = actionDestination;
                 (int? pageIndex, string? named, PdfDestination? destination) =
-                    ReadDestination(document, rawDestination, pages, namedDestinations);
+                    ReadItemDestination(item);
                 result.Add(new PdfBookmarkInfo
                 {
                     ObjectNumber = reference.ObjectNumber,
@@ -100,6 +91,28 @@ public static class PdfBookmarkReader
             }
             return result;
         }
+
+        // A malformed destination loses only the destination: the item keeps its title and the rest of the outline stays readable.
+        (int? PageIndex, string? Named, PdfDestination? Destination) ReadItemDestination(PdfDictionary item)
+        {
+            try
+            {
+                PdfObject? rawDestination = null;
+                if (item.TryGetValue(DestinationName, out PdfObject? direct)) rawDestination = direct;
+                else if (item.TryGetValue(ActionName, out PdfObject? actionValue)
+                    && Resolve(document, actionValue, "A bookmark action") is PdfDictionary action
+                    && action.TryGetValue(ActionTypeName, out PdfObject? typeValue)
+                    && Resolve(document, typeValue, "A bookmark action type") is PdfName type
+                    && type.Equals(GoToName)
+                    && action.TryGetValue(ActionDestinationName, out PdfObject? actionDestination))
+                    rawDestination = actionDestination;
+                return ReadDestination(document, rawDestination, pages, namedDestinations);
+            }
+            catch (Exception error) when (error is InvalidOperationException or ArgumentException)
+            {
+                return (null, null, null);
+            }
+        }
     }
 
     private static Dictionary<string, PdfObject> ReadNamedDestinations(
@@ -110,8 +123,18 @@ public static class PdfBookmarkReader
             && Resolve(document, namesValue, "The catalog /Names value") is PdfDictionary names
             && names.TryGetValue(DestsName, out PdfObject? destinationTree))
             foreach (PdfNameTreeEntry entry in PdfNameTree.Read(document, destinationTree))
-                result.Add(PdfUnicodeEncoding.DecodeTextString(
-                    entry.Key.Bytes.Span, "A named destination key"), entry.Value);
+            {
+                // A key that cannot be decoded names nothing a bookmark could ask for, and when two keys
+                // decode to the same text the first one wins.
+                try
+                {
+                    result.TryAdd(PdfUnicodeEncoding.DecodeTextString(
+                        entry.Key.Bytes.Span, "A named destination key"), entry.Value);
+                }
+                catch (Exception error) when (error is InvalidOperationException or ArgumentException)
+                {
+                }
+            }
         if (catalog.TryGetValue(DestsName, out PdfObject? legacyValue)
             && Resolve(document, legacyValue, "The catalog /Dests value") is PdfDictionary legacy)
             foreach ((PdfName key, PdfObject value) in legacy)

@@ -19,7 +19,11 @@ internal sealed class PdfObjectGraphImporter
     private Func<PdfIndirectReference?, PdfDictionary, PdfDictionary>? _dictionaryTransform;
     private Dictionary<SourceReference, PdfDictionary>? _sourceObjectOverrides;
     private readonly HashSet<SourceReference> _populated = [];
+    // Objects reserved but not yet filled. A long /Next chain is one deep path through the graph, not
+    // deep nesting, so references are queued here and filled by a loop instead of by recursion.
     private readonly HashSet<SourceReference> _populating = [];
+    private readonly Queue<PendingObject> _pending = new();
+    private bool _draining;
     private int _importedObjectCount;
 
     internal PdfObjectGraphImporter(
@@ -108,7 +112,33 @@ internal sealed class PdfObjectGraphImporter
                 + "then edit the saved copy.");
     }
 
-    internal PdfObject Import(PdfObject value) => Import(value, 0, null);
+    internal PdfObject Import(PdfObject value)
+    {
+        // A nested call from inside the loop only queues; the outer loop fills what it queued.
+        if (_draining) return Import(value, 0, null);
+        _draining = true;
+        try
+        {
+            PdfObject imported = Import(value, 0, null);
+            while (_pending.Count > 0)
+            {
+                PendingObject item = _pending.Dequeue();
+                PopulateReference(item.Key, item.Source, item.Destination);
+            }
+            return imported;
+        }
+        catch
+        {
+            // Unfilled objects stay mapped and are filled if a later call reaches them again.
+            _pending.Clear();
+            _populating.Clear();
+            throw;
+        }
+        finally
+        {
+            _draining = false;
+        }
+    }
 
     internal PdfDictionary ApplyDictionaryTransform(PdfDictionary dictionary) =>
         _dictionaryTransform?.Invoke(null, dictionary) ?? dictionary;
@@ -147,7 +177,7 @@ internal sealed class PdfObjectGraphImporter
             throw new InvalidOperationException("The imported PDF object nesting limit was exceeded.");
         return value switch
         {
-            PdfIndirectReference reference => ImportReference(reference, depth),
+            PdfIndirectReference reference => ImportReference(reference),
             PdfArray array => new PdfArray(array.Select(item => Import(item, depth + 1, null))),
             PdfDictionary dictionary => ImportDictionary(dictionary, depth + 1, context),
             PdfStream stream => new PdfStream(ImportStreamDictionary(stream.Dictionary, depth + 1),
@@ -158,13 +188,13 @@ internal sealed class PdfObjectGraphImporter
         };
     }
 
-    private PdfObject ImportReference(PdfIndirectReference sourceReference, int depth)
+    private PdfObject ImportReference(PdfIndirectReference sourceReference)
     {
         var key = new SourceReference(sourceReference.ObjectNumber, sourceReference.Generation);
         if (_references.TryGetValue(key, out PdfIndirectReference? mapped))
         {
             if (!_populated.Contains(key) && !_populating.Contains(key))
-                PopulateReference(key, sourceReference, mapped, depth);
+                QueueReference(key, sourceReference, mapped);
             return mapped;
         }
         if (_sourcePages.Contains(key))
@@ -177,22 +207,28 @@ internal sealed class PdfObjectGraphImporter
         PdfIndirectReference destinationReference = _update.ReserveObject();
         _references.Add(key, destinationReference);
         RegisterDestination(destinationReference, key);
-        PopulateReference(key, sourceReference, destinationReference, depth);
+        QueueReference(key, sourceReference, destinationReference);
         return destinationReference;
+    }
+
+    private void QueueReference(
+        SourceReference key, PdfIndirectReference sourceReference,
+        PdfIndirectReference destinationReference)
+    {
+        _populating.Add(key);
+        _pending.Enqueue(new PendingObject(key, sourceReference, destinationReference));
     }
 
     private void PopulateReference(
         SourceReference key, PdfIndirectReference sourceReference,
-        PdfIndirectReference destinationReference, int depth)
+        PdfIndirectReference destinationReference)
     {
-        PdfObject sourceValue = ResolveSource(sourceReference);
-        if (sourceValue is PdfNull)
-            throw new InvalidOperationException("A reserved imported reference resolves to null.");
-        _populating.Add(key);
         try
         {
-            _update.SetObject(destinationReference,
-                Import(sourceValue, depth + 1, sourceReference));
+            PdfObject sourceValue = ResolveSource(sourceReference);
+            if (sourceValue is PdfNull)
+                throw new InvalidOperationException("A reserved imported reference resolves to null.");
+            _update.SetObject(destinationReference, Import(sourceValue, 0, sourceReference));
             _populated.Add(key);
         }
         finally
@@ -222,4 +258,7 @@ internal sealed class PdfObjectGraphImporter
             : _source.Resolve(reference);
 
     private readonly record struct SourceReference(int ObjectNumber, int Generation);
+
+    private readonly record struct PendingObject(
+        SourceReference Key, PdfIndirectReference Source, PdfIndirectReference Destination);
 }

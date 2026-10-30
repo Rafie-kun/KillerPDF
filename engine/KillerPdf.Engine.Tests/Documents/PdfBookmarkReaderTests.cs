@@ -1,6 +1,8 @@
 using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Editing;
+using KillerPdf.Engine.Objects;
+using KillerPdf.Engine.Writing;
 using System.Text.Json;
 using System.Text;
 using Xunit;
@@ -106,6 +108,94 @@ public sealed class PdfBookmarkReaderTests
         Assert.Null(bookmarks[0].Destination);
         Assert.Equal(0, bookmarks[0].DestinationPageIndex);
         Assert.Equal(PdfDestinationKind.Xyz, bookmarks[1].Destination!.Kind);
+    }
+
+    [Fact]
+    public void Read_KeepsTheOutlineWhenABookmarkDestinationReferencesItself()
+    {
+        byte[] source = TwoBookmarks();
+        source = ChangeFirstBookmark(source, (update, item) =>
+        {
+            PdfIndirectReference loop = update.ReserveObject();
+            update.SetObject(loop, loop);
+            return Replace(item, "Dest", loop);
+        });
+
+        IReadOnlyList<PdfBookmarkInfo> bookmarks = PdfBookmarkReader.Read(PdfDocument.Open(source));
+
+        Assert.Equal(["Broken", "Fine"], bookmarks.Select(item => item.Title));
+        AssertNoDestination(bookmarks[0]);
+        Assert.Equal(0, bookmarks[1].DestinationPageIndex);
+    }
+
+    [Theory]
+    [InlineData(PdfStringForm.Hexadecimal)]
+    [InlineData(PdfStringForm.Literal)]
+    public void Read_KeepsTheOutlineWhenABookmarkDestinationHasBadUtf16(PdfStringForm form)
+    {
+        byte[] source = ChangeFirstBookmark(TwoBookmarks(), (update, item) =>
+            Replace(item, "Dest", new PdfString(new byte[] { 0xFE, 0xFF, 0xD8, 0x00 }, form)));
+
+        IReadOnlyList<PdfBookmarkInfo> bookmarks = PdfBookmarkReader.Read(PdfDocument.Open(source));
+
+        Assert.Equal(["Broken", "Fine"], bookmarks.Select(item => item.Title));
+        AssertNoDestination(bookmarks[0]);
+        Assert.Equal(0, bookmarks[1].DestinationPageIndex);
+    }
+
+    [Fact]
+    public void Read_KeepsTheOutlineWhenAGoToActionDestinationReferencesItself()
+    {
+        byte[] source = ChangeFirstBookmark(TwoBookmarks(), (update, item) =>
+        {
+            PdfIndirectReference loop = update.ReserveObject();
+            update.SetObject(loop, loop);
+            return Replace(new PdfDictionary(item.Where(entry => !entry.Key.Equals(Name("Dest")))), "A",
+                new PdfDictionary([
+                    new(Name("S"), Name("GoTo")),
+                    new(Name("D"), loop)]));
+        });
+
+        IReadOnlyList<PdfBookmarkInfo> bookmarks = PdfBookmarkReader.Read(PdfDocument.Open(source));
+
+        Assert.Equal(["Broken", "Fine"], bookmarks.Select(item => item.Title));
+        AssertNoDestination(bookmarks[0]);
+    }
+
+    [Fact]
+    public void Read_SkipsAnUndecodableNamedDestinationKeyAndKeepsTheRest()
+    {
+        byte[] source = WithNamedDestinationTree(TwoNamedBookmarks(), pageReference =>
+        [
+            (Literal("good"), Destination(pageReference)),
+            (new PdfString(new byte[] { 0xFE, 0xFF, 0xD8, 0x00 }, PdfStringForm.Hexadecimal),
+                Destination(pageReference))
+        ]);
+
+        IReadOnlyList<PdfBookmarkInfo> bookmarks = PdfBookmarkReader.Read(PdfDocument.Open(source));
+
+        Assert.Equal(["Good", "Other"], bookmarks.Select(item => item.Title));
+        Assert.Equal(0, bookmarks[0].DestinationPageIndex);
+        Assert.Equal("good", bookmarks[0].NamedDestination);
+        Assert.Null(bookmarks[1].DestinationPageIndex);
+        Assert.Equal("other", bookmarks[1].NamedDestination);
+    }
+
+    [Fact]
+    public void Read_KeepsTheFirstOfTwoNamedDestinationKeysThatDecodeToTheSameName()
+    {
+        // The byte keys differ, so the name tree accepts both, but they decode to the same text.
+        byte[] source = WithNamedDestinationTree(TwoNamedBookmarks(), pageReference =>
+        [
+            (Literal("good"), Destination(pageReference)),
+            (new PdfString(new byte[] { 0xFE, 0xFF, 0, (byte)'g', 0, (byte)'o', 0, (byte)'o', 0, (byte)'d' },
+                PdfStringForm.Hexadecimal), Destination(pageReference))
+        ]);
+
+        IReadOnlyList<PdfBookmarkInfo> bookmarks = PdfBookmarkReader.Read(PdfDocument.Open(source));
+
+        Assert.Equal(["Good", "Other"], bookmarks.Select(item => item.Title));
+        Assert.Equal(0, bookmarks[0].DestinationPageIndex);
     }
 
     [Fact]
@@ -218,6 +308,66 @@ public sealed class PdfBookmarkReaderTests
         Assert.Throws<NotSupportedException>(() => PdfBookmarkExchange.Import(target,
             """{"schemaVersion":2,"bookmarks":[]}"""));
     }
+
+    private static byte[] TwoBookmarks() => new PdfDocumentBuilder()
+        .AddBlankPage()
+        .AddBookmark("Broken", 0)
+        .AddBookmark("Fine", 0)
+        .Build();
+
+    private static byte[] TwoNamedBookmarks() => new PdfDocumentBuilder()
+        .AddBlankPage()
+        .AddNamedDestination("good", 0)
+        .AddNamedDestination("other", 0)
+        .AddNamedDestinationBookmark("Good", "good")
+        .AddNamedDestinationBookmark("Other", "other")
+        .Build();
+
+    private static void AssertNoDestination(PdfBookmarkInfo bookmark)
+    {
+        Assert.Null(bookmark.DestinationPageIndex);
+        Assert.Null(bookmark.Destination);
+    }
+
+    private static byte[] ChangeFirstBookmark(byte[] source,
+        Func<PdfIncrementalUpdateBuilder, PdfDictionary, PdfDictionary> change)
+    {
+        PdfDocument document = PdfDocument.Open(source);
+        PdfBookmarkInfo first = PdfBookmarkReader.Read(document)[0];
+        var update = new PdfIncrementalUpdateBuilder(document);
+        var item = Assert.IsType<PdfDictionary>(
+            document.Resolve(new PdfIndirectReference(first.ObjectNumber, first.Generation)));
+        update.ReplaceObject(first.ObjectNumber, change(update, item));
+        return update.Build();
+    }
+
+    // Replaces the catalog's /Dests name tree with one flat node holding the given keys, in order.
+    private static byte[] WithNamedDestinationTree(byte[] source,
+        Func<PdfIndirectReference, (PdfString Key, PdfObject Value)[]> entries)
+    {
+        PdfDocument document = PdfDocument.Open(source);
+        PdfIndirectReference page = PdfPageTree.Read(document).Pages[0].Reference;
+        var root = Assert.IsType<PdfIndirectReference>(document.Trailer[Name("Root")]);
+        var catalog = Assert.IsType<PdfDictionary>(document.Resolve(root));
+        var update = new PdfIncrementalUpdateBuilder(document);
+        PdfIndirectReference tree = update.AddObject(new PdfDictionary([
+            new(Name("Names"), new PdfArray(entries(page).SelectMany(
+                entry => new[] { (PdfObject)entry.Key, entry.Value })))]));
+        PdfIndirectReference names = update.AddObject(new PdfDictionary([new(Name("Dests"), tree)]));
+        update.ReplaceObject(root.ObjectNumber, Replace(catalog, "Names", names));
+        return update.Build();
+    }
+
+    private static PdfArray Destination(PdfIndirectReference page) => new([page, Name("Fit")]);
+
+    private static PdfString Literal(string value) =>
+        new(Encoding.ASCII.GetBytes(value), PdfStringForm.Literal);
+
+    private static PdfDictionary Replace(PdfDictionary source, string key, PdfObject value) =>
+        new(source.Where(entry => !entry.Key.Equals(Name(key))).Append(
+            new KeyValuePair<PdfName, PdfObject>(Name(key), value)));
+
+    private static PdfName Name(string value) => new(Encoding.ASCII.GetBytes(value));
 
     private static byte[] ReplaceAscii(byte[] source, string oldValue, string newValue)
     {
