@@ -18056,7 +18056,7 @@ public sealed class PdfIncrementalPageEditor
                     maximumDecodedBytes: 32 * 1024 * 1024);
                 xmp = UpdateXmp(decoded, _metadata, ReadCurrentInformation());
             }
-            catch (Exception error) when (error is InvalidOperationException or PdfFilterException)
+            catch (Exception error) when (PdfReaderDamage.Is(error))
             {
                 xmp = null;
             }

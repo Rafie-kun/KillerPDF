@@ -1,6 +1,5 @@
 using System.Text;
 using System.Formats.Asn1;
-using System.Globalization;
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Objects;
@@ -376,12 +375,14 @@ public static class PdfSignatureReader
         return resolvedSignature.FinalReference;
     }
 
+    // ISO 32000-1 Table 252 makes /Type optional, so a signature dictionary without one is a signature;
+    // a /Type that is present and is not /Sig is not.
     private static void ValidateSignatureDictionaryType(
         PdfDocument document, PdfDictionary signature, string description,
         bool allowDocumentTimestamp = false)
     {
-        if (!signature.TryGetValue(Name("Type"), out PdfObject? signatureTypeValue)
-            || Resolve(document, signatureTypeValue) is not PdfName signatureType
+        if (!signature.TryGetValue(Name("Type"), out PdfObject? signatureTypeValue)) return;
+        if (Resolve(document, signatureTypeValue) is not PdfName signatureType
             || (signatureType.ValueAsLatin1() != "Sig"
                 && (!allowDocumentTimestamp
                     || signatureType.ValueAsLatin1() != "DocTimeStamp")))
@@ -397,51 +398,25 @@ public static class PdfSignatureReader
             : throw new InvalidOperationException($"The signature /{key} value is not a name.");
     }
 
+    // The signer's name, reason, location, contact and signing time are descriptive: whatever cannot be
+    // read costs that value and never the signature. What the signature covers is read strictly elsewhere.
     private static string? OptionalText(
         PdfDocument document, PdfDictionary dictionary, string key)
     {
-        if (!dictionary.TryGetValue(Name(key), out PdfObject? value)) return null;
-        return Resolve(document, value) is PdfString text ? DecodeString(text)
-            : throw new InvalidOperationException($"The signature /{key} value is not a string.");
+        try
+        {
+            return dictionary.TryGetValue(Name(key), out PdfObject? value)
+                && Resolve(document, value) is PdfString text ? DecodeString(text) : null;
+        }
+        catch (Exception error) when (PdfReaderDamage.Is(error))
+        {
+            return null;
+        }
     }
 
     private static DateTimeOffset? OptionalDate(
-        PdfDocument document, PdfDictionary dictionary, string key)
-    {
-        string? value = OptionalText(document, dictionary, key);
-        if (value is null) return null;
-        try
-        {
-            if (!value.StartsWith("D:", StringComparison.Ordinal) || value.Length < 6)
-                throw new FormatException();
-            string digits = new([.. value.Skip(2).TakeWhile(char.IsAsciiDigit)]);
-            if (digits.Length is not (4 or 6 or 8 or 10 or 12 or 14)) throw new FormatException();
-            int Part(int offset, int length, int fallback) => digits.Length >= offset + length
-                ? int.Parse(digits.AsSpan(offset, length), CultureInfo.InvariantCulture) : fallback;
-            int year = Part(0, 4, 1), month = Part(4, 2, 1), day = Part(6, 2, 1);
-            int hour = Part(8, 2, 0), minute = Part(10, 2, 0), second = Part(12, 2, 0);
-            string suffix = value[(2 + digits.Length)..];
-            TimeSpan zone = TimeSpan.Zero;
-            if (suffix.Length > 0 && suffix != "Z")
-            {
-                char sign = suffix[0];
-                // ISO 32000-1 7.9.4 lets Z carry an HH'mm offset too (Adobe signers write Z00'00');
-                // Z means universal time either way.
-                if (sign is not ('+' or '-' or 'Z')) throw new FormatException();
-                string compact = suffix[1..].Replace("'", string.Empty, StringComparison.Ordinal);
-                if (compact.Length != 4 || !int.TryParse(compact[..2], out int zoneHour)
-                    || !int.TryParse(compact[2..], out int zoneMinute)) throw new FormatException();
-                zone = sign == 'Z' ? TimeSpan.Zero
-                    : new TimeSpan(zoneHour, zoneMinute, 0) * (sign == '-' ? -1 : 1);
-            }
-            return new DateTimeOffset(year, month, day, hour, minute, second, zone);
-        }
-        catch (Exception error) when (error is FormatException or ArgumentOutOfRangeException)
-        {
-            throw new InvalidOperationException(
-                $"The signature /{key} value is not a valid PDF date.", error);
-        }
-    }
+        PdfDocument document, PdfDictionary dictionary, string key) =>
+        PdfDateText.TryParse(OptionalText(document, dictionary, key), out DateTimeOffset date) ? date : null;
 
     private static PdfDictionary ResolveDictionary(
         PdfDocument document, PdfObject value, string description)

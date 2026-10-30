@@ -488,7 +488,7 @@ public sealed class PdfSignatureReaderTests
     }
 
     [Fact]
-    public void Read_RejectsSignedValueWithoutSignatureDictionaryType()
+    public void Read_AcceptsSignedValueWithoutSignatureDictionaryType()
     {
         byte[] source = new PdfDocumentBuilder()
             .AddBlankPage()
@@ -518,10 +518,8 @@ public sealed class PdfSignatureReaderTests
                 new PdfDictionary(signature.Where(entry => !entry.Key.Equals(Name("Type")))))
             .Build());
 
-        InvalidOperationException error = Assert.Throws<InvalidOperationException>(() =>
-            PdfSignatureReader.Read(malformed));
-
-        Assert.Contains("does not declare /Type /Sig", error.Message, StringComparison.Ordinal);
+        // /Type is optional in a signature dictionary, and DocuSign output leaves it out.
+        Assert.True(Assert.Single(PdfSignatureReader.Read(malformed)).IsSigned);
     }
 
     [Fact]
@@ -571,7 +569,7 @@ public sealed class PdfSignatureReaderTests
     }
 
     [Fact]
-    public void Read_RejectsCertificationTargetWithoutSignatureDictionaryType()
+    public void Read_AcceptsCertificationTargetWithoutSignatureDictionaryType()
     {
         byte[] source = new PdfDocumentBuilder()
             .AddBlankPage()
@@ -596,11 +594,7 @@ public sealed class PdfSignatureReaderTests
                 new PdfDictionary(signature.Where(entry => !entry.Key.Equals(Name("Type")))))
             .Build());
 
-        InvalidOperationException error = Assert.Throws<InvalidOperationException>(() =>
-            PdfSignatureReader.Read(malformed));
-
-        Assert.Contains("catalog certification signature does not declare /Type /Sig",
-            error.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.True(Assert.Single(PdfSignatureReader.Read(malformed)).IsSigned);
     }
 
     [Fact]

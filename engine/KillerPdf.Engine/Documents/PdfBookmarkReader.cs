@@ -31,9 +31,11 @@ public static class PdfBookmarkReader
         PdfPageTree tree = PdfPageTree.Read(document);
         if (!tree.Catalog.TryGetValue(OutlinesName, out PdfObject? outlinesValue))
             return [];
-        PdfDictionary outlines = Resolve(document, outlinesValue, "The catalog /Outlines value")
-            as PdfDictionary ?? throw new InvalidOperationException(
-                "The catalog /Outlines value is not a dictionary.");
+        // A null or dangling /Outlines is common and means the document has no outline.
+        PdfObject outlinesResolved = Resolve(document, outlinesValue, "The catalog /Outlines value");
+        if (outlinesResolved is PdfNull) return [];
+        PdfDictionary outlines = outlinesResolved as PdfDictionary ?? throw new InvalidOperationException(
+            "The catalog /Outlines value is not a dictionary.");
         if (!outlines.TryGetValue(FirstName, out PdfObject? first)) return [];
 
         var pages = tree.Pages.ToDictionary(
@@ -66,10 +68,10 @@ public static class PdfBookmarkReader
                     : throw new InvalidOperationException("A bookmark item has no valid /Title string.");
                 IReadOnlyList<PdfBookmarkInfo> children = item.TryGetValue(FirstName, out PdfObject? child)
                     ? ReadSiblings(child, depth + 1) : [];
-                long outlineCount = Integer(document, item, CountName, 0, "A bookmark /Count");
-                long styleValue = Integer(document, item, StyleName, 0, "A bookmark /F");
-                if ((styleValue & ~3L) != 0)
-                    throw new InvalidOperationException("A bookmark /F value contains unsupported flags.");
+                // The look of an item is cosmetic: a value that cannot be read loses that value, not the outline.
+                long outlineCount = TolerantInteger(item, CountName, 0, "A bookmark /Count");
+                long styleValue = TolerantInteger(item, StyleName, 0, "A bookmark /F");
+                if ((styleValue & ~3L) != 0) styleValue = 0;
                 PdfRgbColor? color = ReadColor(document, item);
 
                 (int? pageIndex, string? named, PdfDestination? destination) =
@@ -108,9 +110,21 @@ public static class PdfBookmarkReader
                     rawDestination = actionDestination;
                 return ReadDestination(document, rawDestination, pages, namedDestinations);
             }
-            catch (Exception error) when (error is InvalidOperationException or ArgumentException)
+            catch (Exception error) when (PdfReaderDamage.Is(error))
             {
                 return (null, null, null);
+            }
+        }
+
+        long TolerantInteger(PdfDictionary item, PdfName key, long fallback, string description)
+        {
+            try
+            {
+                return Integer(document, item, key, fallback, description);
+            }
+            catch (Exception error) when (PdfReaderDamage.Is(error))
+            {
+                return fallback;
             }
         }
     }
@@ -119,14 +133,28 @@ public static class PdfBookmarkReader
         PdfDocument document, PdfDictionary catalog)
     {
         var result = new Dictionary<string, PdfObject>(StringComparer.Ordinal);
-        if (catalog.TryGetValue(NamesName, out PdfObject? namesValue)
-            && Resolve(document, namesValue, "The catalog /Names value") is PdfDictionary names
-            && names.TryGetValue(DestsName, out PdfObject? destinationTree))
-            PdfNameTree.ReadDestinations(document, destinationTree, result);
-        if (catalog.TryGetValue(DestsName, out PdfObject? legacyValue)
-            && Resolve(document, legacyValue, "The catalog /Dests value") is PdfDictionary legacy)
-            foreach ((PdfName key, PdfObject value) in legacy)
-                result.TryAdd(key.ValueAsLatin1(), value);
+        // Named destinations are a lookup: a /Names or /Dests value that cannot be read costs the names
+        // it holds and never the outline.
+        try
+        {
+            if (catalog.TryGetValue(NamesName, out PdfObject? namesValue)
+                && Resolve(document, namesValue, "The catalog /Names value") is PdfDictionary names
+                && names.TryGetValue(DestsName, out PdfObject? destinationTree))
+                PdfNameTree.ReadDestinations(document, destinationTree, result);
+        }
+        catch (Exception error) when (PdfReaderDamage.Is(error))
+        {
+        }
+        try
+        {
+            if (catalog.TryGetValue(DestsName, out PdfObject? legacyValue)
+                && Resolve(document, legacyValue, "The catalog /Dests value") is PdfDictionary legacy)
+                foreach ((PdfName key, PdfObject value) in legacy)
+                    result.TryAdd(key.ValueAsLatin1(), value);
+        }
+        catch (Exception error) when (PdfReaderDamage.Is(error))
+        {
+        }
         return result;
     }
 
@@ -186,7 +214,7 @@ public static class PdfBookmarkReader
                 _ => null
             };
         }
-        catch (Exception error) when (error is InvalidOperationException or ArgumentException)
+        catch (Exception error) when (PdfReaderDamage.Is(error))
         {
             return null;
         }
@@ -195,11 +223,19 @@ public static class PdfBookmarkReader
     private static PdfRgbColor? ReadColor(PdfDocument document, PdfDictionary item)
     {
         if (!item.TryGetValue(ColorName, out PdfObject? value)) return null;
-        PdfArray array = Resolve(document, value, "A bookmark /C value") as PdfArray
-            ?? throw new InvalidOperationException("A bookmark /C value is not an array.");
-        if (array.Count != 3)
-            throw new InvalidOperationException("A bookmark /C value does not contain three components.");
-        return new PdfRgbColor(Number(document, array[0]), Number(document, array[1]), Number(document, array[2]));
+        try
+        {
+            PdfArray array = Resolve(document, value, "A bookmark /C value") as PdfArray
+                ?? throw new InvalidOperationException("A bookmark /C value is not an array.");
+            if (array.Count != 3)
+                throw new InvalidOperationException("A bookmark /C value does not contain three components.");
+            return new PdfRgbColor(Number(document, array[0]), Number(document, array[1]), Number(document, array[2]));
+        }
+        catch (Exception error) when (PdfReaderDamage.Is(error))
+        {
+            // An out-of-spec color loses the color, not the outline.
+            return null;
+        }
     }
 
     private static long Integer(PdfDocument document, PdfDictionary dictionary, PdfName key,

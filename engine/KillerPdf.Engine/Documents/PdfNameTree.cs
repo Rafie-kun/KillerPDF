@@ -1,4 +1,5 @@
 using System.Text;
+using KillerPdf.Engine.Filters;
 using KillerPdf.Engine.Objects;
 
 namespace KillerPdf.Engine.Documents;
@@ -11,32 +12,66 @@ internal static class PdfNameTree
     private const int MaximumDepth = 256;
     internal const int MaximumEntryCount = 1_000_000;
 
-    // Named destinations are a lookup, so damage costs the names and never the outline or the links
-    // that ask for them. A key that cannot be decoded names nothing anything could ask for, and when
-    // two keys decode to the same text the first one wins.
+    // Named destinations are a lookup, so damage costs the names it touches and never the outline or the
+    // links that ask for them. The walk keeps every pair it can read: lookup needs neither the key order
+    // nor /Limits, a node that cannot be read loses only itself, a key that cannot be decoded names
+    // nothing anything could ask for, and when two keys decode to the same text the first one wins.
+    // The depth and entry limits and the cycle check still bound the walk.
     internal static void ReadDestinations(PdfDocument document, PdfObject root,
         Dictionary<string, PdfObject> destinations)
     {
-        IReadOnlyList<PdfNameTreeEntry> entries;
-        try
+        var visited = new HashSet<(int ObjectNumber, int Generation)>();
+        int entryCount = 0;
+        Visit(root, 0);
+
+        void Visit(PdfObject value, int depth)
         {
-            entries = Read(document, root);
-        }
-        catch (Exception error) when (error is InvalidOperationException or ArgumentException
-            or NotSupportedException or FormatException)
-        {
-            return;
-        }
-        foreach (PdfNameTreeEntry entry in entries)
-        {
+            if (depth >= MaximumDepth) return;
+            PdfDictionary? node;
+            PdfArray? names = null, kids = null;
             try
             {
-                destinations.TryAdd(PdfUnicodeEncoding.DecodeTextString(
-                    entry.Key.Bytes.Span, "A named destination key"), entry.Value);
+                node = Resolve(value, trackNodes: true) as PdfDictionary;
+                if (node is null) return;
+                if (node.TryGetValue(NamesName, out PdfObject? namesValue))
+                    names = Resolve(namesValue, trackNodes: false) as PdfArray;
+                if (node.TryGetValue(KidsName, out PdfObject? kidsValue))
+                    kids = Resolve(kidsValue, trackNodes: false) as PdfArray;
             }
-            catch (Exception error) when (error is InvalidOperationException or ArgumentException)
+            catch (Exception error) when (PdfReaderDamage.Is(error))
             {
+                return;
             }
+            if (names is not null)
+                for (int index = 0; index + 1 < names.Count; index += 2)
+                {
+                    if (++entryCount > MaximumEntryCount) return;
+                    try
+                    {
+                        if (Resolve(names[index], trackNodes: false) is PdfString key)
+                            destinations.TryAdd(PdfUnicodeEncoding.DecodeTextString(
+                                key.Bytes.Span, "A named destination key"), names[index + 1]);
+                    }
+                    catch (Exception error) when (PdfReaderDamage.Is(error))
+                    {
+                    }
+                }
+            if (kids is not null)
+                foreach (PdfObject kid in kids) Visit(kid, depth + 1);
+        }
+
+        // A node reached a second time, which is also how a cycle shows itself, reads as nothing.
+        PdfObject Resolve(PdfObject value, bool trackNodes)
+        {
+            for (int aliasDepth = 0; value is PdfIndirectReference reference; aliasDepth++)
+            {
+                if (aliasDepth >= 32)
+                    throw new InvalidOperationException("A name-tree value is too deeply indirect.");
+                if (trackNodes && !visited.Add((reference.ObjectNumber, reference.Generation)))
+                    return PdfNull.Instance;
+                value = document.Resolve(reference);
+            }
+            return value;
         }
     }
 
@@ -81,6 +116,8 @@ internal static class PdfNameTree
                 int firstEntryIndex = result.Count;
                 bool hasNames = node.TryGetValue(NamesName, out PdfObject? namesValue);
                 bool hasKids = node.TryGetValue(KidsName, out PdfObject? kidsValue);
+                // A root with nothing in it holds no entries; only a node inside the tree must say which it is.
+                if (!hasNames && !hasKids && depth == 0 && node.Count == 0) return;
                 if (hasNames == hasKids)
                     throw new InvalidOperationException(
                         "A name-tree node must contain exactly one of /Names or /Kids.");
@@ -160,3 +197,11 @@ internal static class PdfNameTree
 }
 
 internal sealed record PdfNameTreeEntry(PdfString Key, PdfObject Value);
+
+// The failures a read of damaged file content raises. The tolerant readers catch exactly these, so a
+// value that cannot be read costs that value, and a defect in the reader itself is not swallowed.
+internal static class PdfReaderDamage
+{
+    internal static bool Is(Exception error) => error is InvalidOperationException or ArgumentException
+        or FormatException or NotSupportedException or PdfFilterException;
+}

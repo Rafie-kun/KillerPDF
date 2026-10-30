@@ -509,7 +509,7 @@ public sealed partial class PdfPageRenderer
                             textRenderingMode, clipMark) = stack.Pop();
                         clipScratch.Restore(clipMark);
                     }
-                    ClearPath();
+                    // The current path is not part of the graphics state, so a restore leaves it alone.
                     break;
                 case "cm" when values.Count == 6:
                     if (_document.UsesCompatibilityRecovery

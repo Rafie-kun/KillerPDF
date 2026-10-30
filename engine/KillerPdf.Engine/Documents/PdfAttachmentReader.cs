@@ -488,55 +488,22 @@ public static partial class PdfAttachmentReader
                 $"An embedded file /{key} value is not a string.");
     }
 
+    // The dates in /Params are descriptive, so one that cannot be read costs that date and never the list.
     private static DateTimeOffset? OptionalDate(
         PdfDocument document, PdfDictionary? dictionary, string key)
     {
         if (dictionary is null
             || !dictionary.TryGetValue(Name(key), out PdfObject? value)) return null;
-        if (Resolve(document, value) is not PdfString text)
-            throw new InvalidOperationException(
-                $"An embedded file /{key} value is not a string.");
-        string date = PdfUnicodeEncoding.DecodeTextString(
-            text.Bytes.Span, $"An embedded file /{key} value");
         try
         {
-            if (!date.StartsWith("D:", StringComparison.Ordinal) || date.Length < 6)
-                throw new FormatException();
-            string digits = new([.. date.Skip(2).TakeWhile(char.IsAsciiDigit)]);
-            if (digits.Length is not (4 or 6 or 8 or 10 or 12 or 14))
-                throw new FormatException();
-            int Part(int offset, int length, int fallback) =>
-                digits.Length >= offset + length
-                    ? int.Parse(digits.AsSpan(offset, length),
-                        CultureInfo.InvariantCulture) : fallback;
-            int year = Part(0, 4, 1), month = Part(4, 2, 1);
-            int day = Part(6, 2, 1), hour = Part(8, 2, 0);
-            int minute = Part(10, 2, 0), second = Part(12, 2, 0);
-            string suffix = date[(2 + digits.Length)..];
-            TimeSpan zone = TimeSpan.Zero;
-            if (suffix.Length > 0 && suffix != "Z")
-            {
-                char sign = suffix[0];
-                // ISO 32000-1 7.9.4 lets Z carry an HH'mm offset too (Adobe signers write Z00'00');
-                // Z means universal time either way.
-                if (sign is not ('+' or '-' or 'Z')) throw new FormatException();
-                string compact = suffix[1..].Replace(
-                    "'", string.Empty, StringComparison.Ordinal);
-                if (compact.Length != 4
-                    || !int.TryParse(compact[..2], out int zoneHour)
-                    || !int.TryParse(compact[2..], out int zoneMinute))
-                    throw new FormatException();
-                zone = sign == 'Z' ? TimeSpan.Zero
-                    : new TimeSpan(zoneHour, zoneMinute, 0) * (sign == '-' ? -1 : 1);
-            }
-            return new DateTimeOffset(
-                year, month, day, hour, minute, second, zone);
+            return Resolve(document, value) is PdfString text
+                && PdfDateText.TryParse(PdfUnicodeEncoding.DecodeTextString(
+                    text.Bytes.Span, $"An embedded file /{key} value"), out DateTimeOffset date)
+                ? date : null;
         }
-        catch (Exception error) when (
-            error is FormatException or ArgumentOutOfRangeException)
+        catch (Exception error) when (PdfReaderDamage.Is(error))
         {
-            throw new InvalidOperationException(
-                $"An embedded file /{key} value is not a valid PDF date.", error);
+            return null;
         }
     }
 

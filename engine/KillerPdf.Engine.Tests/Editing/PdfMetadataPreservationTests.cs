@@ -148,6 +148,32 @@ public sealed class PdfMetadataPreservationTests
         Assert.NotEmpty(update.SetDocumentInformation(info, ["CreationDate"]).Build());
     }
 
+    // Saving is how a user fixes bad metadata, so an object that cannot even be parsed must not stop it.
+    [Fact]
+    public void AMetadataObjectThatCannotBeParsedIsReplaced()
+    {
+        byte[] source = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(OnePage(Packet("")))
+            .Replace("/Type /Metadata", "/Type 1.2.3.4.5", StringComparison.Ordinal));
+
+        byte[] output = new PdfIncrementalPageEditor(PdfDocument.Open(source))
+            .SetMetadata(new PdfDocumentMetadata { Title = "New" }).Build();
+
+        Assert.Equal("New", PdfDocumentInformation.Read(PdfDocument.Open(output)).Title);
+    }
+
+    [Fact]
+    public void AnInfoObjectThatCannotBeParsedIsReplaced()
+    {
+        byte[] source = OnePage(null, infoEntries: "/Title (T) /CreationDate 1.2.3.4");
+        PdfDocumentInformation read = PdfDocumentInformation.Read(PdfDocument.Open(source));
+
+        byte[] output = new PdfIncrementalPageEditor(PdfDocument.Open(source))
+            .SetMetadata(new PdfDocumentMetadata { Title = "New", PreservedInfoKeys = [.. read.UnreadableKeys] })
+            .Build();
+
+        Assert.Equal("New", PdfDocumentInformation.Read(PdfDocument.Open(output)).Title);
+    }
+
     private static string Utf16(string value) =>
         "<FEFF" + Convert.ToHexString(Encoding.BigEndianUnicode.GetBytes(value)) + ">";
 

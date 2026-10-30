@@ -1,7 +1,5 @@
-using System.Globalization;
 using System.Text;
 using KillerPdf.Engine.Authoring;
-using KillerPdf.Engine.Filters;
 using KillerPdf.Engine.Objects;
 using KillerPdf.Engine.Syntax;
 
@@ -47,9 +45,9 @@ public sealed record PdfDocumentInformation
     {
         ArgumentNullException.ThrowIfNull(document);
         // Each descriptive value is read on its own, so one bad value shows as blank without
-        // hiding the rest. An /Info that is not a dictionary carries no values at all.
+        // hiding the rest. An /Info that is not a dictionary, or cannot be parsed, carries no values at all.
         PdfDictionary? info = document.Trailer.TryGetValue(new PdfName("Info"u8), out PdfObject? value)
-            ? Resolve(document, value) as PdfDictionary : null;
+            ? ResolveOrNull(document, value) as PdfDictionary : null;
 
         PdfPageTree pageTree = PdfPageTree.Read(document);
         // PDF 2.0 deprecates /Info, so a field missing there is read from the XMP packet.
@@ -58,7 +56,7 @@ public sealed record PdfDocumentInformation
         {
             xmp = PdfXmpDocumentMetadata.Read(document);
         }
-        catch (Exception error) when (error is InvalidOperationException or PdfFilterException)
+        catch (Exception error) when (PdfReaderDamage.Is(error))
         {
             // Optional, damaged metadata must not prevent access to the document's pages or /Info.
             xmp = null;
@@ -77,10 +75,17 @@ public sealed record PdfDocumentInformation
         var unreadable = new List<string>();
         void Check(string key, bool readable, PdfDictionary? source)
         {
-            if (!readable && source is not null
-                && source.TryGetValue(new PdfName(Encoding.ASCII.GetBytes(key)), out PdfObject? raw)
-                && Resolve(document, raw) is not PdfNull)
-                unreadable.Add(key);
+            if (readable || source is null
+                || !source.TryGetValue(new PdfName(Encoding.ASCII.GetBytes(key)), out PdfObject? raw)) return;
+            try
+            {
+                if (Resolve(document, raw) is PdfNull) return;
+            }
+            catch (Exception error) when (PdfReaderDamage.Is(error))
+            {
+                // An object that cannot be parsed is present but unreadable.
+            }
+            unreadable.Add(key);
         }
         Check("Title", title is not null, info);
         Check("Author", author is not null, info);
@@ -114,7 +119,7 @@ public sealed record PdfDocumentInformation
     // Null, a dangling reference and a non-string all mean the same as an absent entry.
     private static string? CatalogText(PdfDocument document, PdfDictionary catalog, string key) =>
         catalog.TryGetValue(new PdfName(Encoding.ASCII.GetBytes(key)), out PdfObject? value)
-            ? DecodedText(Resolve(document, value)) : null;
+            ? DecodedText(ResolveOrNull(document, value)) : null;
 
     private static string? DecodedText(PdfObject value)
     {
@@ -130,49 +135,36 @@ public sealed record PdfDocumentInformation
         }
     }
 
-    private static DateTimeOffset? Date(PdfDocument document, PdfDictionary? info, string key)
-    {
-        string? value = Text(document, info, key);
-        if (value is null) return null;
-        try
-        {
-            if (!value.StartsWith("D:", StringComparison.Ordinal) || value.Length < 6)
-                throw new FormatException();
-            string digits = new([.. value.Skip(2).TakeWhile(char.IsAsciiDigit)]);
-            if (digits.Length is not (4 or 6 or 8 or 10 or 12 or 14)) throw new FormatException();
-            int Part(int offset, int length, int fallback) => digits.Length >= offset + length
-                ? int.Parse(digits.AsSpan(offset, length), CultureInfo.InvariantCulture) : fallback;
-            int year = Part(0, 4, 1), month = Part(4, 2, 1), day = Part(6, 2, 1);
-            int hour = Part(8, 2, 0), minute = Part(10, 2, 0), second = Part(12, 2, 0);
-            string suffix = value[(2 + digits.Length)..];
-            TimeSpan offset = TimeSpan.Zero;
-            if (suffix.Length > 0 && suffix != "Z")
-            {
-                char sign = suffix[0];
-                // ISO 32000-1 7.9.4 lets Z carry an HH'mm offset too (Adobe signers write Z00'00');
-                // Z means universal time either way.
-                if (sign is not ('+' or '-' or 'Z')) throw new FormatException();
-                string compact = suffix[1..].Replace("'", string.Empty, StringComparison.Ordinal);
-                // The minutes are optional in ISO 32000, so +01 is an hour-only offset.
-                if (compact.Length is not (2 or 4) || !int.TryParse(compact[..2], out int oh)) throw new FormatException();
-                int om = 0;
-                if (compact.Length == 4 && !int.TryParse(compact[2..], out om)) throw new FormatException();
-                offset = sign == 'Z' ? TimeSpan.Zero : new TimeSpan(oh, om, 0) * (sign == '-' ? -1 : 1);
-            }
-            return new DateTimeOffset(year, month, day, hour, minute, second, offset);
-        }
-        catch (Exception error) when (error is FormatException or ArgumentOutOfRangeException)
-        {
-            return null;
-        }
-    }
+    private static DateTimeOffset? Date(PdfDocument document, PdfDictionary? info, string key) =>
+        PdfDateText.TryParse(Text(document, info, key), out DateTimeOffset date) ? date : null;
 
     private static PdfTrappedStatus? ReadTrapped(PdfDocument document, PdfDictionary? info)
     {
         if (info is null || !info.TryGetValue(new PdfName("Trapped"u8), out PdfObject? value)) return null;
         // A null entry carries no value and means the same as an absent entry, as does an undefined one.
-        return Resolve(document, value) is PdfName name && Enum.TryParse(name.ValueAsLatin1(), out PdfTrappedStatus result)
-            ? result : null;
+        // Only the three names count: Enum.TryParse would also take numeric text such as /7 or /1.
+        return ResolveOrNull(document, value) is PdfName name
+            ? name.ValueAsLatin1() switch
+            {
+                "True" => PdfTrappedStatus.True,
+                "False" => PdfTrappedStatus.False,
+                "Unknown" => PdfTrappedStatus.Unknown,
+                _ => null
+            }
+            : null;
+    }
+
+    // An object that cannot be parsed reads as null, the same as a dangling reference.
+    private static PdfObject ResolveOrNull(PdfDocument document, PdfObject value)
+    {
+        try
+        {
+            return Resolve(document, value);
+        }
+        catch (Exception error) when (PdfReaderDamage.Is(error))
+        {
+            return PdfNull.Instance;
+        }
     }
 
     private static PdfObject Resolve(PdfDocument document, PdfObject value)
@@ -188,5 +180,5 @@ public sealed record PdfDocumentInformation
 
     private static string? Text(PdfDocument document, PdfDictionary? info, string key) =>
         info is not null && info.TryGetValue(new PdfName(System.Text.Encoding.ASCII.GetBytes(key)), out PdfObject? value)
-            ? DecodedText(Resolve(document, value)) : null;
+            ? DecodedText(ResolveOrNull(document, value)) : null;
 }

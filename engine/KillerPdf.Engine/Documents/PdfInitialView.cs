@@ -108,7 +108,8 @@ public sealed record PdfInitialView
         {
             try
             {
-                return (null, null, PdfUnicodeEncoding.DecodeTextString(text.Bytes.Span, "The catalog /OpenAction value"));
+                string decoded = PdfUnicodeEncoding.DecodeTextString(text.Bytes.Span, "The catalog /OpenAction value");
+                return (null, null, NamedDestinationExists(document, tree.Catalog, decoded) ? decoded : null);
             }
             catch (InvalidOperationException)
             {
@@ -116,7 +117,11 @@ public sealed record PdfInitialView
                 return (null, null, null);
             }
         }
-        if (value is PdfName name) return (null, null, name.ValueAsLatin1());
+        if (value is PdfName name)
+        {
+            string named = name.ValueAsLatin1();
+            return (null, null, NamedDestinationExists(document, tree.Catalog, named) ? named : null);
+        }
         if (value is not PdfArray array || array.Count < 2) return (null, null, null);
         if (array[0] is not PdfIndirectReference pageReference || Resolve(document, array[1]) is not PdfName kindName) return (null, null, null);
         int pageIndex = tree.Pages.ToList().FindIndex(page =>
@@ -149,6 +154,19 @@ public sealed record PdfInitialView
         return (pageIndex, destination, null);
     }
 
+    // A name nothing defines is no destination: the dialog hands the view back as it read it, and saving
+    // a named opening action that has no destination to open is refused.
+    private static bool NamedDestinationExists(PdfDocument document, PdfDictionary catalog, string name)
+    {
+        var destinations = new Dictionary<string, PdfObject>(StringComparer.Ordinal);
+        if (TryValue(document, catalog, "Names", out PdfObject? namesValue) && namesValue is PdfDictionary names
+            && names.TryGetValue(new PdfName("Dests"u8), out PdfObject? tree))
+            PdfNameTree.ReadDestinations(document, tree, destinations);
+        if (destinations.ContainsKey(name)) return true;
+        return TryValue(document, catalog, "Dests", out PdfObject? legacyValue) && legacyValue is PdfDictionary legacy
+            && legacy.Keys.Any(key => string.Equals(key.ValueAsLatin1(), name, StringComparison.Ordinal));
+    }
+
     private static T? ReadEnum<T>(PdfDocument document, PdfDictionary dictionary, string key,
         params (string Name, T Value)[] values) where T : struct
     {
@@ -177,9 +195,17 @@ public sealed record PdfInitialView
         var visited = new HashSet<(int, int)>();
         while (value is PdfIndirectReference reference)
         {
-            // The opening view is advisory, so a reference cycle reads as an absent value.
+            // The opening view is advisory, so a reference cycle or an object that cannot be parsed
+            // reads as an absent value.
             if (!visited.Add((reference.ObjectNumber, reference.Generation))) return PdfNull.Instance;
-            value = document.Resolve(reference);
+            try
+            {
+                value = document.Resolve(reference);
+            }
+            catch (Exception error) when (PdfReaderDamage.Is(error))
+            {
+                return PdfNull.Instance;
+            }
         }
         return value;
     }

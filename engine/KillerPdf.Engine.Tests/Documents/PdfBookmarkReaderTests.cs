@@ -312,13 +312,38 @@ public sealed class PdfBookmarkReaderTests
     [Fact]
     public void AMalformedNamedDestinationTreeCostsItsNamesNotTheOutline()
     {
+        PdfDocument document = PdfDocument.Open(WithNamedDestinationRoot(TwoNamedBookmarks(),
+            update => update.AddObject(new PdfDictionary([new(Name("Names"), new PdfInteger(5))]))));
+
+        IReadOnlyList<PdfBookmarkInfo> bookmarks = PdfBookmarkReader.Read(document);
+
+        Assert.Equal(["Good", "Other"], bookmarks.Select(bookmark => bookmark.Title));
+        Assert.All(bookmarks, AssertNoDestination);
+    }
+
+    [Fact]
+    public void ARepeatedNamedDestinationKeyKeepsTheFirstOfThem()
+    {
         PdfDocument document = PdfDocument.Open(WithNamedDestinationTree(TwoNamedBookmarks(),
             page => [(Literal("good"), Destination(page)), (Literal("good"), Destination(page))]));
 
         IReadOnlyList<PdfBookmarkInfo> bookmarks = PdfBookmarkReader.Read(document);
 
         Assert.Equal(["Good", "Other"], bookmarks.Select(bookmark => bookmark.Title));
-        Assert.All(bookmarks, AssertNoDestination);
+        Assert.Equal(0, bookmarks[0].DestinationPageIndex);
+        Assert.Null(bookmarks[1].DestinationPageIndex);
+    }
+
+    [Fact]
+    public void NamedDestinationsOutOfOrderStillResolve()
+    {
+        // Lookup needs neither the key order nor /Limits.
+        PdfDocument document = PdfDocument.Open(WithNamedDestinationTree(TwoNamedBookmarks(),
+            page => [(Literal("other"), Destination(page)), (Literal("good"), Destination(page))]));
+
+        IReadOnlyList<PdfBookmarkInfo> bookmarks = PdfBookmarkReader.Read(document);
+
+        Assert.Equal([0, 0], bookmarks.Select(bookmark => bookmark.DestinationPageIndex));
     }
 
     private static byte[] TwoBookmarks() => new PdfDocumentBuilder()
@@ -357,14 +382,21 @@ public sealed class PdfBookmarkReaderTests
     private static byte[] WithNamedDestinationTree(byte[] source,
         Func<PdfIndirectReference, (PdfString Key, PdfObject Value)[]> entries)
     {
+        PdfIndirectReference page = PdfPageTree.Read(PdfDocument.Open(source)).Pages[0].Reference;
+        return WithNamedDestinationRoot(source, update => update.AddObject(new PdfDictionary([
+            new(Name("Names"), new PdfArray(entries(page).SelectMany(
+                entry => new[] { (PdfObject)entry.Key, entry.Value })))])));
+    }
+
+    // Replaces the catalog's /Dests name tree with the root object the callback adds.
+    private static byte[] WithNamedDestinationRoot(byte[] source,
+        Func<PdfIncrementalUpdateBuilder, PdfIndirectReference> addRoot)
+    {
         PdfDocument document = PdfDocument.Open(source);
-        PdfIndirectReference page = PdfPageTree.Read(document).Pages[0].Reference;
         var root = Assert.IsType<PdfIndirectReference>(document.Trailer[Name("Root")]);
         var catalog = Assert.IsType<PdfDictionary>(document.Resolve(root));
         var update = new PdfIncrementalUpdateBuilder(document);
-        PdfIndirectReference tree = update.AddObject(new PdfDictionary([
-            new(Name("Names"), new PdfArray(entries(page).SelectMany(
-                entry => new[] { (PdfObject)entry.Key, entry.Value })))]));
+        PdfIndirectReference tree = addRoot(update);
         PdfIndirectReference names = update.AddObject(new PdfDictionary([new(Name("Dests"), tree)]));
         update.ReplaceObject(root.ObjectNumber, Replace(catalog, "Names", names));
         return update.Build();
