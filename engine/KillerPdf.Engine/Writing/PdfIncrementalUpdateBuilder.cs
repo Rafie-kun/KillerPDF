@@ -52,6 +52,7 @@ public sealed class PdfIncrementalUpdateBuilder
     private bool _documentInformationSpecified;
     private PdfObject? _documentInformation;
     private bool _documentInformationRemovedByFree;
+    private IReadOnlyCollection<string> _documentInformationKeptKeys = [];
 
     /// <summary>
     /// Creates an incremental update builder for an opened document. A document opened with its user
@@ -167,6 +168,17 @@ public sealed class PdfIncrementalUpdateBuilder
         _documentInformationSpecified = true;
         _documentInformation = value;
         _documentInformationRemovedByFree = false;
+        _documentInformationKeptKeys = [];
+        return this;
+    }
+
+    // keptKeys are entries copied as they were found. They could not be read, so they skip the checks
+    // on strings and dates that a value being written must pass.
+    internal PdfIncrementalUpdateBuilder SetDocumentInformation(
+        PdfObject value, IReadOnlyCollection<string> keptKeys)
+    {
+        SetDocumentInformation(value);
+        _documentInformationKeptKeys = keptKeys;
         return this;
     }
 
@@ -761,7 +773,7 @@ public sealed class PdfIncrementalUpdateBuilder
             if (_documentInformationSpecified)
                 ValidateDocumentInformation(informationDictionary, value =>
                     ResolveCurrentValue(value,
-                        "A document-information value"));
+                        "A document-information value"), _documentInformationKeptKeys);
             ValidateInformationGraph(informationDictionary, 0,
                 []);
         }
@@ -891,12 +903,14 @@ public sealed class PdfIncrementalUpdateBuilder
     }
 
     private static void ValidateDocumentInformation(
-        PdfDictionary information, Func<PdfObject, PdfObject> resolve)
+        PdfDictionary information, Func<PdfObject, PdfObject> resolve,
+        IReadOnlyCollection<string> keptKeys)
     {
         foreach (string key in new[]
             { "Title", "Author", "Subject", "Keywords", "Creator", "Producer",
               "CreationDate", "ModDate" })
-            if (information.TryGetValue(new PdfName(Encoding.ASCII.GetBytes(key)),
+            if (!keptKeys.Contains(key)
+                && information.TryGetValue(new PdfName(Encoding.ASCII.GetBytes(key)),
                     out PdfObject value)
                 && resolve(value) is not PdfString)
                 throw new InvalidOperationException(
@@ -904,13 +918,13 @@ public sealed class PdfIncrementalUpdateBuilder
         foreach (string key in new[] { "CreationDate", "ModDate" })
         {
             PdfName name = new(Encoding.ASCII.GetBytes(key));
-            if (information.TryGetValue(name, out PdfObject value)
+            if (!keptKeys.Contains(key) && information.TryGetValue(name, out PdfObject value)
                 && resolve(value) is PdfString date && !PdfDateStringValidator.IsValid(date))
                 throw new InvalidOperationException(
                     $"Trailer /Info /{key} value is not a valid PDF date string.");
         }
         PdfName trappedName = new("Trapped"u8);
-        if (!information.TryGetValue(trappedName, out PdfObject trapped)) return;
+        if (keptKeys.Contains("Trapped") || !information.TryGetValue(trappedName, out PdfObject trapped)) return;
         string state = (resolve(trapped) as PdfName)?.ValueAsLatin1()
             ?? throw new InvalidOperationException(
                 "Trailer /Info /Trapped value is not a name.");

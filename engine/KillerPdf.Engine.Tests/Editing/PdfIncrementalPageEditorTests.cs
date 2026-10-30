@@ -571,6 +571,57 @@ public sealed class PdfIncrementalPageEditorTests
                 [new PdfContentInstruction("FutureOp", 0, [])]));
     }
 
+    // Pruning with the page's own instructions leaves its content alone, so a tagged document, which
+    // refuses any content update without matching structure changes, can still be pruned.
+    [Fact]
+    public void PrunePageResources_DropsUnusedResourcesFromATaggedPageAndLeavesItsContent()
+    {
+        var content = new PdfContentStreamBuilder()
+            .BeginMarkedContent(PdfStructureType.Figure, 0)
+            .Rectangle(10, 10, 20, 20).Fill()
+            .EndMarkedContent();
+        PdfDocument tagged = PdfDocument.Open(new PdfDocumentBuilder()
+            .SetMetadata(new PdfDocumentMetadata { Title = "Tagged", Language = "en-US" })
+            .EnablePdfUa2Conformance()
+            .AddPage(200, 200, content)
+            .AddStructureContainer(PdfStructureType.Document)
+            .AddStructureElement(PdfStructureType.Figure, 0, 0, 1, alternateDescription: "Text")
+            .Build());
+        (_, PdfIndirectReference[] references, PdfDictionary[] pages) = FlatPages(tagged);
+        PdfDictionary resources = pages[0].TryGetValue(Name("Resources"), out PdfObject? resourcesValue)
+            ? ResolveDictionary(tagged, resourcesValue) : new PdfDictionary([]);
+        PdfDictionary fonts = resources.TryGetValue(Name("Font"), out PdfObject? fontsValue)
+            ? ResolveDictionary(tagged, fontsValue) : new PdfDictionary([]);
+        var update = new PdfIncrementalUpdateBuilder(tagged);
+        PdfIndirectReference unused = update.AddObject(new PdfDictionary([
+            new(Name("Type"), Name("Font")), new(Name("Subtype"), Name("Type1")),
+            new(Name("BaseFont"), Name("Courier"))]));
+        var widened = new PdfDictionary(resources.Where(entry => !entry.Key.Equals(Name("Font")))
+            .Append(new(Name("Font"), new PdfDictionary(
+                fonts.Append(new KeyValuePair<PdfName, PdfObject>(Name("Unused"), unused))))));
+        update.ReplaceObject(references[0].ObjectNumber, new PdfDictionary(
+            pages[0].Where(entry => !entry.Key.Equals(Name("Resources")))
+                .Append(new(Name("Resources"), widened))));
+        PdfDocument withUnused = PdfDocument.Open(update.Build());
+        Assert.True(ResolveDictionary(withUnused, ResolveDictionary(withUnused,
+            FlatPages(withUnused).Pages[0][Name("Resources")])[Name("Font")]).ContainsKey(Name("Unused")));
+        IReadOnlyList<PdfContentInstruction> instructions =
+            new PdfPageContentReader(withUnused).ReadInstructions(0);
+
+        PdfDocument pruned = PdfDocument.Open(new PdfIncrementalPageEditor(withUnused)
+            .PrunePageResources(0, instructions).Build());
+
+        PdfDictionary page = FlatPages(pruned).Pages[0];
+        PdfDictionary prunedResources = ResolveDictionary(pruned, page[Name("Resources")]);
+        Assert.False(prunedResources.TryGetValue(Name("Font"), out PdfObject? prunedFonts)
+            && ResolveDictionary(pruned, prunedFonts).ContainsKey(Name("Unused")));
+        Assert.Equal(PdfObjectWriter.Write(FlatPages(withUnused).Pages[0][Name("Contents")]),
+            PdfObjectWriter.Write(page[Name("Contents")]));
+        Assert.Equal(PdfObjectWriter.Write(FlatPages(withUnused).Pages[0][Name("StructParents")]),
+            PdfObjectWriter.Write(page[Name("StructParents")]));
+        Assert.True(ResolveDictionary(pruned, pruned.Trailer[Name("Root")]).ContainsKey(Name("StructTreeRoot")));
+    }
+
     [Fact]
     public void Build_RejectsContentUpdatesInExistingTaggedDocument()
     {

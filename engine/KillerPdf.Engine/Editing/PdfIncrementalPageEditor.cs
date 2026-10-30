@@ -1279,13 +1279,16 @@ public sealed class PdfIncrementalPageEditor
             modificationDate, creationDate, originalKey: null, key: null);
 
     // originalKey is the name-tree key of the file this one replaces, so its specification is carried
-    // over. key is the name-tree key to store it under, or null to use the file name.
+    // over. key is the name-tree key to store it under, or null to use the file name. A name or a type
+    // is checked only where the edit sets it, so a file whose existing value would be refused can still
+    // have another field changed.
     private PdfIncrementalPageEditor AddAttachmentCore(
         string fileName, ReadOnlyMemory<byte> data, string mimeType, string? description,
         PdfAssociatedFileRelationship relationship, DateTimeOffset? modificationDate,
-        DateTimeOffset? creationDate, string? originalKey, string? key)
+        DateTimeOffset? creationDate, string? originalKey, string? key,
+        bool checksName = true, bool checksType = true)
     {
-        PdfAttachmentFactory.Validate(fileName, mimeType, relationship);
+        ValidateAttachment(fileName, mimeType, relationship, checksName, checksType);
         (bool pdfA4, string? pdfA4Conformance, bool pdfUa2) =
             ReadDocumentConformance();
         if (pdfA4 && pdfA4Conformance is not ("F" or "E"))
@@ -1308,6 +1311,13 @@ public sealed class PdfIncrementalPageEditor
         RequireVersion(PdfVersion.Pdf20);
         return this;
     }
+
+    private static void ValidateAttachment(
+        string fileName, string mimeType, PdfAssociatedFileRelationship relationship,
+        bool checksName, bool checksType) =>
+        PdfAttachmentFactory.Validate(
+            checksName ? fileName : "attachment",
+            checksType ? mimeType : "application/octet-stream", relationship);
 
     /// <summary>
     /// Removes an embedded file and its catalog association by the name the reader lists, or by its
@@ -1340,9 +1350,8 @@ public sealed class PdfIncrementalPageEditor
     /// </summary>
     public PdfIncrementalPageEditor RemoveAttachmentByKey(string key)
     {
-        if (string.IsNullOrWhiteSpace(key))
-            throw new ArgumentException(
-                "An attachment name-tree key is required.", nameof(key));
+        // A name tree can hold a blank key, so any key that exists is accepted, as ReadAttachmentAtKey does.
+        ArgumentNullException.ThrowIfNull(key);
         if (_attachments.RemoveAll(value => string.Equals(
                 value.Key ?? value.FileName, key, StringComparison.Ordinal)) > 0)
         {
@@ -1405,22 +1414,21 @@ public sealed class PdfIncrementalPageEditor
 
     private PdfAttachmentInfo ReadAttachmentAtKey(string key)
     {
-        if (string.IsNullOrWhiteSpace(key))
-            throw new ArgumentException(
-                "An attachment name-tree key is required.", nameof(key));
+        ArgumentNullException.ThrowIfNull(key);
         return PdfAttachmentReader.Read(_document).FirstOrDefault(item =>
                 string.Equals(item.NameTreeKey, key, StringComparison.Ordinal))
             ?? throw new ArgumentException(
                 $"The document has no attachment stored under '{key}'.", nameof(key));
     }
 
-    // Replaces the file stored under attachment's key. A rename gives the file a new key, the new
-    // name; every other edit keeps the key, so a file whose key is another file's listed name stays
-    // out of that file's way.
+    // Replaces the file stored under the key of attachment. A rename gives the file a new key, the new
+    // name or newKey when another file already holds that name; every other edit keeps the key, so a
+    // file whose key is another file's listed name stays out of that file's way. Only a rename checks
+    // the name and only a type change checks the type.
     private PdfIncrementalPageEditor RewriteAttachment(
         PdfAttachmentInfo attachment, string fileName, ReadOnlyMemory<byte> data,
         string mimeType, string? description, PdfAssociatedFileRelationship relationship,
-        DateTimeOffset? modificationDate, bool renames)
+        DateTimeOffset? modificationDate, bool renames, string? newKey = null, bool changesType = false)
     {
         string key = attachment.NameTreeKey!;
         if (_removedAttachments.Contains(key))
@@ -1428,7 +1436,8 @@ public sealed class PdfIncrementalPageEditor
                 $"Attachment '{key}' is already scheduled for removal.", nameof(attachment));
         AddAttachmentCore(fileName, data, mimeType, description, relationship,
             modificationDate, attachment.CreationDate,
-            originalKey: key, key: renames ? null : key);
+            originalKey: key, key: renames ? newKey : key,
+            checksName: renames, checksType: changesType);
         _removedAttachments.Add(key);
         return this;
     }
@@ -1475,7 +1484,29 @@ public sealed class PdfIncrementalPageEditor
                 nameof(newFileName));
         return RewriteAttachment(attachment, newFileName, attachment.Data,
             attachment.MimeType, attachment.Description, attachment.Relationship,
-            attachment.ModificationDate, renames: true);
+            attachment.ModificationDate, renames: true,
+            newKey: UniqueKeyForRename(newFileName, key));
+    }
+
+    // A rename stores the file under its new name. When another file already holds that name as a key,
+    // which no row shows, the name the user typed stays as the listed name and the key is made unique.
+    private string? UniqueKeyForRename(string newFileName, string ownKey)
+    {
+        var taken = new HashSet<string>(
+            ReadAttachmentKeys()
+                .Where(existing => !string.Equals(existing, ownKey, StringComparison.Ordinal)
+                    && !_removedAttachments.Contains(existing))
+                .Concat(_attachments.Select(pending => pending.Key ?? pending.FileName)),
+            StringComparer.OrdinalIgnoreCase);
+        if (!taken.Contains(newFileName)) return null;
+        int dot = newFileName.LastIndexOf('.');
+        string stem = dot > 0 ? newFileName[..dot] : newFileName;
+        string extension = dot > 0 ? newFileName[dot..] : string.Empty;
+        for (int number = 2; ; number++)
+        {
+            string candidate = $"{stem}-{number}{extension}";
+            if (!taken.Contains(candidate)) return candidate;
+        }
     }
 
     /// <summary>Replaces an embedded file payload while preserving its name and metadata.</summary>
@@ -1534,10 +1565,10 @@ public sealed class PdfIncrementalPageEditor
         string key, string mimeType, PdfAssociatedFileRelationship relationship)
     {
         PdfAttachmentInfo attachment = ReadAttachmentAtKey(key);
-        PdfAttachmentFactory.Validate(attachment.FileName, mimeType, relationship);
+        ValidateAttachment(attachment.FileName, mimeType, relationship, checksName: false, checksType: true);
         return RewriteAttachment(attachment, attachment.FileName, attachment.Data,
             mimeType, attachment.Description, relationship,
-            attachment.ModificationDate, renames: false);
+            attachment.ModificationDate, renames: false, changesType: true);
     }
 
     /// <summary>Adds a bookmark targeting a page in the edited document.</summary>
@@ -1807,6 +1838,20 @@ public sealed class PdfIncrementalPageEditor
         return this;
     }
 
+    // Prunes with the page's own instruction sequence and replaces only its /Resources. The content is not
+    // replaced, so there is no content update, which an existing tagged document refuses without
+    // matching structure changes.
+    internal PdfIncrementalPageEditor PrunePageResources(
+        int pageIndex, IEnumerable<PdfContentInstruction> instructions)
+    {
+        ValidateIndex(pageIndex, nameof(pageIndex));
+        ArgumentNullException.ThrowIfNull(instructions);
+        PageState page = _pages[pageIndex];
+        page.ReplacementResources = PrunePageResources(page, [.. instructions]);
+        _pagePresentationChanged = true;
+        return this;
+    }
+
     /// <summary>Appends a raw PDF content stream after a page's existing content.</summary>
     public PdfIncrementalPageEditor AppendPageContent(
         int pageIndex, ReadOnlyMemory<byte> content)
@@ -1893,8 +1938,7 @@ public sealed class PdfIncrementalPageEditor
         if (sourcePageIndex < 0 || sourcePageIndex >= sourceTree.Pages.Count)
             throw new ArgumentOutOfRangeException(nameof(sourcePageIndex));
         PdfPageTreeEntry sourcePage = sourceTree.Pages[sourcePageIndex];
-        ValidateImportablePage(source, sourcePage,
-            allowFormWidgets: true, allowTaggedPage: true);
+        ValidateImportablePage(source, sourcePage, allowFormWidgets: true);
         PageState page = _pages[pageIndex];
         if (page.Entry is null)
             throw new InvalidOperationException(
@@ -1970,8 +2014,7 @@ public sealed class PdfIncrementalPageEditor
             throw new ArgumentOutOfRangeException(nameof(sourcePageIndex));
         PdfPageTreeEntry sourcePage = sourceTree.Pages[sourcePageIndex];
         ValidateImportablePage(source, sourcePage,
-            allowFormWidgets: sourceTree.Catalog.ContainsKey(AcroFormName),
-            allowTaggedPage: sourceTree.Catalog.ContainsKey(StructTreeRootName));
+            allowFormWidgets: sourceTree.Catalog.ContainsKey(AcroFormName));
         EnsurePageCapacity(1);
         int batchId = _nextImportBatchId++;
         _pages.Insert(pageIndex,
@@ -2013,8 +2056,7 @@ public sealed class PdfIncrementalPageEditor
                     nameof(sourcePageIndices));
             PdfPageTreeEntry sourcePage = sourceTree.Pages[sourcePageIndex];
             ValidateImportablePage(source, sourcePage,
-                allowFormWidgets: sourceTree.Catalog.ContainsKey(AcroFormName),
-                allowTaggedPage: sourceTree.Catalog.ContainsKey(StructTreeRootName));
+                allowFormWidgets: sourceTree.Catalog.ContainsKey(AcroFormName));
             selected.Add(sourcePage);
         }
         if (selected.Count == 0) return this;
@@ -2046,11 +2088,9 @@ public sealed class PdfIncrementalPageEditor
         ArgumentNullException.ThrowIfNull(source);
         EnforceSourceCopyPermission(source);
         PdfPageTree sourceTree = PdfPageTree.Read(source);
-        bool hasStructureTree = sourceTree.Catalog.ContainsKey(StructTreeRootName);
         // Every page comes along, so widgets are kept whether or not the source declares an /AcroForm.
         foreach (PdfPageTreeEntry page in sourceTree.Pages)
-            ValidateImportablePage(source, page,
-                allowFormWidgets: true, allowTaggedPage: hasStructureTree);
+            ValidateImportablePage(source, page, allowFormWidgets: true);
         if (sourceTree.Pages.Count == 0) return this;
         EnsurePageCapacity(sourceTree.Pages.Count);
         int batchId = _nextImportBatchId++;
@@ -7881,12 +7921,9 @@ public sealed class PdfIncrementalPageEditor
         Dictionary<PdfName, PdfObject> catalogReplacements,
         StructureRewriteState? rewriteState)
     {
+        // A page key with no structure tree behind it points at nothing and is dropped as the page is built.
         PageState[][] sourceTaggedGroups = [.. importedGroups.Where(group =>
-        {
-            PdfPageTree sourceTree = group[0].ImportedTree!;
-            return sourceTree.Catalog.ContainsKey(StructTreeRootName)
-                || group.Any(page => page.ImportedEntry!.Dictionary.ContainsKey(StructParentsName));
-        })];
+            group[0].ImportedTree!.Catalog.ContainsKey(StructTreeRootName))];
         PageState[][] taggedGroups = [.. sourceTaggedGroups.Where(group =>
             IsCompleteImport(group, group[0].ImportedTree!)
             || group.Any(page => page.ImportedEntry!.Dictionary.ContainsKey(StructParentsName)))];
@@ -7895,9 +7932,6 @@ public sealed class PdfIncrementalPageEditor
         foreach (PageState[] taggedGroup in taggedGroups)
         {
             PdfPageTree taggedTree = taggedGroup[0].ImportedTree!;
-            if (!taggedTree.Catalog.ContainsKey(StructTreeRootName))
-                throw new InvalidOperationException(
-                    "An imported page has /StructParents but its source catalog has no /StructTreeRoot.");
             if (IsCompleteImport(taggedGroup, taggedTree)) continue;
             var retained = taggedGroup.Select(page =>
                 (page.ImportedEntry!.Reference.ObjectNumber,
@@ -10486,8 +10520,10 @@ public sealed class PdfIncrementalPageEditor
             throw new InvalidOperationException($"{description} is not a valid PDF date string.");
     }
 
+    // checksMimeType is false for an entry that is only being kept, such as the existing catalog /AF
+    // entries, since a file with an odd /Subtype is still carried through an edit to another field.
     private static void ValidateFileSpecification(
-        PdfDocument document, PdfObject value, string description)
+        PdfDocument document, PdfObject value, string description, bool checksMimeType = true)
     {
         PdfDictionary dictionary = ResolveDictionary(document, value, description);
         if (dictionary.TryGetValue(TypeName, out PdfObject? type)
@@ -10557,10 +10593,10 @@ public sealed class PdfIncrementalPageEditor
                         $"{streamDescription} /Subtype value is not a name.");
                 string mimeType = subtypeName.ValueAsLatin1();
                 int separator = mimeType.IndexOf('/');
-                if (separator <= 0 || separator != mimeType.LastIndexOf('/')
+                if (checksMimeType && (separator <= 0 || separator != mimeType.LastIndexOf('/')
                     || separator == mimeType.Length - 1
                     || !IsMimeToken(mimeType.AsSpan(0, separator))
-                    || !IsMimeToken(mimeType.AsSpan(separator + 1)))
+                    || !IsMimeToken(mimeType.AsSpan(separator + 1))))
                     throw new InvalidOperationException(
                         $"{streamDescription} /Subtype is not a valid MIME type name.");
             }
@@ -11978,10 +12014,12 @@ public sealed class PdfIncrementalPageEditor
         Dictionary<PdfImage, PdfIndirectReference> images)
     {
         PdfPageTreeEntry source = state.ImportedEntry!;
+        bool sourceIsTagged = state.ImportedTree!.Catalog.ContainsKey(StructTreeRootName);
         var entries = source.Dictionary
             .Where(entry => !entry.Key.Equals(ParentName)
                 && !InheritableNames.Contains(entry.Key)
-                && !(state.RemoveThumbnail && entry.Key.Equals(ThumbnailName)))
+                && !(state.RemoveThumbnail && entry.Key.Equals(ThumbnailName))
+                && !(entry.Key.Equals(StructParentsName) && !sourceIsTagged))
             .Select(entry => entry.Key.Equals(Name("Contents"))
                 ? new KeyValuePair<PdfName, PdfObject>(
                     entry.Key, ImportPageContents(entry.Value))
@@ -18016,7 +18054,7 @@ public sealed class PdfIncrementalPageEditor
                 byte[] decoded = PdfStreamDecoder.Decode(
                     existing, reference => _document.Resolve(reference),
                     maximumDecodedBytes: 32 * 1024 * 1024);
-                xmp = UpdateXmp(decoded, _metadata);
+                xmp = UpdateXmp(decoded, _metadata, ReadCurrentInformation());
             }
             catch (Exception error) when (error is InvalidOperationException or PdfFilterException)
             {
@@ -18034,15 +18072,19 @@ public sealed class PdfIncrementalPageEditor
             catalogReplacements[LanguageName] = TextString(_metadata.Language);
 
         PdfDictionary information = PdfDocumentBuilder.BuildInfo(_metadata);
+        PdfObject? existingValue = null;
+        PdfDictionary? existingInformation = null;
         if (_metadata.PreservedInfoKeys.Count > 0
-            && _document.Trailer.TryGetValue(Name("Info"), out PdfObject? existingValue)
-            && existingValue is PdfIndirectReference existingReference
-            && ResolveCatalogValue(_document, existingReference, "The trailer /Info value")
-                is PdfDictionary existingInformation)
+            && _document.Trailer.TryGetValue(Name("Info"), out existingValue))
+            existingInformation = (existingValue is PdfIndirectReference existingReference
+                ? ResolveCatalogValue(_document, existingReference, "The trailer /Info value")
+                : existingValue) as PdfDictionary;
+        if (existingInformation is not null)
         {
             // Entries kept as they are may hold a value the update builder would refuse in a new
-            // /Info, such as a date that is not a valid PDF date. The existing /Info object is
-            // rewritten in place, with the trailer left alone, so that check does not apply.
+            // /Info, such as a date that is not a valid PDF date. An /Info object is rewritten in
+            // place, with the trailer left alone, so that check does not apply. A direct /Info moves
+            // into a new object, and the builder is told which entries to take as they are.
             var entries = information.ToList();
             foreach (string key in _metadata.PreservedInfoKeys)
             {
@@ -18051,12 +18093,33 @@ public sealed class PdfIncrementalPageEditor
                     && !information.ContainsKey(name))
                     entries.Add(new KeyValuePair<PdfName, PdfObject>(name, raw));
             }
-            update.ReplaceObject(existingReference.ObjectNumber, new PdfDictionary(entries));
+            if (existingValue is PdfIndirectReference rewritten)
+            {
+                update.ReplaceObject(rewritten.ObjectNumber, new PdfDictionary(entries));
+                return;
+            }
+            PdfIndirectReference replacement = update.ReserveObject();
+            update.SetObject(replacement, new PdfDictionary(entries));
+            update.SetDocumentInformation(replacement, _metadata.PreservedInfoKeys);
             return;
         }
         PdfIndirectReference informationReference = update.ReserveObject();
         update.SetObject(informationReference, information);
         update.SetDocumentInformation(informationReference);
+    }
+
+    // What the document reads as its descriptive values now, or null when they cannot be read, in which
+    // case a save writes every field.
+    private PdfDocumentInformation? ReadCurrentInformation()
+    {
+        try
+        {
+            return PdfDocumentInformation.Read(_document);
+        }
+        catch (Exception error) when (error is not OperationCanceledException and not OutOfMemoryException)
+        {
+            return null;
+        }
     }
 
     private void AddOutputIntent(
@@ -18104,10 +18167,12 @@ public sealed class PdfIncrementalPageEditor
             .ToList();
         var files = new List<PdfNameTreeEntry>();
         var removedReferences = new HashSet<(int ObjectNumber, int Generation)>();
-        // Name-tree keys are byte strings, so every key set here compares them exactly. A new file
-        // is still refused when its name matches a retained key apart from case.
+        // Name-tree keys are byte strings, so the set of keys in use compares their bytes. Two keys can
+        // decode to the same text, and a key by that text names the first of them. A new file is still
+        // refused when its name matches a retained key apart from case.
         var originalSpecifications = new Dictionary<string,
             (PdfDictionary Value, PdfIndirectReference? Reference)>(StringComparer.Ordinal);
+        var originalKeys = new Dictionary<string, PdfString>(StringComparer.Ordinal);
         var fileNames = new HashSet<string>(
             StringComparer.Ordinal);
         var retainedFolded = new HashSet<string>(
@@ -18122,26 +18187,31 @@ public sealed class PdfIncrementalPageEditor
             {
                 string name = PdfUnicodeEncoding.DecodeTextString(
                     entry.Key.Bytes.Span, "An embedded-file name");
-                if (!existingFileNames.Add(name))
+                string keyBytes = Convert.ToBase64String(entry.Key.Bytes.Span);
+                if (!existingFileNames.Add(keyBytes))
                     throw new InvalidOperationException(
                         "The embedded-files name tree contains duplicate file names.");
-                if (_removedAttachments.Contains(name))
+                if (_removedAttachments.Contains(name) && !originalSpecifications.ContainsKey(name))
                 {
                     var (specification, reference) = ResolveCatalogWithIdentity(
                         _document, entry.Value,
                         $"Embedded file '{name}' specification");
                     originalSpecifications.Add(name, ((PdfDictionary)specification, reference));
+                    originalKeys.Add(name, entry.Key);
                     if (reference is not null)
                         removedReferences.Add((reference.ObjectNumber,
                             reference.Generation));
                     continue;
                 }
-                fileNames.Add(name);
+                fileNames.Add(keyBytes);
                 retainedFolded.Add(name);
                 if (entry.Value is PdfIndirectReference retained)
                     retainedReferences.Add((retained.ObjectNumber, retained.Generation));
                 files.Add(entry);
             }
+        // Several keys can name one file specification. It stays associated while a key that is kept
+        // still names it.
+        removedReferences.ExceptWith(retainedReferences);
 
         // The listed names of the removed files, for a catalog /AF entry that is not the same object
         // as the specification it duplicates. A removed file is matched by identity first.
@@ -18168,7 +18238,7 @@ public sealed class PdfIncrementalPageEditor
             foreach (PdfObject value in existing)
             {
                 ValidateFileSpecification(
-                    _document, value, "A catalog /AF entry");
+                    _document, value, "A catalog /AF entry", checksMimeType: false);
                 var (Value, FinalReference) = ResolveCatalogWithIdentity(
                     _document, value, "A catalog /AF entry");
                 PdfIndirectReference? reference = FinalReference;
@@ -18189,13 +18259,23 @@ public sealed class PdfIncrementalPageEditor
             }
         }
 
+        var renamedKeys = new Dictionary<string, string>(StringComparer.Ordinal);
+        var rewrittenInPlace = new HashSet<(int ObjectNumber, int Generation)>();
         foreach (PendingAttachment attachment in _attachments)
         {
             string storedKey = attachment.Key ?? attachment.FileName;
+            // A key that is kept keeps its exact bytes, so an edit never turns a key into one that
+            // decodes alike and collides with another.
+            PdfString storedKeyText =
+                attachment.OriginalFileName is not null && attachment.Key == attachment.OriginalFileName
+                    && originalKeys.TryGetValue(attachment.OriginalFileName, out PdfString? keptKey)
+                    ? keptKey : TextString(storedKey);
             if ((attachment.Key is null && retainedFolded.Contains(storedKey))
-                || !fileNames.Add(storedKey))
+                || !fileNames.Add(Convert.ToBase64String(storedKeyText.Bytes.Span)))
                 throw new ArgumentException(
                     $"Attachment file name '{storedKey}' already exists.");
+            if (attachment.OriginalFileName is not null && storedKey != attachment.OriginalFileName)
+                renamedKeys[attachment.OriginalFileName] = storedKey;
             PdfIndirectReference embeddedReference = update.ReserveObject();
             update.SetObject(embeddedReference,
                 PdfAttachmentFactory.EmbeddedFile(
@@ -18213,7 +18293,11 @@ public sealed class PdfIncrementalPageEditor
                 entries.Remove(Name("Desc"));
                 foreach (var entry in specification) entries[entry.Key] = entry.Value;
                 specification = new PdfDictionary(entries);
-                if (original.Reference is not null)
+                // A specification that another key still names is left as it is and the edited file gets
+                // its own, so an edit never changes a file the user did not choose.
+                if (original.Reference is not null
+                    && !retainedReferences.Contains((original.Reference.ObjectNumber, original.Reference.Generation))
+                    && rewrittenInPlace.Add((original.Reference.ObjectNumber, original.Reference.Generation)))
                 {
                     fileReference = original.Reference;
                     update.ReplaceObject(fileReference.ObjectNumber, specification);
@@ -18229,10 +18313,10 @@ public sealed class PdfIncrementalPageEditor
                 fileReference = update.ReserveObject();
                 update.SetObject(fileReference, specification);
             }
-            files.Add(new PdfNameTreeEntry(
-                TextString(storedKey), fileReference));
+            files.Add(new PdfNameTreeEntry(storedKeyText, fileReference));
             associated.Add(fileReference);
         }
+        CarryPortfolioInitialDocument(update, catalogReplacements, renamedKeys);
 
         if (files.Count > PdfNameTree.MaximumEntryCount)
             throw new NotSupportedException(
@@ -18255,6 +18339,30 @@ public sealed class PdfIncrementalPageEditor
             catalogReplacements[AssociatedFilesName] = new PdfArray(associated);
         else
             _removeCatalogAssociatedFiles = true;
+    }
+
+    // A portfolio names its initial document by name-tree key, so a renamed file takes the name along.
+    private void CarryPortfolioInitialDocument(
+        PdfIncrementalUpdateBuilder update,
+        Dictionary<PdfName, PdfObject> catalogReplacements,
+        Dictionary<string, string> renamedKeys)
+    {
+        if (renamedKeys.Count == 0
+            || !_tree.Catalog.TryGetValue(Name("Collection"), out PdfObject? collectionValue)
+            || ResolveCatalogValue(_document, collectionValue, "The catalog /Collection value")
+                is not PdfDictionary collection
+            || !collection.TryGetValue(Name("D"), out PdfObject? initial)
+            || ResolveCatalogValue(_document, initial, "The catalog /Collection /D value")
+                is not PdfString initialName
+            || !renamedKeys.TryGetValue(PdfUnicodeEncoding.DecodeTextString(
+                initialName.Bytes.Span, "The catalog /Collection /D value"), out string? renamed))
+            return;
+        PdfDictionary carried = ReplaceMany(collection,
+            new Dictionary<PdfName, PdfObject> { [Name("D")] = TextString(renamed) });
+        if (collectionValue is PdfIndirectReference reference)
+            update.ReplaceObject(reference.ObjectNumber, carried);
+        else
+            catalogReplacements[Name("Collection")] = carried;
     }
 
     private void AddPendingLegacyDestinationReplacements(
@@ -18287,7 +18395,7 @@ public sealed class PdfIncrementalPageEditor
     // Returns null when the existing packet is not well-formed XML or has no RDF description, so the
     // caller can author a new one.
     private static byte[]? UpdateXmp(
-        byte[] source, PdfDocumentMetadata metadata)
+        byte[] source, PdfDocumentMetadata metadata, PdfDocumentInformation? read)
     {
         XDocument document;
         try
@@ -18317,16 +18425,30 @@ public sealed class PdfIncrementalPageEditor
 
         // An entry kept as it is in /Info is left alone here too.
         bool Keeps(string key) => metadata.PreservedInfoKeys.Contains(key, StringComparer.Ordinal);
-        if (!Keeps("Title")) SetAlternative(dc + "title", metadata.Title);
-        if (!Keeps("Author")) SetSequence(dc + "creator", metadata.Author);
-        if (!Keeps("Subject")) SetAlternative(dc + "description", metadata.Subject);
-        if (!Keeps("Lang")) SetBag(dc + "language", metadata.Language);
-        if (!Keeps("Keywords")) SetSimple(pdf + "Keywords", metadata.Keywords);
-        if (!Keeps("Producer")) SetSimple(pdf + "Producer", metadata.Producer);
-        if (!Keeps("Trapped")) SetSimple(pdf + "Trapped", metadata.Trapped?.ToString());
-        if (!Keeps("Creator")) SetSimple(xmp + "CreatorTool", metadata.Creator);
-        if (!Keeps("CreationDate")) SetSimple(xmp + "CreateDate", XmpDate(metadata.CreationDate));
-        if (!Keeps("ModDate")) SetSimple(xmp + "ModifyDate", XmpDate(metadata.ModificationDate));
+        // A field is rewritten only when the save changes it from what the document read, so translated
+        // titles, every listed author and the language list survive a save that touched something else.
+        // A field the packet lacks is still filled in.
+        void Apply(string key, XName name, string? value, string? before, Action<XName, string?> set)
+        {
+            if (Keeps(key)) return;
+            bool unchanged = read is not null && (string.IsNullOrEmpty(value)
+                ? string.IsNullOrEmpty(before) : string.Equals(value, before, StringComparison.Ordinal));
+            bool missing = !string.IsNullOrEmpty(value)
+                && !document.Descendants(name).Any() && !document.Descendants().Attributes(name).Any();
+            if (!unchanged || missing) set(name, value);
+        }
+        Apply("Title", dc + "title", metadata.Title, read?.Title, SetAlternative);
+        Apply("Author", dc + "creator", metadata.Author, read?.Author, SetSequence);
+        Apply("Subject", dc + "description", metadata.Subject, read?.Subject, SetAlternative);
+        Apply("Lang", dc + "language", metadata.Language, read?.Language, SetBag);
+        Apply("Keywords", pdf + "Keywords", metadata.Keywords, read?.Keywords, SetSimple);
+        Apply("Producer", pdf + "Producer", metadata.Producer, read?.Producer, SetSimple);
+        Apply("Trapped", pdf + "Trapped", metadata.Trapped?.ToString(), read?.Trapped?.ToString(), SetSimple);
+        Apply("Creator", xmp + "CreatorTool", metadata.Creator, read?.Creator, SetSimple);
+        Apply("CreationDate", xmp + "CreateDate",
+            XmpDate(metadata.CreationDate), XmpDate(read?.CreationDate), SetSimple);
+        Apply("ModDate", xmp + "ModifyDate",
+            XmpDate(metadata.ModificationDate), XmpDate(read?.ModificationDate), SetSimple);
 
         using var output = new MemoryStream();
         using (XmlWriter writer = XmlWriter.Create(output, new XmlWriterSettings
@@ -18340,26 +18462,43 @@ public sealed class PdfIncrementalPageEditor
             document.Save(writer);
         return output.ToArray();
 
+        // XML cannot carry every character a PDF text string can, so each value is cleaned on its way in.
         void SetSimple(XName name, string? value)
         {
+            value = PdfDocumentBuilder.XmlSafe(value);
             Clear(name);
             if (!string.IsNullOrEmpty(value))
                 description.Add(new XElement(name, value));
         }
 
+        // Only the x-default entry changes, so the translations of a title or subject stay.
         void SetAlternative(XName name, string? value)
         {
-            Clear(name);
-            if (string.IsNullOrEmpty(value)) return;
-            description.Add(new XElement(name,
-                new XElement(rdf + "Alt",
-                    new XElement(rdf + "li",
-                        new XAttribute(XNamespace.Xml + "lang", "x-default"),
-                        value))));
+            value = PdfDocumentBuilder.XmlSafe(value);
+            if (string.IsNullOrEmpty(value))
+            {
+                Clear(name);
+                return;
+            }
+            XElement? alternatives = document.Descendants(name).FirstOrDefault()?.Element(rdf + "Alt");
+            if (alternatives is null)
+            {
+                Clear(name);
+                description.Add(new XElement(name, new XElement(rdf + "Alt", DefaultEntry(value))));
+                return;
+            }
+            XElement? existing = alternatives.Elements(rdf + "li").FirstOrDefault(item =>
+                (string?)item.Attribute(XNamespace.Xml + "lang") == "x-default");
+            if (existing is not null) existing.Value = value;
+            else alternatives.AddFirst(DefaultEntry(value));
         }
+
+        XElement DefaultEntry(string value) => new(rdf + "li",
+            new XAttribute(XNamespace.Xml + "lang", "x-default"), value);
 
         void SetSequence(XName name, string? value)
         {
+            value = PdfDocumentBuilder.XmlSafe(value);
             Clear(name);
             if (string.IsNullOrEmpty(value)) return;
             description.Add(new XElement(name,
@@ -18369,6 +18508,7 @@ public sealed class PdfIncrementalPageEditor
 
         void SetBag(XName name, string? value)
         {
+            value = PdfDocumentBuilder.XmlSafe(value);
             Clear(name);
             if (string.IsNullOrEmpty(value)) return;
             description.Add(new XElement(name,
@@ -18630,12 +18770,8 @@ public sealed class PdfIncrementalPageEditor
     }
 
     private static void ValidateImportablePage(
-        PdfDocument source, PdfPageTreeEntry page,
-        bool allowFormWidgets, bool allowTaggedPage)
+        PdfDocument source, PdfPageTreeEntry page, bool allowFormWidgets)
     {
-        if (!allowTaggedPage && page.Dictionary.ContainsKey(StructParentsName))
-            throw new NotSupportedException(
-                "Tagged pages must be imported as a complete document into an empty destination.");
         if (!page.Dictionary.TryGetValue(AnnotsName, out PdfObject? annotationsValue)) return;
         PdfObject annotations = ResolveCatalogValue(
             source, annotationsValue, "An imported page /Annots value");
@@ -18727,7 +18863,7 @@ public sealed class PdfIncrementalPageEditor
         {
             byte[] decoded = PdfStreamDecoder.Decode(
                 stream, source.Resolve, maximumContentBytes);
-            var tokenizer = new PdfTokenizer(decoded);
+            var tokenizer = new PdfTokenizer(decoded) { ContentNumbers = true };
             while (true)
             {
                 PdfToken token = tokenizer.Read();
@@ -18761,7 +18897,7 @@ public sealed class PdfIncrementalPageEditor
                         if (after < content.Length
                             && !IsContentWhitespace(content[after])
                             && !IsContentDelimiter(content[after])) continue;
-                        return new PdfTokenizer(content, after);
+                        return new PdfTokenizer(content, after) { ContentNumbers = true };
                     }
                     throw new InvalidOperationException("An inline image has no EI operator.");
                 }

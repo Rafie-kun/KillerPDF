@@ -216,6 +216,98 @@ public sealed class PdfImportRobustnessTests
         Assert.Equal(bookmarks, PdfBookmarkReader.Read(PdfDocument.Open(output)).Count);
     }
 
+    // A /StructParents key with no /StructTreeRoot is a leftover that points at nothing, as
+    // jcpe13896_am.pdf has. It must not count as tagging, or the pages are refused or lost from a combine.
+    [Theory]
+    [InlineData("document")]
+    [InlineData("document-into-pages")]
+    [InlineData("page")]
+    [InlineData("pages")]
+    public void AStructParentsKeyWithNoStructureTreeIsDroppedWhenPagesAreImported(string mode)
+    {
+        PdfDocument source = PdfDocument.Open(Update(
+            new PdfDocumentBuilder().AddBlankPage().AddBlankPage().Build(),
+            (document, update, root, catalog) =>
+            {
+                PdfPageTreeEntry[] pages = [.. PdfPageTree.Read(document).Pages];
+                for (int index = 0; index < pages.Length; index++)
+                    update.ReplaceObject(pages[index].Reference.ObjectNumber,
+                        Replace(pages[index].Dictionary, "StructParents", new PdfInteger(index)));
+                return catalog;
+            }));
+        Assert.All(PdfPageTree.Read(source).Pages, page => Assert.True(page.Dictionary.ContainsKey(Name("StructParents"))));
+        PdfDocument destination = mode == "document-into-pages" ? PdfDocument.Open(OnePage()) : Empty();
+
+        var editor = new PdfIncrementalPageEditor(destination);
+        _ = mode switch
+        {
+            "page" => editor.AddImportedPage(source, 1),
+            "pages" => editor.AddImportedPages(source, [1, 0]),
+            _ => editor.AddImportedDocument(source)
+        };
+        PdfDocument output = PdfDocument.Open(editor.Build());
+
+        PdfPageTreeEntry[] imported = [.. PdfPageTree.Read(output).Pages];
+        Assert.Equal(mode switch { "page" => 1, "pages" => 2, "document" => 2, _ => 3 }, imported.Length);
+        Assert.All(imported, page => Assert.False(page.Dictionary.ContainsKey(Name("StructParents"))));
+        Assert.False(PdfPageTree.Read(output).Catalog.ContainsKey(Name("StructTreeRoot")));
+    }
+
+    [Fact]
+    public void ATruePageTaggedByAStructureTreeKeepsItsKeyWhenImportedPageByPage()
+    {
+        byte[] tagged = new PdfDocumentBuilder()
+            .SetMetadata(new PdfDocumentMetadata { Title = "Tagged", Language = "en-US" })
+            .AddPage(100, 100, new PdfContentStreamBuilder()
+                .BeginMarkedContent(PdfStructureType.Figure, 0).Rectangle(10, 10, 20, 20).Fill().EndMarkedContent())
+            .AddStructureContainer(PdfStructureType.Document)
+            .AddStructureElement(PdfStructureType.Figure, 0, 0, 1, alternateDescription: "A square")
+            .Build();
+
+        PdfDocument output = PdfDocument.Open(new PdfIncrementalPageEditor(Empty())
+            .AddImportedPage(PdfDocument.Open(tagged), 0).Build());
+
+        PdfPageTree tree = PdfPageTree.Read(output);
+        Assert.True(Assert.Single(tree.Pages).Dictionary.ContainsKey(Name("StructParents")));
+        Assert.True(tree.Catalog.ContainsKey(Name("StructTreeRoot")));
+    }
+
+    // 0.00-96880406 reads as a number in page content, so a layered source that holds it still imports.
+    [Fact]
+    public void ImportingAPageWithAStrayMinusInANumberFromALayeredSourceSucceeds()
+    {
+        string stray = "BT /F1 10 Tf 0.00-96880406 0 0 rg 30 250 Td (Stray) Tj ET";
+        string plain = "BT /F1 10 Tf 0 0 0 rg 30 250 Td (Plain) Tj ET";
+        string[] objects =
+        [
+            "<< /Type /Catalog /Pages 2 0 R /OCProperties << /OCGs [6 0 R] /D << /Order [6 0 R] /ON [6 0 R] >> >> >>",
+            "<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 300] /Resources << /Font << /F1 5 0 R >> >> /Contents 7 0 R >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 300] /Resources << /Font << /F1 5 0 R >> >> /Contents 8 0 R >>",
+            "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+            "<< /Type /OCG /Name (Layer) >>",
+            $"<< /Length {stray.Length} >>\nstream\n{stray}\nendstream",
+            $"<< /Length {plain.Length} >>\nstream\n{plain}\nendstream"
+        ];
+        var text = new StringBuilder("%PDF-1.7\n");
+        var offsets = new List<int>();
+        for (int index = 0; index < objects.Length; index++)
+        {
+            offsets.Add(text.Length);
+            text.Append($"{index + 1} 0 obj\n{objects[index]}\nendobj\n");
+        }
+        int xref = text.Length;
+        text.Append($"xref\n0 {objects.Length + 1}\n0000000000 65535 f \n");
+        foreach (int offset in offsets) text.Append($"{offset:0000000000} 00000 n \n");
+        text.Append($"trailer\n<< /Size {objects.Length + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
+        PdfDocument source = PdfDocument.Open(Encoding.ASCII.GetBytes(text.ToString()));
+        Assert.Equal("Stray", new PdfPageContentReader(source).Read(0).TextRuns.Single().Text);
+
+        byte[] output = new PdfIncrementalPageEditor(Empty()).AddImportedPage(source, 0).Build();
+
+        Assert.Equal("Stray", new PdfPageContentReader(PdfDocument.Open(output)).Read(0).TextRuns.Single().Text);
+    }
+
     // The catalog's first page carries /Link, the head of a chain of dictionaries joined by /Next.
     private static byte[] LinkChainDocument(int links, bool closeTheLoop)
     {

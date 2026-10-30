@@ -5795,10 +5795,12 @@ public sealed partial class PdfDocumentBuilder
 
             void WriteSimple(string prefix, string name, string ns, string? value)
             {
+                value = XmlSafe(value);
                 if (!string.IsNullOrEmpty(value)) xml.WriteElementString(prefix, name, ns, value);
             }
             void WriteAlternative(string name, string? value)
             {
+                value = XmlSafe(value);
                 if (string.IsNullOrEmpty(value)) return;
                 xml.WriteStartElement("dc", name, "http://purl.org/dc/elements/1.1/");
                 xml.WriteStartElement("rdf", "Alt", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
@@ -5809,6 +5811,7 @@ public sealed partial class PdfDocumentBuilder
             }
             void WriteSequence(string name, string? value)
             {
+                value = XmlSafe(value);
                 if (string.IsNullOrEmpty(value)) return;
                 xml.WriteStartElement("dc", name, "http://purl.org/dc/elements/1.1/");
                 xml.WriteStartElement("rdf", "Seq", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
@@ -5817,6 +5820,7 @@ public sealed partial class PdfDocumentBuilder
             }
             void WriteBag(string name, string? value)
             {
+                value = XmlSafe(value);
                 if (string.IsNullOrEmpty(value)) return;
                 xml.WriteStartElement("dc", name, "http://purl.org/dc/elements/1.1/");
                 xml.WriteStartElement("rdf", "Bag", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
@@ -5830,6 +5834,32 @@ public sealed partial class PdfDocumentBuilder
 
     internal static byte[] BuildXmp(PdfDocumentMetadata metadata) =>
         BuildXmp(metadata, PdfA4Flavor.None, pdfUa2: false);
+
+    // XML 1.0 cannot carry most control characters or an unpaired surrogate, though a PDF text string can.
+    // ImageMagick ends /Title with U+0000. The packet leaves them out and the /Info value keeps them.
+    internal static string? XmlSafe(string? value)
+    {
+        if (value is null) return null;
+        StringBuilder? kept = null;
+        for (int index = 0; index < value.Length; index++)
+        {
+            char character = value[index];
+            bool pair = char.IsHighSurrogate(character) && index + 1 < value.Length
+                && char.IsLowSurrogate(value[index + 1]);
+            bool valid = pair || character is (char)9 or (char)10 or (char)13
+                || character is >= (char)0x20 and <= (char)0xD7FF || character is >= (char)0xE000 and <= (char)0xFFFD;
+            if (!valid)
+            {
+                kept ??= new StringBuilder(value, 0, index, value.Length);
+                continue;
+            }
+            kept?.Append(character);
+            if (!pair) continue;
+            index++;
+            kept?.Append(value[index]);
+        }
+        return kept?.ToString() ?? value;
+    }
 
     private enum PdfA4Flavor
     {
