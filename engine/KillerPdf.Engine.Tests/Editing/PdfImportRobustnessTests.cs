@@ -32,16 +32,23 @@ public sealed class PdfImportRobustnessTests
         Assert.Equal("kept.txt", attachment.FileName);
     }
 
-    [Fact]
-    public void ImportingOptionalContentWithoutAGroupListGivesAReadableRefusal()
+    // An /OCProperties with no /OCGs declares no layers, as PDFBOX-4615-7.pdf does, so it has nothing
+    // to carry over or merge with and must not stop the pages being copied.
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public void MergingOptionalContentWithoutAGroupListKeepsThePages(bool sourceLacksGroups, bool targetLacksGroups)
     {
-        byte[] source = Update(OnePage(), (document, update, root, catalog) => Replace(catalog,
-            "OCProperties", Dictionary(("D", Dictionary(("OFF", new PdfArray([])))))));
-        var editor = new PdfIncrementalPageEditor(Empty());
+        byte[] Part(bool lacksGroups) => lacksGroups
+            ? Update(OnePage(), (document, update, root, catalog) => Replace(catalog,
+                "OCProperties", Dictionary(("D", Dictionary(("OFF", new PdfArray([])))))))
+            : OnePage();
 
-        InvalidOperationException error = Assert.Throws<InvalidOperationException>(() =>
-            editor.AddImportedDocument(PdfDocument.Open(source)).Build());
-        Assert.Contains("/OCGs", error.Message);
+        byte[] output = new PdfIncrementalPageEditor(PdfDocument.Open(Part(targetLacksGroups)))
+            .AddImportedDocument(PdfDocument.Open(Part(sourceLacksGroups))).Build();
+
+        Assert.Equal(2, PdfPageInformation.Read(PdfDocument.Open(output)).Count);
     }
 
     [Fact]

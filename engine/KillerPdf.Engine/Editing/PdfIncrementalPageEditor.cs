@@ -9727,12 +9727,11 @@ public sealed class PdfIncrementalPageEditor
             retainedParentEntries, retainedStructureObjects);
     }
 
-    private static PdfObject RequireOptionalContentGroups(
-        PdfDictionary properties, string description) =>
-        properties.TryGetValue(Name("OCGs"), out PdfObject? groups)
-            ? groups
-            : throw new InvalidOperationException(
-                $"{description} is missing, so the optional-content properties cannot be merged.");
+    // An /OCProperties with no /OCGs declares no layers, so there is nothing to carry over or merge.
+    private static bool DeclaresOptionalContentGroups(PdfDocument document, PdfDictionary catalog) =>
+        catalog.TryGetValue(OptionalContentPropertiesName, out PdfObject? properties)
+        && ResolveDictionary(document, properties, "The catalog /OCProperties value")
+            .ContainsKey(Name("OCGs"));
 
     private void AddImportedOptionalContent(
         PdfIncrementalUpdateBuilder update,
@@ -9741,7 +9740,7 @@ public sealed class PdfIncrementalPageEditor
         Dictionary<PdfName, PdfObject> catalogReplacements)
     {
         PageState[][] sourceLayeredGroups = [.. importedGroups.Where(group =>
-            group[0].ImportedTree!.Catalog.ContainsKey(OptionalContentPropertiesName))];
+            DeclaresOptionalContentGroups(group[0].ImportedDocument!, group[0].ImportedTree!.Catalog))];
         var layeredGroupList = new List<PageState[]>();
         var selectedGroups = new Dictionary<PageState[],
             IReadOnlySet<(int ObjectNumber, int Generation)>>();
@@ -9767,8 +9766,9 @@ public sealed class PdfIncrementalPageEditor
         PageState[][] layeredGroups = [.. layeredGroupList];
         if (layeredGroups.Length == 0) return;
 
-        bool targetHasProperties = _tree.Catalog.TryGetValue(
-            OptionalContentPropertiesName, out PdfObject? targetPropertiesValue);
+        bool targetHasProperties = DeclaresOptionalContentGroups(_document, _tree.Catalog);
+        PdfObject? targetPropertiesValue = targetHasProperties
+            ? _tree.Catalog[OptionalContentPropertiesName] : null;
         if (!targetHasProperties && layeredGroups.Length == 1
             && !selectedGroups.ContainsKey(layeredGroups[0]))
         {
@@ -9780,8 +9780,7 @@ public sealed class PdfIncrementalPageEditor
             ValidateOptionalContentGroups(source, sourceProperties,
                 "A source /OCProperties /OCGs");
             HashSet<(int ObjectNumber, int Generation)> registeredGroups = [.. ResolveArray(
-                    source, RequireOptionalContentGroups(sourceProperties,
-                        "A source /OCProperties /OCGs"),
+                    source, sourceProperties[Name("OCGs")],
                     "A source /OCProperties /OCGs")
                 .Select(item => ResolvedReferenceIdentity(source, item,
                     "A source /OCProperties /OCGs entry"))];
@@ -9819,8 +9818,7 @@ public sealed class PdfIncrementalPageEditor
             ? ResolveDictionary(_document, targetPropertiesValue!, "The destination /OCProperties")
             : new PdfDictionary([]);
         var groups = targetHasProperties
-            ? ResolveArray(_document, RequireOptionalContentGroups(targetProperties,
-                    "The destination /OCProperties /OCGs"),
+            ? ResolveArray(_document, targetProperties[Name("OCGs")],
                 "The destination /OCProperties /OCGs").ToList()
             : [];
         if (targetHasProperties)
@@ -9877,8 +9875,7 @@ public sealed class PdfIncrementalPageEditor
             PdfDictionary sourceProperties = ResolveDictionary(source,
                 group[0].ImportedTree!.Catalog[OptionalContentPropertiesName],
                 "A source /OCProperties");
-            PdfArray allSourceGroups = ResolveArray(source,
-                RequireOptionalContentGroups(sourceProperties, "A source /OCProperties /OCGs"),
+            PdfArray allSourceGroups = ResolveArray(source, sourceProperties[Name("OCGs")],
                 "A source /OCProperties /OCGs");
             ValidateOptionalContentGroups(source, sourceProperties,
                 "A source /OCProperties /OCGs");
@@ -10072,7 +10069,7 @@ public sealed class PdfIncrementalPageEditor
             PdfDocument document, PdfDictionary properties, string description)
         {
             PdfArray registeredGroups = ResolveArray(
-                document, RequireOptionalContentGroups(properties, description), description);
+                document, properties[Name("OCGs")], description);
             foreach (PdfObject value in registeredGroups)
             {
                 PdfIndirectReference reference = AssertReference(value, $"{description} entry");

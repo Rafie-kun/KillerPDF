@@ -122,8 +122,7 @@ namespace KillerPDF.Features
                         _host.SetResultText(_host.Loc("Str_Search_NoMatches"));
                         return;
                     }
-                    _host.SetResultText(FormatOrFallback("Str_Search_NoMatchesPartial",
-                        "No matches on the readable pages. {0} pages could not be read.", UnreadablePages.Count));
+                    _host.SetResultText(string.Format(_host.Loc("Str_Search_NoMatchesPartial"), UnreadablePages.Count));
                     _host.SetStatus(SkippedPagesText());
                     return;
                 }
@@ -189,17 +188,7 @@ namespace KillerPDF.Features
 
         /// <summary>Names the (zero-based) pages that were not searched because they could not be read,
         /// for the search bar, the status line and the Find-and-Redact warning.</summary>
-        internal string SkippedPagesMessage(IEnumerable<int> pages) => FormatOrFallback("Str_Search_PagesSkipped",
-            "These pages could not be read, so they were not searched: {0}", SearchService.SkippedPagesText(pages));
-
-        // The string table may not carry a key yet (Loc then returns the key itself), and a translation
-        // may not match the placeholders: either way the English text still reaches the user.
-        private string FormatOrFallback(string key, string english, object argument)
-        {
-            string text = _host.Loc(key);
-            if (text == key) text = english;
-            try { return string.Format(text, argument); }
-            catch (FormatException) { return string.Format(english, argument); }
-        }
+        internal string SkippedPagesMessage(IEnumerable<int> pages) =>
+            string.Format(_host.Loc("Str_Search_PagesSkipped"), SearchService.SkippedPagesText(pages));
     }
 }

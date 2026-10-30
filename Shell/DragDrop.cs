@@ -523,10 +523,8 @@ namespace KillerPDF.Shell
                     selectedPageAfterReload: insertAt,
                     documentUndo: documentUndo);
                 string merged = string.Format(Loc("Str_Status_Merged"), imports.Count);
-                // Str_Drop_SkippedFiles is added with the other strings; until then the English text stands in.
-                string skipped = Application.Current.TryFindResource("Str_Drop_SkippedFiles") as string
-                    ?? "Skipped {0} file(s) that could not be repaired.";
-                SetStatus(notRepaired > 0 ? merged + " " + string.Format(skipped, notRepaired) : merged);
+                SetStatus(notRepaired > 0
+                    ? merged + " " + string.Format(Loc("Str_Drop_SkippedFiles"), notRepaired) : merged);
             }
             catch (Exception ex)
             {
