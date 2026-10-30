@@ -38,16 +38,17 @@ namespace KillerPDF.Services
         /// <summary>The family to draw <paramref name="text"/> with: the user's choice when it
         /// covers everything, otherwise the first family in the script's chain that does. Falls
         /// back to the user's choice when nothing covers it, so behavior never gets worse than
-        /// before - the caller warns in that case.</summary>
+        /// before - the caller warns in that case. Empty text is covered by any installed family,
+        /// so a preferred family that is not installed still gets a real one.</summary>
         internal static string PickFamily(string preferred, string? text)
         {
-            if (string.IsNullOrEmpty(text)) return preferred;
-            if (Covers(preferred, text!)) return preferred;
+            text ??= "";
+            if (Covers(preferred, text)) return preferred;
 
-            foreach (var family in ChainFor(text!))
+            foreach (var family in ChainFor(text))
             {
                 if (string.Equals(family, preferred, StringComparison.OrdinalIgnoreCase)) continue;
-                if (Covers(family, text!)) return family;
+                if (Covers(family, text)) return family;
             }
             return preferred;
         }

@@ -163,7 +163,7 @@ internal sealed class ParagraphEditDialog : Window
         _text.TextChanged += (_, _) => { if (!_setting) Invalidate(); };
         _alignment.SelectionChanged += (_, _) => { if (!_setting) Invalidate(); };
         _candidateBox.SelectedIndex = _candidates.Count > 0 ? 0 : -1;
-        _status.Text = _candidates.Count == 0 ? RefusalMessage(inspection) : "";
+        if (_candidates.Count == 0) _status.Text = RefusalMessage(inspection);
         if (pagePoint is Point pointOnPage) SelectAt(pointOnPage);
         _preview.IsEnabled = _candidates.Count > 0;
         _text.IsEnabled = _candidates.Count > 0;
@@ -231,8 +231,17 @@ internal sealed class ParagraphEditDialog : Window
     {
         _operation?.Cancel(); _plan = null; _apply.IsEnabled = false; _editedImage = null;
         _image.Source = _originalImage; _original.IsChecked = true; _fontLabel.Text = "";
-        _status.Text = "";
+        _status.Text = HyphenNote();
         PlaceBox();
+    }
+
+    // A word joined on a guess stays listed until someone has reworded it.
+    private string HyphenNote()
+    {
+        if (_candidateBox.SelectedIndex < 0 || _candidateBox.SelectedIndex >= _candidates.Count) return "";
+        string[] words = [.. _candidates[_candidateBox.SelectedIndex].HyphenGuesses.Distinct()
+            .Where(word => _text.Text.Contains(word, StringComparison.Ordinal))];
+        return words.Length == 0 ? "" : string.Format(L("Str_Paragraph_HyphensToCheck"), string.Join(", ", words));
     }
 
     private void PlaceBox()
@@ -283,7 +292,9 @@ internal sealed class ParagraphEditDialog : Window
             if (result.Plan.HasOverflow) { _status.Text = L("Str_Paragraph_Overflow"); return; }
             _plan = result.Plan; _editedImage = result.Image;
             _original.IsChecked = false; _image.Source = _editedImage;
-            _status.Text = L("Str_Paragraph_Ready") + (candidate.MixedStyles ? "\n" + L("Str_Paragraph_MixedStyles") : "");
+            string hyphens = HyphenNote();
+            _status.Text = L("Str_Paragraph_Ready") + (candidate.MixedStyles ? "\n" + L("Str_Paragraph_MixedStyles") : "")
+                + (hyphens.Length == 0 ? "" : "\n" + hyphens);
             _fontLabel.Text = string.Format(L("Str_Paragraph_Font"), font.Value.Family);
             _apply.IsEnabled = true;
         }

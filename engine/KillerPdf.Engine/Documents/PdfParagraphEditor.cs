@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using KillerPdf.Engine.Authoring;
@@ -46,8 +47,16 @@ public sealed record PdfParagraphCandidate(int PageIndex, PdfContentBounds Sourc
     /// <summary>Gets how far the first line starts to the right of <see cref="TextLeft"/>.</summary>
     public double FirstLineIndent { get; init; }
 
+    /// <summary>Gets the left edge of the nearest other text to the right on the paragraph's rows,
+    /// where a default box has to stop, or null when nothing lies there.</summary>
+    public double? RightLimit { get; init; }
+
     /// <summary>Gets the text of each source line, in reading order.</summary>
     public IReadOnlyList<string> RowTexts { get; init; } = [];
+
+    /// <summary>Gets each word joined across a line end with its hyphen dropped when nothing in the
+    /// document shows whether the hyphen belongs to it, as it reads in <see cref="Text"/>.</summary>
+    public IReadOnlyList<string> HyphenGuesses { get; init; } = [];
 
     // Where each source line sits, so an underline drawn beneath it can leave with it.
     internal IReadOnlyList<PdfParagraphRowSpan> RowSpans { get; init; } = [];
@@ -156,6 +165,8 @@ public static class PdfParagraphEditor
     private const double WordGapEm = 0.15;
     // A line takes one em whatever the font, so a baseline does not depend on the font's metrics.
     private const double LineAscent = 0.8, LineDescent = 0.2;
+    // The least a typeset word space comes to, and what a box leaves before the next column.
+    private const double SpaceEm = 0.25;
 
     private static readonly HashSet<string> InlineElements = new(StringComparer.Ordinal)
         { "Span", "Link", "Em", "Strong", "Quote", "Code", "Reference", "Sub" };
@@ -311,6 +322,7 @@ public static class PdfParagraphEditor
             get
             {
                 var text = new StringBuilder();
+                double tracking = Tracking();
                 PdfExtractedLetter? previous = null;
                 foreach (PdfExtractedLetter letter in Letters)
                 {
@@ -320,13 +332,58 @@ public static class PdfParagraphEditor
                         previous = null;
                         continue;
                     }
-                    if (previous is not null && letter.StartBaseLine.X - previous.EndBaseLine.X
-                        > Math.Max(1, Math.Min(previous.PointSize, letter.PointSize)) * WordGapEm) text.Append(' ');
+                    if (previous is not null && WordGap(previous, letter, tracking)) text.Append(' ');
                     text.Append(letter.Value);
                     previous = letter;
                 }
                 return ExpandLigatures(text.ToString().Trim());
             }
+        }
+
+        // How wide the row's first word is, for telling whether it would have fit on the row above.
+        internal double FirstWordWidth
+        {
+            get
+            {
+                double tracking = Tracking();
+                PdfExtractedLetter? first = null, previous = null;
+                foreach (PdfExtractedLetter letter in Letters)
+                {
+                    bool blank = string.IsNullOrWhiteSpace(letter.Value);
+                    if (first is null && blank) continue;
+                    if (blank || previous is not null && WordGap(previous, letter, tracking)) break;
+                    first ??= letter;
+                    previous = letter;
+                }
+                return previous is null ? 0 : previous.EndBaseLine.X - first!.StartBaseLine.X;
+            }
+        }
+
+        // What the row spends on a word space, which a monospaced font makes far wider than usual.
+        internal double SpaceWidth => Math.Max(Style.Size * SpaceEm, Letters.Where(letter => letter.Value == " ")
+            .Select(letter => letter.EndBaseLine.X - letter.StartBaseLine.X).DefaultIfEmpty().Max());
+
+        private static bool WordGap(PdfExtractedLetter previous, PdfExtractedLetter letter, double tracking) =>
+            letter.StartBaseLine.X - previous.EndBaseLine.X
+                > tracking + Math.Max(1, Math.Min(previous.PointSize, letter.PointSize)) * WordGapEm;
+
+        // Letter spacing widens every gap in a row, so word gaps are told from the row's usual one.
+        // The lower median is zero for ordinary text, even set with no space glyphs at all. Three
+        // pairs is the least that shows a habit, and digits do not count, since a run of spaced
+        // figures looks just like tracked letters and is far more often separate numbers.
+        private double Tracking()
+        {
+            var gaps = new List<double>();
+            PdfExtractedLetter? previous = null;
+            foreach (PdfExtractedLetter letter in Letters)
+            {
+                bool counts = letter.Value.Length != 0 && char.IsLetter(letter.Value[0]);
+                if (counts && previous is not null) gaps.Add(letter.StartBaseLine.X - previous.EndBaseLine.X);
+                previous = counts ? letter : null;
+            }
+            if (gaps.Count < 3) return 0;
+            gaps.Sort();
+            return Math.Max(0, gaps[(gaps.Count - 1) / 2]);
         }
 
         internal void Add(PdfExtractedLine line)
@@ -366,56 +423,175 @@ public static class PdfParagraphEditor
 
     // Table columns line up from row to row, and the wide gaps of justified or typewritten text only
     // do by chance, so every wide gap of a row must find one in the next row. A wide gap that sits
-    // where all the other rows leave any gap is a column too, since cells can nearly touch.
+    // where all the other rows leave any gap is a column too, since cells can nearly touch. Right
+    // aligned cells end together instead, but so does every justified line, so all the rows have
+    // to agree before that counts.
     private static bool LooksLikeTable(IReadOnlyList<ParagraphRow> rows, double size)
     {
         // A monospaced word space is 0.6 em.
         const double ColumnGapEm = 0.65;
-        (double X, double Gap)[][] starts = [.. rows.Select(row => PieceStarts(row, size))];
-        double[][] wide = [.. starts.Select(row => row.Where(piece => piece.Gap > size * ColumnGapEm).Select(piece => piece.X).ToArray())];
+        (double X, double Gap, double End)[][] pieces = [.. rows.Select(row => Pieces(row, size))];
+        double[][] wide = [.. pieces.Select(row => row.Where(piece => piece.Gap > size * ColumnGapEm).Select(piece => piece.X).ToArray())];
         for (int index = 1; index < wide.Length; index++)
             if (wide[index].Length > 0 && wide[index - 1].Length > 0
                 && (AllFound(wide[index], wide[index - 1]) || AllFound(wide[index - 1], wide[index]))) return true;
-        return rows.Count > 1 && wide.SelectMany(row => row).Any(x => starts.All(row => AllFound([x], [.. row.Select(piece => piece.X)])));
+        if (rows.Count > 1 && wide.SelectMany(row => row).Any(x => pieces.All(row => AllFound([x], [.. row.Select(piece => piece.X)])))) return true;
+        double[][] ends = [.. pieces.Select(row => row.Where(piece => piece.Gap > size * ColumnGapEm).Select(piece => piece.End).ToArray())];
+        return rows.Count > 1 && ends[0].Length > 0 && ends.All(row => row.Length == ends[0].Length && AllFound(row, ends[0]));
 
         static bool AllFound(double[] some, double[] others) =>
             some.All(x => others.Any(other => Math.Abs(other - x) <= 1));
     }
 
-    private static (double X, double Gap)[] PieceStarts(ParagraphRow row, double size)
+    // The pieces of a row between gaps. Spaces leave no gap of their own between their neighbours, so
+    // two or more together, which pad a column out to its place, count as one gap across the run. A
+    // single space is a word space however justification stretches it.
+    private static (double X, double Gap, double End)[] Pieces(ParagraphRow row, double size)
     {
-        var starts = new List<(double X, double Gap)>();
-        for (int index = 1; index < row.Letters.Length; index++)
+        var pieces = new List<(double X, double Gap, double End)>();
+        PdfExtractedLetter? mark = null, previous = null;
+        int spaces = 0;
+        foreach (PdfExtractedLetter letter in row.Letters)
         {
-            double gap = row.Letters[index].StartBaseLine.X - row.Letters[index - 1].EndBaseLine.X;
-            if (gap >= size * 0.1) starts.Add((row.Letters[index].StartBaseLine.X, gap));
+            if (string.IsNullOrWhiteSpace(letter.Value))
+            {
+                spaces++;
+                previous = letter;
+                continue;
+            }
+            if (mark is not null && letter.StartBaseLine.X - (spaces >= 2 ? mark : previous!).EndBaseLine.X is var gap && gap >= size * 0.1)
+            {
+                if (pieces.Count > 0) pieces[^1] = pieces[^1] with { End = mark.EndBaseLine.X };
+                pieces.Add((letter.StartBaseLine.X, gap, 0));
+            }
+            mark = previous = letter;
+            spaces = 0;
         }
-        return [.. starts];
+        if (pieces.Count > 0) pieces[^1] = pieces[^1] with { End = mark!.EndBaseLine.X };
+        return [.. pieces];
     }
 
-    // A word broken across two rows is one word again. A compound keeps its hyphen, which the page
-    // shows by writing it whole somewhere else.
-    private static string JoinRows(IReadOnlyList<string> rows, string pageText)
+    // A word broken across two rows is one word again, and a row that stopped with room for the next
+    // word ended on purpose, so it stays a row. A list or an address does that on most of its rows,
+    // which says the same of the longest one, where there was no room to tell by. The room is judged
+    // against the longest row, which is never wider than the column the text was set in.
+    private static string JoinRows(IReadOnlyList<ParagraphRow> rows, IReadOnlyList<string> texts, ParagraphWords words,
+        int pageIndex, List<string> guesses)
     {
-        var text = new StringBuilder();
-        for (int index = 0; index < rows.Count; index++)
+        double longest = rows.Max(row => row.End);
+        bool[] ended = [.. rows.Select((row, index) => index + 1 < rows.Count
+            && longest - row.End > row.SpaceWidth + rows[index + 1].FirstWordWidth)];
+        bool allRows = ended.Count(end => end) * 2 >= rows.Count - 1 && ended.Any(end => end);
+        var text = new StringBuilder(texts[0]);
+        for (int index = 1; index < rows.Count; index++)
         {
-            string row = rows[index];
-            string previous = index > 0 ? rows[index - 1] : string.Empty;
-            bool broken = previous.Length >= 2 && previous[^1] is '-' or '‐' && char.IsLower(previous[^2])
-                && row.Length > 0 && char.IsLower(row[0]);
-            if (!broken)
+            string previous = texts[index - 1], row = texts[index];
+            bool hyphen = previous.Length >= 2 && previous[^1] is '-' or '‐' && char.IsLetterOrDigit(previous[^2]) && row.Length > 0;
+            // A digit carries a compound on, whatever room the row had: COVID- ahead of 19 is no list item.
+            if (hyphen && (!ended[index - 1] || !char.IsLetter(row[0])))
             {
-                if (index > 0) text.Append(' ');
+                bool? keeps = KeepsHyphen(previous, row, words, pageIndex);
+                if (keeps == true) text[^1] = '-';
+                else text.Length--;
+                if (keeps is null) guesses.Add(Bare(previous[(previous.LastIndexOf(' ') + 1)..^1]) + string.Concat(row.TakeWhile(char.IsLetter)));
             }
-            else
-            {
-                string whole = previous[(previous.LastIndexOf(' ') + 1)..] + string.Concat(row.TakeWhile(char.IsLetter));
-                if (!pageText.Contains(whole, StringComparison.Ordinal)) text.Length--;
-            }
+            else if (previous[^1] == '\u00AD') text.Length--;
+            else if (ended[index - 1] || allRows) text.Append('\n');
+            else if (previous.Length < 2 || previous[^1] != '/' || previous[^2] == ' ') text.Append(' ');
             text.Append(row);
         }
         return text.ToString();
+    }
+
+    // Soft breaks fall between lowercase letters of a word, and an address holds no words. After
+    // that the document's own spelling decides, the hyphenated form first because a real hyphen is
+    // the one never to lose. When neither form is written anywhere, a longer compound that holds it
+    // or both halves being words on their own shows a compound. Null means nothing shows either.
+    private static bool? KeepsHyphen(string previous, string row, ParagraphWords words, int pageIndex)
+    {
+        if (!char.IsLower(previous[^2]) || !char.IsLower(row[0])) return true;
+        string left = Bare(previous[(previous.LastIndexOf(' ') + 1)..^1]).Replace('‐', '-');
+        if ((left + row.Split(' ')[0]).AsSpan().IndexOfAny("/@=%") >= 0) return true;
+        string right = string.Concat(row.TakeWhile(char.IsLetter));
+        if (words.Contains(left + "-" + right, pageIndex)) return true;
+        if (words.Contains(left + right, pageIndex)) return false;
+        if (words.InCompound(left + "-" + right, pageIndex)) return true;
+        string half = left[(left.LastIndexOf('-') + 1)..];
+        return half.Length >= 2 && right.Length >= 2 && words.Contains(half, pageIndex) && words.Contains(right, pageIndex)
+            ? true : null;
+    }
+
+    private static string Bare(string word)
+    {
+        int start = 0, end = word.Length;
+        while (start < end && !char.IsLetterOrDigit(word[start])) start++;
+        while (end > start && !char.IsLetterOrDigit(word[end - 1])) end--;
+        return word[start..end];
+    }
+
+    // The words a document writes whole, for settling line-end hyphens. Reading them costs a pass
+    // over the pages, so it waits for the first hyphen that asks and then lasts as long as the
+    // document. The two pieces of a word broken across rows are not words, and they would pass for
+    // proof of each other, though a hyphen inside one is still a real one.
+    private sealed class ParagraphWords(PdfDocument document)
+    {
+        private const int PagesRead = 300;
+        private static readonly ConditionalWeakTable<PdfDocument, ParagraphWords> ByDocument = [];
+        private readonly HashSet<string> _words = new(StringComparer.OrdinalIgnoreCase);
+        private readonly List<string> _compounds = [];
+        private readonly HashSet<int> _read = [];
+
+        internal static ParagraphWords Of(PdfDocument document) => ByDocument.GetValue(document, item => new ParagraphWords(item));
+
+        internal bool Contains(string word, int pageIndex)
+        {
+            lock (_words)
+            {
+                ReadPages(pageIndex);
+                return _words.Contains(word);
+            }
+        }
+
+        // Whether a longer compound holds this one, as non-sub-graphs does sub-graph. Tokens can run
+        // together where a page lost its word spaces, so it may sit anywhere inside.
+        internal bool InCompound(string word, int pageIndex)
+        {
+            lock (_words)
+            {
+                ReadPages(pageIndex);
+                return _compounds.Any(item => item.Contains(word, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+
+        private void ReadPages(int pageIndex)
+        {
+            if (_read.Count == 0)
+            {
+                var reader = new PdfPageContentReader(document);
+                for (int index = 0; index < Math.Min(PagesRead, reader.PageCount); index++) Read(reader, index);
+            }
+            if (!_read.Contains(pageIndex)) Read(new PdfPageContentReader(document), pageIndex);
+        }
+
+        private void Read(PdfPageContentReader reader, int pageIndex)
+        {
+            _read.Add(pageIndex);
+            IReadOnlyList<PdfExtractedWord> words;
+            try { words = reader.Read(pageIndex).Words; }
+            catch (Exception error) when (IsRefusal(error) || error is Filters.PdfFilterException) { return; }
+            bool broken = false;
+            for (int index = 0; index < words.Count; index++)
+            {
+                PdfExtractedWord word = words[index];
+                bool breaks = index + 1 < words.Count && word.Text.TrimEnd() is { Length: >= 2 } text && text[^1] is '-' or '‐'
+                    && char.IsLetter(text[^2]) && words[index + 1].BoundingBox.Left < word.BoundingBox.Right
+                    && words[index + 1].BoundingBox.Top < word.BoundingBox.Bottom + 1;
+                string whole = Bare(ExpandLigatures(word.Text)).Replace('‐', '-');
+                if (!broken && !breaks) _words.Add(whole);
+                if (whole.Contains('-')) _compounds.Add(whole);
+                broken = breaks;
+            }
+        }
     }
 
     private static string ExpandLigatures(string text) => text.Replace("ﬀ", "ff", StringComparison.Ordinal)
@@ -529,7 +705,9 @@ public static class PdfParagraphEditor
         double leading = rows.Count > 1 ? rows[0].Baseline - rows[1].Baseline : first.Size * 1.2;
         string[] rowTexts = [.. rows.Select(row => row.Text)];
         double indent = rows.Count > 1 && rows[0].Left - rows[1].Left > 1 ? rows[0].Left - rows[1].Left : 0;
-        var candidate = new PdfParagraphCandidate(pageIndex, bounds, JoinRows(rowTexts, page.Text), first.Font, first.Size, leading, color)
+        var guesses = new List<string>();
+        string text = JoinRows(rows, rowTexts, ParagraphWords.Of(document), pageIndex, guesses);
+        var candidate = new PdfParagraphCandidate(pageIndex, bounds, text, first.Font, first.Size, leading, color)
         {
             Clip = clip,
             MixedStyles = mixedFills || selected.Select(letter => (letter.FontName, Math.Round(letter.PointSize, 2))).Distinct().Skip(1).Any(),
@@ -537,7 +715,13 @@ public static class PdfParagraphEditor
             FirstBaseline = rows[0].Baseline,
             TextRight = selected.Max(letter => letter.EndBaseLine.X),
             FirstLineIndent = indent,
+            RightLimit = page.Letters.Where(letter => !string.IsNullOrWhiteSpace(letter.Value)
+                && (letter.BoundingBox.Left + letter.BoundingBox.Right) / 2 > bounds.Right
+                && (letter.BoundingBox.Bottom + letter.BoundingBox.Top) / 2 >= bounds.Bottom
+                && (letter.BoundingBox.Bottom + letter.BoundingBox.Top) / 2 <= bounds.Top)
+                .Select(letter => (double?)letter.BoundingBox.Left).Min(),
             RowTexts = Array.AsReadOnly(rowTexts),
+            HyphenGuesses = Array.AsReadOnly(guesses.ToArray()),
             RowSpans = Array.AsReadOnly(rows.Select(row => new PdfParagraphRowSpan(row.Left, row.End, row.Baseline, row.Style.Size)).ToArray())
         };
         return new PdfParagraphInspection(true, string.Empty, candidate);
@@ -559,7 +743,10 @@ public static class PdfParagraphEditor
         double left = Math.Max(0, candidate.TextLeft), right = candidate.TextRight;
         // The replacement paints under the source's clip, so more width than that would only vanish.
         double limit = Math.Min(pageWidth, candidate.Clip?.Right ?? pageWidth);
+        // Text to the right stays where it is, so the box stops short of it and the lines wrap instead.
+        if (candidate.RightLimit is double next) limit = Math.Min(limit, Math.Max(next - size * SpaceEm, right));
         int lines = Math.Max(1, candidate.RowTexts.Count);
+        bool kept = false;
         if (font is not null)
         {
             // Measured at the source size, so a larger size wraps within the column instead of widening it.
@@ -568,7 +755,12 @@ public static class PdfParagraphEditor
                     + PdfTextReflow.MeasureLine(candidate.RowTexts[index], font, candidate.FontSize));
             right = Math.Min(right + 0.01, limit);
             string wrapped = Normalized(text ?? candidate.Text);
-            int LinesWithin(double edge) => PdfTextReflow.Wrap(wrapped, font, size, edge - left, candidate.FirstLineIndent).Count;
+            int LinesWithin(double edge)
+            {
+                double indent = FittedIndent(wrapped, font, size, edge - left, candidate.FirstLineIndent);
+                return (SourceRows(candidate, wrapped, font, size, edge - left, indent)
+                    ?? PdfTextReflow.Wrap(wrapped, font, size, edge - left, indent)).Count;
+            }
             lines = LinesWithin(right);
             // A rejoined hyphenated word can push the source's own text one row further. A little
             // more width costs less than a new row over whatever sits below.
@@ -580,14 +772,42 @@ public static class PdfParagraphEditor
                     right = wider;
                     lines = candidate.RowTexts.Count;
                 }
+            kept = SourceRows(candidate, wrapped, font, size, right - left,
+                FittedIndent(wrapped, font, size, right - left, candidate.FirstLineIndent)) is not null;
         }
         double top = Math.Min(pageHeight, candidate.FirstBaseline + size * LineAscent);
-        return new PdfContentBounds(left, Math.Max(0, top - size - (lines - 1) * (leading ?? candidate.Leading)),
+        return new PdfContentBounds(left, Math.Max(0, top - size - Drop(candidate, kept, lines - 1, leading ?? candidate.Leading)),
             Math.Min(right, limit), top);
     }
 
+    // How far a line sits below the first. Rows kept from the source stay on their own baselines,
+    // which need not be evenly spaced.
+    private static double Drop(PdfParagraphCandidate source, bool kept, int index, double leading) =>
+        kept && leading == source.Leading ? source.RowSpans[0].Baseline - source.RowSpans[index].Baseline : index * leading;
+
     private static string Normalized(string text) =>
         ExpandLigatures(text.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n'));
+
+    // The first line is shorter by the indent. A box too narrow for the indent has no first line to
+    // shorten, and a first word that fits the box but not that line would be split, so the indent gives way.
+    private static double FittedIndent(string text, TrueTypeFont font, double size, double width, double indent)
+    {
+        if (indent >= width) return 0;
+        double word = PdfTextReflow.MeasureLine(text.TrimStart().Split(' ', '\n')[0], font, size);
+        return word > width - indent && word <= width ? 0 : indent;
+    }
+
+    // Text nobody changed goes back in the rows the page has it in, line-end hyphens included, so it
+    // does not move however the replacement font's widths would wrap it. Null means a row will not fit.
+    private static IReadOnlyList<PdfReflowLine>? SourceRows(PdfParagraphCandidate source, string text, TrueTypeFont font,
+        double size, double width, double indent)
+    {
+        if (text != source.Text || size != source.FontSize) return null;
+        PdfReflowLine[] rows = [.. source.RowTexts.Select(row => new PdfReflowLine(row, PdfTextReflow.MeasureLine(row, font, size)))];
+        bool fits = rows.Select((row, index) => row.Width + (index == 0 ? indent : 0)).All(row => row <= width + 0.0001);
+        return fits && rows.All(row => row.Text.EnumerateRunes().All(rune => rune.Value == ' ' || font.GetGlyphId(rune.Value) != 0))
+            ? rows : null;
+    }
 
     /// <summary>Creates a source-bound layout and an exact, unapplied preview when it fits.</summary>
     public static PdfParagraphPlan Plan(PdfDocument document, int pageIndex, PdfContentBounds sourceRegion,
@@ -624,15 +844,15 @@ public static class PdfParagraphEditor
         // Reflow and authoring must use the same space glyph. Missing spaces must not silently become .notdef.
         if (normalized.Contains(' ') && font.GetGlyphId(' ') == 0)
             throw new NotSupportedException("The replacement font has no space glyph.");
-        // A box too narrow for the indent has no first line to shorten.
-        double indent = alignment == PdfParagraphAlignment.Left && source.FirstLineIndent < targetBounds.Width
-            ? source.FirstLineIndent : 0;
+        double indent = alignment == PdfParagraphAlignment.Left
+            ? FittedIndent(normalized, font, fontSize, targetBounds.Width, source.FirstLineIndent) : 0;
+        IReadOnlyList<PdfReflowLine>? kept = SourceRows(source, normalized, font, fontSize, targetBounds.Width, indent);
         IReadOnlyList<PdfReflowLine> wrapped = normalized.Length == 0 ? []
-            : PdfTextReflow.Wrap(normalized, font, fontSize, targetBounds.Width, indent);
+            : kept ?? PdfTextReflow.Wrap(normalized, font, fontSize, targetBounds.Width, indent);
         var lines = wrapped.Select((line, index) => new PdfParagraphLine(line.Text,
             targetBounds.Left + (alignment == PdfParagraphAlignment.Center ? (targetBounds.Width - line.Width) / 2
                 : alignment == PdfParagraphAlignment.Right ? targetBounds.Width - line.Width : index == 0 ? indent : 0),
-            targetBounds.Top - fontSize * LineAscent - index * leading, line.Width)).ToArray();
+            targetBounds.Top - fontSize * LineAscent - Drop(source, kept is not null, index, leading), line.Width)).ToArray();
         string overflow = lines.Any(line => line.X + line.Width > targetBounds.Right + 0.0001
             || line.Baseline - fontSize * LineDescent < targetBounds.Bottom - 0.0001)
             ? "The text overflows the paragraph box. Resize the box or adjust the font size or line spacing." : string.Empty;
@@ -657,6 +877,13 @@ public static class PdfParagraphEditor
         byte[]? preview = null;
         if (overflow.Length == 0)
         {
+            // The new text goes in at the paragraph's last glyph. The cover check judges what is painted
+            // after that, and text from before it would be printed over, which extraction would never show.
+            PdfExtractedLetter[] under = [.. page.Letters.Reverse().SkipWhile(letter => !CenterInside(letter.BoundingBox, source.SourceRegion))
+                .Where(letter => !string.IsNullOrWhiteSpace(letter.Value) && !CenterInside(letter.BoundingBox, source.SourceRegion))];
+            if (lines.Any(line => line.Text.Length != 0 && under.Any(letter => CenterInside(letter.BoundingBox, new PdfContentBounds(
+                line.X, line.Baseline - fontSize * LineDescent, line.X + line.Width, line.Baseline + fontSize * 0.7)))))
+                throw new NotSupportedException("The new text would land on other text on the page. Move the box or adjust the text.");
             var edit = new PdfTextLineEdit(pageIndex, source.SourceRegion, string.Join("\n", lines.Select(line => line.Text)))
             {
                 Substitute = font, UseSubstitute = true, FontSize = fontSize,

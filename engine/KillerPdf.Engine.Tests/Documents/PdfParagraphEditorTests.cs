@@ -735,7 +735,7 @@ public sealed class PdfParagraphEditorTests
         PdfDocument source = Raw("BT /F1 10 Tf 42 250 Td (Old first line indented) Tj -12 -12 Td (Old body line two) Tj " +
             "0 -12 Td (Old body line three) Tj ET");
         PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
-        Assert.Equal("Old first line indented Old body line two Old body line three", candidate.Text);
+        Assert.Equal("Old first line indented\nOld body line two\nOld body line three", candidate.Text);
         Assert.Equal(30, candidate.TextLeft, 6);
         Assert.Equal(12, candidate.FirstLineIndent, 6);
         PdfParagraphPlan plan = Unchanged(source, candidate, Font());
@@ -955,12 +955,333 @@ public sealed class PdfParagraphEditorTests
 
     [Theory]
     [InlineData("(The word is sim-)", "(ilar to most)", "The word is similar to most")]
-    [InlineData("(See Smith-)", "(Jones here)", "See Smith- Jones here")]
-    [InlineData("(Now 3-)", "(way talks)", "Now 3- way talks")]
+    [InlineData("(See Smith-)", "(Jones here)", "See Smith-Jones here")]
+    [InlineData("(Now 3-)", "(way talks)", "Now 3-way talks")]
     public void ALineEndHyphenIsDroppedFromABrokenWord(string first, string second, string expected)
     {
         PdfDocument source = Raw($"BT /F1 10 Tf 30 250 Td {first} Tj 0 -12 Td {second} Tj ET");
         Assert.Equal(expected, Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0)).Text);
+    }
+
+    // A soft break and a compound look the same at a line end, so the rest of the document decides,
+    // and what nothing settles is joined and handed to the dialog to ask about.
+    [Theory]
+    // The compound written whole, on another page.
+    [InlineData("It is well-", "known, to all", "a well-known thing", "It is well-known, to all", "")]
+    // The word written whole with no hyphen.
+    [InlineData("It runs in real-", "time always", "and realtime data", "It runs in realtime always", "")]
+    // Both forms: a real hyphen is never the one to lose.
+    [InlineData("It runs in real-", "time always", "realtime and real-time", "It runs in real-time always", "")]
+    // Both halves are words of the document.
+    [InlineData("This leads to the so-", "called problem", "so it was called", "This leads to the so-called problem", "")]
+    [InlineData("It is the real-", "time rate", "a real rate in time", "It is the real-time rate", "")]
+    [InlineData("A state-of-the-", "art method", "the art of it", "A state-of-the-art method", "")]
+    // A longer compound that opens with it, and the one after a slash.
+    [InlineData("A clear line-", "of-sight path", "the line-of-sight view", "A clear line-of-sight path", "")]
+    [InlineData("On a sub-", "graph here", "many sub-graphs and a non-sub-graph", "On a sub-graph here", "")]
+    [InlineData("A passive/device-", "free one", "the device was free", "A passive/device-free one", "")]
+    // A compound inside text whose word spaces did not survive, and one broken at a later hyphen.
+    [InlineData("A good short-", "term plan", "Predictingshort-terminterests", "A good short-term plan", "")]
+    [InlineData("Given two anti-", "self-dual ones", "is anti-self-\ndual here", "Given two anti-self-dual ones", "")]
+    // A hyphen in an address is never a soft break.
+    [InlineData("See http://a.example/pc-", "dpc here", "other things", "See http://a.example/pc-dpc here", "")]
+    [InlineData("Mail yi.wang-", "li@uconn.edu now", "other things", "Mail yi.wang-li@uconn.edu now", "")]
+    // The word written whole outranks a compound that only opens the same way.
+    [InlineData("It is re-", "al work", "real and re-allocate", "It is real work", "")]
+    // Nothing settles it.
+    [InlineData("The word is sim-", "ilar to most", "other things", "The word is similar to most", "similar")]
+    [InlineData("Well-", "known, to all", "other things", "Wellknown, to all", "Wellknown")]
+    // A capital or a digit on either side rules out a soft break, and no space goes inside the word.
+    [InlineData("We use Wi-", "Fi here", "other things", "We use Wi-Fi here", "")]
+    [InlineData("The COVID-", "19 rules", "other things", "The COVID-19 rules", "")]
+    [InlineData("The COVID-", "related rules", "other things", "The COVID-related rules", "")]
+    [InlineData("An Anglo-", "Saxon word", "other things", "An Anglo-Saxon word", "")]
+    [InlineData("Now 3-", "way talks", "other things", "Now 3-way talks", "")]
+    // A word broken across a line end somewhere else proves nothing about either half.
+    [InlineData("The com-", "puter here", "a com-\nputer there", "The computer here", "computer")]
+    public void TheDocumentDecidesALineEndHyphen(string first, string second, string other, string expected, string guess)
+    {
+        PdfDocument source = Pages([first, second], other.Split('\n'));
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        Assert.Equal(expected, candidate.Text);
+        Assert.Equal(guess.Length == 0 ? [] : [guess], candidate.HyphenGuesses);
+    }
+
+    [Fact]
+    public void ThePageBeingEditedCountsEvenPastTheLastPageReadForEvidence()
+    {
+        var builder = new PdfDocumentBuilder();
+        for (int index = 0; index < 301; index++)
+            builder.AddPage(300, 300, Rows(index == 300 ? ["It is well-", "known, to all", "", "", "", "", "", "", "a well-known thing"] : ["Other"]));
+        PdfParagraphCandidate candidate = PdfParagraphEditor.FindParagraphs(PdfDocument.Open(builder.Build()), 300).First();
+        Assert.Equal("It is well-known, to all", candidate.Text);
+    }
+
+    // A soft hyphen says what it is, so there is nothing to ask about.
+    [Fact]
+    public void ASoftHyphenAtTheEndOfARowJoinsItsWord()
+    {
+        PdfDocument source = Raw("BT /F3 10 Tf 30 250 Td (The interA) Tj 0 -12 Td (national body) Tj ET", fonts:
+            "/F3 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding << /Type /Encoding /Differences [65 /sfthyphen] >> >>");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        Assert.Equal("The international body", candidate.Text);
+        Assert.Empty(candidate.HyphenGuesses);
+    }
+
+    // Not every font has the Unicode hyphen, and the plain one looks the same.
+    [Fact]
+    public void AKeptHyphenIsThePlainOne()
+    {
+        PdfDocument source = Raw("BT /F3 10 Tf 30 250 Td (We use WiA) Tj 0 -12 Td (Fi here) Tj ET", fonts:
+            "/F3 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding << /Type /Encoding /Differences [65 /uni2010] >> >>");
+        Assert.Equal("We use Wi-Fi here", Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0)).Text);
+    }
+
+    // A URL broken across rows must not gain a space.
+    [Theory]
+    [InlineData("(See example.com/)", "(path/to here)", "See example.com/path/to here")]
+    [InlineData("(Use and/)", "(or both)", "Use and/or both")]
+    public void NoSpaceFollowsASlashAtTheEndOfARow(string first, string second, string expected)
+    {
+        PdfDocument source = Raw($"BT /F1 10 Tf 30 250 Td {first} Tj 0 -12 Td {second} Tj ET");
+        Assert.Equal(expected, Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0)).Text);
+    }
+
+    // Nothing was typed, so nothing moves and no hyphen goes, whichever way the words were joined.
+    [Theory]
+    [InlineData(0)]
+    [InlineData(4)]
+    [InlineData(6)]
+    public void UnchangedTextComesBackInTheRowsThePageHasThem(int font)
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (The method is well-) Tj 0 -12 Td (known and also rea-) Tj " +
+            "0 -12 Td (sonable in a way that) Tj 0 -12 Td (runs on for a while) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        PdfParagraphPlan plan = Unchanged(source, candidate, PdfStandardFontSubstitutes.OcrTrainingFonts()[font]);
+        Assert.False(plan.HasOverflow, plan.OverflowReason);
+        Assert.Equal(candidate.RowTexts, plan.Lines.Select(line => line.Text));
+    }
+
+    // Rows set a little unevenly stay on their own baselines, and an edit goes back to even lines.
+    [Theory]
+    [InlineData("BT /F1 10 Tf 30 250 Td (Old line of text here) Tj 0 -12 Td (and a second line of it) Tj 0 -16 Td (and the third row here) Tj ET")]
+    [InlineData("BT /F1 10 Tf 30 250 Td (Old line of text here) Tj 0 -14 Td (and a second line of it) Tj 0 -11.5 Td (and the third row here) Tj ET")]
+    public void UnchangedRowsStayOnTheirOwnBaselines(string content)
+    {
+        PdfDocument source = Raw(content);
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        PdfParagraphPlan plan = Unchanged(source, candidate, Font());
+        Assert.False(plan.HasOverflow, plan.OverflowReason);
+        double[] baselines = [.. new PdfPageContentReader(source).Read(0).Lines.Select(line => line.Runs[0].Letters[0].StartBaseLine.Y)];
+        Assert.Equal(baselines, plan.Lines.Select(line => line.Baseline), (a, b) => Math.Abs(a - b) < 0.001);
+        string edited = candidate.Text + " more";
+        PdfParagraphPlan changed = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            PdfParagraphEditor.DefaultBox(candidate, 300, 300, edited, Font()), edited, Font(), candidate.FontSize,
+            candidate.Leading, PdfParagraphAlignment.Left);
+        Assert.Equal(candidate.Leading, changed.Lines[0].Baseline - changed.Lines[1].Baseline, 6);
+        Assert.Equal(candidate.Leading, changed.Lines[1].Baseline - changed.Lines[2].Baseline, 6);
+    }
+
+    [Fact]
+    public void AnEditedParagraphIsWrappedFromItsJoinedText()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (The word is sim-) Tj 0 -12 Td (ilar to most) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        string edited = candidate.Text.Replace("most", "many", StringComparison.Ordinal);
+        PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            PdfParagraphEditor.DefaultBox(candidate, 300, 300, edited, Font()), edited, Font(), candidate.FontSize,
+            candidate.Leading, PdfParagraphAlignment.Left);
+        Assert.Equal(edited, string.Join(" ", plan.Lines.Select(line => line.Text)));
+    }
+
+    // Letter spacing widens every gap, so a word gap is measured from the row's own letter gap.
+    [Theory]
+    [InlineData("2 Tc (ANNUAL REPORT) Tj", "ANNUAL REPORT")]
+    [InlineData("1.6 Tc (Tracked body words here) Tj", "Tracked body words here")]
+    [InlineData("2 Tc [(TWO) -300 (WORDS)] TJ", "TWO WORDS")]
+    [InlineData("0 Tc [(Word) -300 (gaps) -300 (here)] TJ", "Word gaps here")]
+    // Digits are not letters spaced apart.
+    [InlineData("0 Tc [(1) -300 (2) -300 (3) -300 (4) -300 (5)] TJ", "1 2 3 4 5")]
+    public void LetterSpacingIsNotReadAsWordSpaces(string shown, string expected)
+    {
+        PdfDocument source = Raw($"BT /F1 10 Tf 30 250 Td {shown} ET");
+        Assert.Equal(expected, Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0)).Text);
+    }
+
+    [Fact]
+    public void EachRowOfATrackedParagraphReadsAsWords()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 1.6 Tc 30 250 Td (Tracked body words here) Tj 0 -12 Td (and more words follow) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        Assert.Equal(["Tracked body words here", "and more words follow"], candidate.RowTexts);
+    }
+
+    // A row that stops with room for the next word ended on purpose, as lists and addresses do.
+    [Theory]
+    [InlineData(new[] { "John Smith", "123 Main Street, Apartment 4", "Springfield" }, 0)]
+    [InlineData(new[] { "John Smith", "123 Main Street, Apartment 4", "Springfield" }, 4)]
+    [InlineData(new[] { "1. Apples", "2. A much longer list item with words", "3. Plums", "4. Pears" }, 0)]
+    [InlineData(new[] { "1. Apples", "2. A much longer list item with words", "3. Plums", "4. Pears" }, 4)]
+    [InlineData(new[] { "1. Apples", "2. A much longer list item with words", "3. Plums", "4. Pears" }, 6)]
+    public void RowsThatEndOnPurposeKeepTheirBreaks(string[] rows, int font)
+    {
+        PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder().AddPage(300, 300, Rows(rows)).Build());
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        Assert.Equal(string.Join("\n", rows), candidate.Text);
+        PdfParagraphPlan plan = Unchanged(source, candidate, PdfStandardFontSubstitutes.OcrTrainingFonts()[font]);
+        Assert.Equal(rows, plan.Lines.Select(line => line.Text));
+    }
+
+    [Fact]
+    public void AnEditKeepsTheRowBreaksInTheText()
+    {
+        PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder().AddPage(300, 300, Rows(["John Smith", "123 Main Street, Apartment 4", "Springfield"])).Build());
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        string edited = candidate.Text.Replace("John", "Jon", StringComparison.Ordinal);
+        PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            PdfParagraphEditor.DefaultBox(candidate, 300, 300, edited, Font()), edited, Font(), candidate.FontSize,
+            candidate.Leading, PdfParagraphAlignment.Left);
+        Assert.Equal(edited.Split('\n'), plan.Lines.Select(line => line.Text));
+    }
+
+    [Fact]
+    public void AFullJustifiedParagraphHasNoRowBreaks()
+    {
+        PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder().AddPage(300, 300,
+            Rows(["aaaa aaaa aaaa aaaa", "bbbb bbbb bbbb bbbb", "dddd dddd dddd dddd", "ee nn"])).Build());
+        Assert.DoesNotContain('\n', Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0)).Text);
+    }
+
+    // The room is judged against the longest row, so the short rows of ragged text stay joined.
+    [Fact]
+    public void ARaggedRowWithNoRoomForTheNextWordIsNotAnEnd()
+    {
+        PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder().AddPage(300, 300,
+            Rows(["some words on one row", "extraordinarily long word", "and then the last row of it"])).Build());
+        Assert.DoesNotContain('\n', Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0)).Text);
+    }
+
+    private const string Courier = "/F3 << /Type /Font /Subtype /Type1 /BaseFont /Courier /Encoding /WinAnsiEncoding >>";
+
+    // A space glyph leaves no gap between its neighbours, so a run of them has to count as one.
+    [Theory]
+    [InlineData("BT /F3 10 Tf 30 250 Td (Name        Qty    Price) Tj 0 -11 Td (Alpha       10     1.50) Tj 0 -11 Td (Beta        200    12.25) Tj ET")]
+    // Right aligned cells start anywhere and end together.
+    [InlineData("BT /F1 10 Tf 30 250 Td (Apples) Tj ET BT /F1 10 Tf 73 250 Td (1.50) Tj ET BT /F1 10 Tf 30 238 Td (Pears) Tj ET BT /F1 10 Tf 67.4 238 Td (12.25) Tj ET")]
+    public void TablesPaddedWithSpacesOrAlignedRightAreRefused(string content)
+    {
+        PdfParagraphCandidateInspection inspection = PdfParagraphEditor.InspectCandidates(Raw(content, fonts: Courier), 0);
+        Assert.Empty(inspection.Candidates);
+        Assert.Contains(inspection.Refusals, item => item.Reason.Contains("table", StringComparison.Ordinal));
+    }
+
+    // One space glyph is a word space, however far justification stretches it, and a double space
+    // after a sentence is not a column just because a word starts below it in a monospaced font.
+    [Theory]
+    [InlineData("BT /F1 10 Tf 9 Tw 30 250 Td (But of those that) Tj 2 Tw 0 -12 Td (offer total choice over half think) Tj 7 Tw 0 -12 Td (everybody needs to be) Tj ET")]
+    [InlineData("BT /F1 10 Tf 9 Tw 30 250 Td (Two words) Tj 0 -12 Td (More words) Tj ET")]
+    [InlineData("BT /F3 10 Tf 30 250 Td (Copyright 2012 the Trust and the persons) Tj 0 -11 Td (document authors.  All rights reserved.) Tj ET")]
+    public void WordSpacesAreNotColumns(string content) =>
+        Assert.Single(PdfParagraphEditor.FindParagraphs(Raw(content, fonts: Courier), 0));
+
+    // Only the right margin lines up here, which is what every justified paragraph does.
+    [Fact]
+    public void JustifiedRowsWithWideGapsAreNotATable()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td [(one) -900 (two) -900 (three) -700 (four)] TJ 0 -12 Td " +
+            "[(fives) -600 (sixes) -1000 (seven)] TJ 0 -12 Td (the last row) Tj ET");
+        Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+    }
+
+    [Fact]
+    public void ATableDrawnColumnByColumnKeepsItsRows()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (Name) Tj 0 -12 Td (Alpha) Tj 0 -12 Td (Beta) Tj ET " +
+            "BT /F1 10 Tf 120 250 Td (Qty) Tj 0 -12 Td (10) Tj 0 -12 Td (20) Tj ET");
+        foreach (PdfParagraphCandidate candidate in PdfParagraphEditor.FindParagraphs(source, 0))
+            Assert.Equal(candidate.RowTexts, Unchanged(source, candidate, Font()).Lines.Select(line => line.Text));
+    }
+
+    private const string TwoColumns =
+        "BT /F1 10 Tf 30 250 Td (Old line of text near the edge) Tj 0 -12 Td (and a second line of it here) Tj ET " +
+        "BT /F1 10 Tf 182 250 Td (Next column words) Tj 0 -12 Td (and its second line) Tj 0 -12 Td (and a third) Tj ET";
+
+    // A wider replacement font has to wrap, because the next column stays where it is.
+    [Fact]
+    public void TheDefaultBoxStopsShortOfTheNextColumn()
+    {
+        TrueTypeFont wide = PdfStandardFontSubstitutes.OcrTrainingFonts()[8];
+        PdfDocument source = Raw(TwoColumns);
+        PdfParagraphCandidate candidate = PdfParagraphEditor.FindParagraphs(source, 0).First();
+        Assert.Equal(182, candidate.RightLimit!.Value, 0);
+        PdfContentBounds box = PdfParagraphEditor.DefaultBox(candidate, 300, 300, candidate.Text, wide);
+        Assert.True(box.Right < 182, $"The box ends at {box.Right}.");
+        PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion, box, candidate.Text, wide,
+            candidate.FontSize, candidate.Leading, PdfParagraphAlignment.Left);
+        Assert.All(plan.Lines, line => Assert.True(line.X + line.Width < 182, $"{line.Text} ends at {line.X + line.Width}."));
+    }
+
+    [Fact]
+    public void WideningForARejoinedWordStopsAtTheNextColumnToo()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (aaaa bbbb cccc dd-) Tj 0 -12 Td (eeee ffff gggg hhh) Tj ET " +
+            "BT /F1 10 Tf 135 250 Td (Next) Tj 0 -12 Td (column) Tj ET");
+        PdfParagraphCandidate candidate = PdfParagraphEditor.FindParagraphs(source, 0).First();
+        Assert.True(PdfParagraphEditor.DefaultBox(candidate, 300, 300, candidate.Text, Font()).Right < 135);
+    }
+
+    // Extraction reports both texts, so nothing else would notice one printed over the other. Text
+    // painted after the paragraph is the cover check's, whichever side of it the column lies.
+    [Theory]
+    [InlineData(TwoColumns, "would cover")]
+    [InlineData("BT /F1 10 Tf 182 250 Td (Next column words) Tj 0 -12 Td (and its second line) Tj ET " +
+        "BT /F1 10 Tf 30 250 Td (Old line of text near the edge) Tj 0 -12 Td (and a second line of it here) Tj ET", "other text")]
+    public void AnEditThatWouldLandOnOtherTextIsRefused(string content, string reason)
+    {
+        PdfDocument source = Raw(content);
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0),
+            item => item.Text.StartsWith("Old", StringComparison.Ordinal));
+        NotSupportedException refusal = Assert.Throws<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0,
+            candidate.SourceRegion, new PdfContentBounds(30, 200, 290, 258), "A new line that runs right across the column beside it", Font(), 10, 12,
+            PdfParagraphAlignment.Left));
+        Assert.Contains(reason, refusal.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void AnExtraRowThatWouldLandOnTheTextBelowIsRefused()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (Old line) Tj ET BT /F1 10 Tf 30 226 Td (The text below it) Tj ET");
+        PdfParagraphCandidate candidate = PdfParagraphEditor.FindParagraphs(source, 0).First();
+        Assert.Throws<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            new PdfContentBounds(30, 100, 60, 258), "AAAA BBBB CCCC DDDD EEEE FFFF", Font(), 10, 12, PdfParagraphAlignment.Left));
+    }
+
+    [Fact]
+    public void AnEditThatStaysInItsOwnRoomIsNotRefused()
+    {
+        PdfDocument source = Raw(TwoColumns);
+        PdfParagraphCandidate candidate = PdfParagraphEditor.FindParagraphs(source, 0).First();
+        PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            new PdfContentBounds(30, 200, 170, 258), "A new line", Font(), 10, 12, PdfParagraphAlignment.Left);
+        Assert.False(plan.HasOverflow, plan.OverflowReason);
+    }
+
+    // The word fits the box and only the indent is in its way.
+    [Fact]
+    public void ALongFirstWordIsNotSplitByTheIndent()
+    {
+        TrueTypeFont font = Font();
+        const string word = "Electroencephalographically";
+        double width = PdfTextReflow.Wrap(word, font, 10, 1000).Single().Width;
+        PdfDocument source = Raw("BT /F1 10 Tf 60 250 Td (Old first line) Tj -30 -12 Td (Old body line of it here) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        Assert.Equal(30, candidate.FirstLineIndent, 6);
+        var box = new PdfContentBounds(30, 200, 30 + width + 10, 258);
+        PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion, box, word + " measured", font, 10, 12,
+            PdfParagraphAlignment.Left);
+        Assert.False(plan.HasOverflow, plan.OverflowReason);
+        Assert.Equal([word, "measured"], plan.Lines.Select(line => line.Text));
+        Assert.Equal(30, plan.Lines[0].X, 6);
     }
 
     [Fact]
@@ -1045,6 +1366,24 @@ public sealed class PdfParagraphEditorTests
             || (letter.BoundingBox.Bottom + letter.BoundingBox.Top) / 2 < area.Bottom
             || (letter.BoundingBox.Bottom + letter.BoundingBox.Top) / 2 > area.Top)
             .Select(letter => (letter.Value, Math.Round(letter.StartBaseLine.X, 5), Math.Round(letter.StartBaseLine.Y, 5))).ToArray();
+
+    private static PdfContentStreamBuilder Rows(string[] rows)
+    {
+        PdfContentStreamBuilder content = new PdfContentStreamBuilder().BeginText().SetFont(PdfStandardFont.Helvetica, 10).MoveText(30, 250);
+        foreach (string row in rows)
+        {
+            if (row.Length != 0) content.ShowLatin1Text(row);
+            content.MoveText(0, -12);
+        }
+        return content.EndText();
+    }
+
+    private static PdfDocument Pages(params string[][] pages)
+    {
+        var builder = new PdfDocumentBuilder();
+        foreach (string[] rows in pages) builder.AddPage(300, 300, Rows(rows));
+        return PdfDocument.Open(builder.Build());
+    }
 
     private static PdfDocument Document() => PdfDocument.Open(new PdfDocumentBuilder()
         .AddPage(300, 300, new PdfContentStreamBuilder()
