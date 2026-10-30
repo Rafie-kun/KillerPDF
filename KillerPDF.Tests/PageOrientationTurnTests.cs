@@ -46,7 +46,7 @@ public sealed class PageOrientationTurnTests
     public void TheWindowFallsBackToTheFilesRotationBeforeRotationsAreCaptured()
     {
         string source = File.ReadAllText(Path.Combine(FindRepositoryRoot(), "Shell", "PageArrangement.cs"));
-        Match method = Regex.Match(source, @"private int CurrentPageRotation\(int page\)(?<body>.*?)\n\n", RegexOptions.Singleline);
+        Match method = Regex.Match(source, @"private int CurrentPageRotation\(int page\)(?<body>.*?)\r?\n\r?\n", RegexOptions.Singleline);
         Assert.True(method.Success, "CurrentPageRotation was not found.");
         string body = method.Groups["body"].Value;
         Assert.DoesNotContain("? rotation : 0;", body);
