@@ -21,7 +21,10 @@ public enum PdfRedactionPageMethod
     Raster
 }
 
-/// <summary>The redaction analysis for one page that has at least one region.</summary>
+/// <summary>
+/// The redaction analysis for one page that has a region, or that hides content another page's
+/// region covers and can only give it up by being replaced with an image.
+/// </summary>
 public sealed record PdfRedactionPageAnalysis(
     int PageIndex,
     PdfRedactionPageMethod Method,
@@ -54,7 +57,8 @@ public sealed record PdfContentRedactionOptions
 {
     /// <summary>
     /// Gets the pages the caller approved for image replacement. Every page the analysis marks as
-    /// raster must be listed; listing a content page replaces it with an image as well.
+    /// raster must be listed, including one with no region; listing a content page that has a
+    /// region replaces it with an image as well.
     /// </summary>
     public IReadOnlyCollection<int> ApprovedRasterPages { get; init; } = [];
     /// <summary>Gets the resolution of replacement page images.</summary>
@@ -95,6 +99,9 @@ public static partial class PdfContentRedaction
 {
     internal const string RedactionImageName = "KPRedactImage";
     private const int MaximumFieldDepth = 256;
+    private const int MaximumStructureDepth = 256;
+    // Each level of a structure tree is usually an element, an array and a reference, four frames at most.
+    private const int MaximumStructureFrames = 4 * MaximumStructureDepth;
     /// <summary>The most a retained stream may decode to during prohibited-text inspection.</summary>
     internal static int InspectionDecodeLimit { get; set; } = 64 * 1024 * 1024;
     private static readonly PdfName ContentsName = Name("Contents");
@@ -118,20 +125,30 @@ public static partial class PdfContentRedaction
     private static readonly PdfName[] PrunedCategories =
         [Name("Font"), Name("XObject"), Name("ExtGState"), Name("ColorSpace"), Name("Pattern"), Name("Shading"), Name("Properties")];
 
-    /// <summary>Determines, without changing the document, how each page with regions will be redacted.</summary>
+    /// <summary>
+    /// Determines, without changing the document, how each page with regions will be redacted, and
+    /// which other pages hide what those regions cover and must become images to give it up.
+    /// </summary>
     public static PdfContentRedactionPlan Analyze(PdfDocument document,
         IEnumerable<PdfRedactionRegion> regions, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(document);
         PdfPageTree tree = PdfPageTree.Read(document);
-        Dictionary<int, PdfContentBounds[]> byPage = GroupRegions(regions, tree.Pages.Count);
+        return AnalyzePages(document, tree, GroupRegions(regions, tree.Pages.Count), cancellationToken, out _);
+    }
+
+    private static PdfContentRedactionPlan AnalyzePages(PdfDocument document, PdfPageTree tree,
+        Dictionary<int, PdfContentBounds[]> byPage, CancellationToken cancellationToken, out RetiredContent retired)
+    {
         var fonts = new Dictionary<PdfDictionary, PdfExtractionFont?>(ReferenceEqualityComparer.Instance);
         var pages = new List<PdfRedactionPageAnalysis>();
+        retired = new RetiredContent(document, cancellationToken);
         foreach ((int pageIndex, PdfContentBounds[] pageRegions) in byPage.OrderBy(item => item.Key))
         {
             cancellationToken.ThrowIfCancellationRequested();
             PageGeometry geometry = Geometry(document, tree.Pages[pageIndex]);
-            var rewriter = new ContentRewriter(document, null, pageRegions, textOnly: false, fonts, cancellationToken);
+            var rewriter = new ContentRewriter(document, null, pageRegions, textOnly: false, fonts, cancellationToken,
+                retired: retired);
             rewriter.RewritePage(tree.Pages[pageIndex], geometry);
             int annotations = IntersectingAnnotations(document, tree.Pages[pageIndex], geometry, pageRegions).Count;
             pages.Add(new PdfRedactionPageAnalysis(pageIndex,
@@ -142,7 +159,23 @@ public static partial class PdfContentRedaction
                 RedactedImages = rewriter.RedactedImages
             });
         }
-        return new PdfContentRedactionPlan(Array.AsReadOnly(pages.ToArray())) { RemovesXfaForm = HasXfaForm(document, tree) };
+        retired.Seal();
+        // A page can hide what another page's regions cover, with no region of its own.
+        HashSet<int> shared = SharedContentPages(document, tree, byPage, fonts, retired, cancellationToken);
+        for (int index = 0; index < pages.Count; index++)
+            if (shared.Remove(pages[index].PageIndex))
+                pages[index] = pages[index] with
+                {
+                    Method = PdfRedactionPageMethod.Raster,
+                    RasterReasons = Array.AsReadOnly(pages[index].RasterReasons.Append(SharedContentReason)
+                        .Distinct().Order(StringComparer.Ordinal).ToArray())
+                };
+        pages.AddRange(shared.Select(pageIndex => new PdfRedactionPageAnalysis(pageIndex, PdfRedactionPageMethod.Raster,
+            Array.AsReadOnly([SharedContentReason]), 0, 0, 0, 0)));
+        return new PdfContentRedactionPlan(Array.AsReadOnly(pages.OrderBy(page => page.PageIndex).ToArray()))
+        {
+            RemovesXfaForm = HasXfaForm(document, tree)
+        };
     }
 
     private static bool HasXfaForm(PdfDocument document, PdfPageTree tree) =>
@@ -166,18 +199,22 @@ public static partial class PdfContentRedaction
         PdfRedactionRegion[] regionList = [.. regions];
         PdfPageTree tree = PdfPageTree.Read(document);
         Dictionary<int, PdfContentBounds[]> byPage = GroupRegions(regionList, tree.Pages.Count);
-        PdfContentRedactionPlan plan = Analyze(document, regionList, cancellationToken);
+        PdfContentRedactionPlan plan = AnalyzePages(document, tree, byPage, cancellationToken, out RetiredContent retired);
         var approved = new HashSet<int>(options.ApprovedRasterPages);
         int[] unapproved = [.. plan.RasterPages.Where(page => !approved.Contains(page))];
         if (unapproved.Length != 0)
             throw new InvalidOperationException("Pages " + string.Join(", ", unapproved.Select(page => page + 1))
                 + " cannot be redacted without replacing them with an image.");
-        var rasterPages = new HashSet<int>(approved.Where(byPage.ContainsKey));
+        // A page that hides another page's covered content can need its image with no region of its own.
+        var planned = new HashSet<int>(plan.RasterPages);
+        var rasterPages = new HashSet<int>(approved.Where(page => byPage.ContainsKey(page) || planned.Contains(page)));
         Dictionary<int, PdfRedactionRegion[]> covers = GroupCovers(regionList);
+        foreach (int page in rasterPages)
+            if (byPage.TryAdd(page, [])) covers[page] = [];
 
         PdfDocumentWriteResult written;
         IReadOnlyList<PdfReferenceRepair> preflightRepairs = [];
-        try { written = Rewrite(document, tree, byPage, covers, rasterPages, options, cancellationToken); }
+        try { written = Rewrite(document, tree, byPage, covers, rasterPages, retired, options, cancellationToken); }
         catch (Exception error) when (error is InvalidOperationException or FormatException
             or NotSupportedException)
         {
@@ -194,7 +231,8 @@ public static partial class PdfContentRedaction
             });
             preflightRepairs = normalizedWrite.ReferenceRepairs;
             PdfDocument normalized = PdfDocument.Open(normalizedWrite.Data);
-            written = Rewrite(normalized, PdfPageTree.Read(normalized), byPage, covers, rasterPages, options, cancellationToken);
+            written = Rewrite(normalized, PdfPageTree.Read(normalized), byPage, covers, rasterPages,
+                retired.For(normalized), options, cancellationToken);
         }
         byte[] output = written.Bytes;
         PdfRedactionVerificationReport verification = Verify(output, regionList, rasterPages,
@@ -258,7 +296,8 @@ public static partial class PdfContentRedaction
 
     private static PdfDocumentWriteResult Rewrite(PdfDocument document, PdfPageTree tree,
         Dictionary<int, PdfContentBounds[]> byPage, Dictionary<int, PdfRedactionRegion[]> covers,
-        HashSet<int> rasterPages, PdfContentRedactionOptions options, CancellationToken cancellationToken)
+        HashSet<int> rasterPages, RetiredContent retired, PdfContentRedactionOptions options,
+        CancellationToken cancellationToken)
     {
         Dictionary<int, PdfImage> images = rasterPages.Count == 0 ? []
             : RenderRasterPages(document, tree, covers, rasterPages, options, cancellationToken);
@@ -271,7 +310,6 @@ public static partial class PdfContentRedaction
         var retiredStreams = new HashSet<int>();
         var retiredDescriptions = new HashSet<string>(StringComparer.Ordinal);
         var touchedContent = new Dictionary<int, (HashSet<int> Mcids, bool Whole)>();
-        MaterializeInheritedResources(document, tree, update, byPage.Keys.ToHashSet(), cancellationToken);
         foreach ((int pageIndex, PdfContentBounds[] pageRegions) in byPage.OrderBy(item => item.Key))
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -279,7 +317,7 @@ public static partial class PdfContentRedaction
             PageGeometry geometry = Geometry(document, page);
             bool raster = rasterPages.Contains(pageIndex);
             var rewriter = new ContentRewriter(document, update, pageRegions, raster, fonts, cancellationToken,
-                fills: [.. covers[pageIndex].Select(cover => cover.FillColor ?? DefaultFill)]);
+                fills: [.. covers[pageIndex].Select(cover => cover.FillColor ?? DefaultFill)], retired: retired);
             List<PdfContentInstruction> content = rewriter.RewritePage(page, geometry);
             if (page.Dictionary.TryGetValue(ContentsName, out PdfObject? originalContents))
                 CollectSourceStreams(document, originalContents, retiredStreams);
@@ -324,6 +362,7 @@ public static partial class PdfContentRedaction
             entries[ContentsName] = contentReference;
             entries[ResourcesName] = resources;
             List<PdfObject> removed = IntersectingAnnotations(document, page, geometry, pageRegions);
+            removed.AddRange(HiddenAnnotations(document, page, geometry, rewriter.HiddenPageAreas));
             PdfArray? annotations = RemainingAnnotations(document, page, removed, removedAnnotations, removedWidgets);
             if (annotations is not null) entries[AnnotsName] = annotations;
             // A widget the field tree places on this page but the page does not list cannot be shown to be
@@ -337,6 +376,9 @@ public static partial class PdfContentRedaction
             update.ReplaceObject(page.Reference.ObjectNumber, new PdfDictionary(entries));
             touchedContent[page.Reference.ObjectNumber] = (rewriter.TouchedMcids, raster || rewriter.FormMarkedContentTouched);
         }
+        HashSet<int> survivors = RewriteSurvivorPages(document, tree, update, byPage, fonts, retired, touchedContent,
+            retiredStreams, retiredDescriptions, removedAnnotations, removedWidgets, cancellationToken);
+        MaterializeInheritedResources(document, tree, update, [.. byPage.Keys, .. survivors], cancellationToken);
 
         PdfDictionary catalog = tree.Catalog;
         var catalogEntries = catalog.ToDictionary(entry => entry.Key, entry => entry.Value);
@@ -361,15 +403,19 @@ public static partial class PdfContentRedaction
             CompressUnfilteredStreams = true
         };
         PdfDocumentWriteResult output = PdfDocumentWriter.WriteWithReport(edited, writeOptions);
-        try { VerifyRetiredStreams(PdfDocument.Open(output.Data), retiredStreams, retiredDescriptions, cancellationToken); }
+        PdfDocument written = PdfDocument.Open(output.Data);
+        VerifySurvivors(written, retired, cancellationToken);
+        try { VerifyRetiredStreams(written, retiredStreams, retiredDescriptions, cancellationToken); }
         catch (PdfRedactionVerificationException error)
             when (error.Report.Findings.All(finding => finding.Code == "RetainedSourceStream"))
         {
             // The original may only be listed in a resource dictionary that unredacted pages share.
-            PdfDocument? cleaned = DropUndrawnRetiredResources(edited, retiredStreams, cancellationToken);
+            PdfDocument? cleaned = DropUndrawnRetiredResources(edited, written, retiredStreams, cancellationToken);
             if (cleaned is null) throw;
             output = PdfDocumentWriter.WriteWithReport(cleaned, writeOptions);
-            VerifyRetiredStreams(PdfDocument.Open(output.Data), retiredStreams, retiredDescriptions, cancellationToken);
+            written = PdfDocument.Open(output.Data);
+            VerifySurvivors(written, retired, cancellationToken);
+            VerifyRetiredStreams(written, retiredStreams, retiredDescriptions, cancellationToken);
         }
         return output;
     }
@@ -400,6 +446,9 @@ public static partial class PdfContentRedaction
             findings.Add(new("XfaFormData", "The output still carries an XFA form packet, whose datasets repeat field values."));
         Dictionary<int, PdfContentBounds[]> byPage = GroupRegions(regionList, tree.Pages.Count);
         Dictionary<int, PdfRedactionRegion[]> covers = GroupCovers(regionList);
+        // A page turned into an image for what it hid has no region, and is held to the same checks.
+        foreach (int page in rasterPages.Where(page => page >= 0 && page < tree.Pages.Count))
+            if (byPage.TryAdd(page, [])) covers[page] = [];
         var reader = new PdfPageContentReader(document);
         var vectorFonts = new Dictionary<PdfDictionary, PdfExtractionFont?>(ReferenceEqualityComparer.Instance);
         foreach ((int pageIndex, PdfContentBounds[] pageRegions) in byPage.OrderBy(item => item.Key))
@@ -443,6 +492,7 @@ public static partial class PdfContentRedaction
                 if (tree.Pages[pageIndex].Dictionary.ContainsKey(key))
                     findings.Add(new("PageData", $"The redacted page still contains /{key.ValueAsLatin1()}.", pageIndex));
         }
+        InspectStructure(document, tree, byPage.Keys, findings, cancellationToken);
         if (prohibited.Length != 0)
         {
             for (int pageIndex = 0; pageIndex < tree.Pages.Count; pageIndex++)
@@ -786,7 +836,7 @@ public static partial class PdfContentRedaction
         if (Resolve(document, rootValue) is not PdfDictionary root
             || !root.TryGetValue(Name("K"), out PdfObject? kids)) return false;
         var visited = new HashSet<int>();
-        (PdfObject rootKids, bool rootChanged, _) = Clean(kids, null, 0);
+        (PdfObject rootKids, bool rootChanged, _) = Clean(kids, null, 0, 0);
         if (!rootChanged) return false;
         var entries = root.ToDictionary(entry => entry.Key, entry => entry.Value);
         entries[Name("K")] = rootKids;
@@ -800,13 +850,18 @@ public static partial class PdfContentRedaction
         return true;
 
         // Returns the possibly rewritten value, whether it changed, and whether it covers redacted content.
-        (PdfObject Value, bool Changed, bool Touched) Clean(PdfObject value, int? page, int depth)
+        (PdfObject Value, bool Changed, bool Touched) Clean(PdfObject value, int? page, int depth, int frames)
         {
-            if (depth > 256) return (value, false, false);
+            // Stopping early would leave every description of a deep tree in place, so the limit refuses.
+            // Only elements count toward it; references and arrays are bounded by the frame count and
+            // by the stack the calling thread has left.
+            if (depth > MaximumStructureDepth || frames > MaximumStructureFrames
+                || !System.Runtime.CompilerServices.RuntimeHelpers.TryEnsureSufficientExecutionStack())
+                throw new NotSupportedException("The document structure is too deeply nested to redact safely.");
             if (value is PdfIndirectReference reference)
             {
                 if (!visited.Add(reference.ObjectNumber)) return (value, false, false);
-                (PdfObject inner, bool changed, bool hit) = Clean(document.Resolve(reference), page, depth + 1);
+                (PdfObject inner, bool changed, bool hit) = Clean(document.Resolve(reference), page, depth, frames + 1);
                 if (changed) update.ReplaceObject(reference.ObjectNumber, inner);
                 return (value, false, hit);
             }
@@ -819,8 +874,8 @@ public static partial class PdfContentRedaction
                 var items = new List<PdfObject>();
                 foreach (PdfObject item in array)
                 {
-                    if (IsRemovedObjectReference(item)) { changed = true; continue; }
-                    (PdfObject cleanedItem, bool itemChanged, bool itemHit) = Clean(item, page, depth + 1);
+                    if (IsRemovedObjectReference(item)) { changed = true; hit = true; continue; }
+                    (PdfObject cleanedItem, bool itemChanged, bool itemHit) = Clean(item, page, depth, frames + 1);
                     changed |= itemChanged;
                     hit |= itemHit;
                     items.Add(cleanedItem);
@@ -847,14 +902,18 @@ public static partial class PdfContentRedaction
                 if (IsRemovedObjectReference(elementKids))
                 {
                     childChanged = true;
+                    childHit = true;
                     newKids = new PdfArray([]);
                 }
                 else
                 {
-                    (newKids, childChanged, childHit) = Clean(elementKids, ownPage, depth + 1);
+                    (newKids, childChanged, childHit) = Clean(elementKids, ownPage, depth + 1, frames + 1);
                 }
             }
-            bool strip = childHit && ReplacementTextKeys.Any(dictionary.ContainsKey);
+            // An element with nothing left on a redacted page describes nothing that remains there.
+            bool emptied = newKids is not null && Resolve(document, newKids) is PdfArray { Count: 0 }
+                && (ownPage is not int elementPage || touched.ContainsKey(elementPage));
+            bool strip = (childHit || emptied) && ReplacementTextKeys.Any(dictionary.ContainsKey);
             if (!childChanged && !strip) return (value, false, childHit);
             var entries = dictionary.Where(entry => !strip || !ReplacementTextKeys.Contains(entry.Key))
                 .ToDictionary(entry => entry.Key, entry => entry.Value);
@@ -869,6 +928,43 @@ public static partial class PdfContentRedaction
                 && objectReference.TryGetValue(Name("Obj"), out PdfObject? target)
                 && target is PdfIndirectReference targetReference
                 && removedAnnotations.Contains(targetReference.ObjectNumber);
+        }
+    }
+
+    // An element whose content is gone must not keep the text that described it. Elements of other
+    // pages keep theirs, since the redaction says nothing about them.
+    private static void InspectStructure(PdfDocument document, PdfPageTree tree, ICollection<int> redactedPages,
+        List<PdfRedactionVerificationFinding> findings, CancellationToken cancellationToken)
+    {
+        if (!tree.Catalog.TryGetValue(StructTreeRootName, out PdfObject? rootValue)
+            || Resolve(document, rootValue) is not PdfDictionary root
+            || !root.TryGetValue(Name("K"), out PdfObject? kids)) return;
+        Dictionary<int, int> pageIndexes = tree.Pages.ToDictionary(page => page.Reference.ObjectNumber, page => page.Index);
+        var visited = new HashSet<int>();
+        var pending = new Stack<(PdfObject Value, int? Page)>();
+        pending.Push((kids, null));
+        while (pending.TryPop(out var item))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (item.Value is PdfIndirectReference reference && !visited.Add(reference.ObjectNumber)) continue;
+            PdfObject value = Resolve(document, item.Value);
+            if (value is PdfArray array)
+            {
+                foreach (PdfObject child in array) pending.Push((child, item.Page));
+                continue;
+            }
+            if (value is not PdfDictionary element || !element.TryGetValue(Name("K"), out PdfObject? content)) continue;
+            // A page reference that names no page of the document matches no redacted page.
+            int? page = !element.TryGetValue(Name("Pg"), out PdfObject? pg) || pg is not PdfIndirectReference pageReference
+                ? item.Page : pageIndexes.GetValueOrDefault(pageReference.ObjectNumber, -1);
+            if (Resolve(document, content) is PdfArray { Count: 0 })
+            {
+                if ((page is not int number || redactedPages.Contains(number))
+                    && ReplacementTextKeys.Any(element.ContainsKey))
+                    findings.Add(new("StructureDescription", "A structure element with no content keeps its replacement text.", page));
+                continue;
+            }
+            pending.Push((content, page));
         }
     }
 
@@ -1034,7 +1130,7 @@ public static partial class PdfContentRedaction
     }
 
     // Overlaps smaller than this are rounding noise from rewritten text positions, not visible content.
-    private const double OverlapTolerance = 1e-4;
+    internal const double OverlapTolerance = 1e-4;
 
     internal static bool Overlaps(PdfContentBounds content, PdfContentBounds region) =>
         content.Right > region.Left + OverlapTolerance && content.Left < region.Right - OverlapTolerance
@@ -1168,7 +1264,8 @@ public static partial class PdfContentRedaction
     private sealed class ContentRewriter(PdfDocument document, PdfIncrementalUpdateBuilder? update,
         PdfContentBounds[] regions, bool textOnly, Dictionary<PdfDictionary, PdfExtractionFont?> fonts,
         CancellationToken cancellationToken, bool glyphsOnly = false, PdfRgbColor[]? fills = null,
-        LineInsertion? insertion = null, Dictionary<object, Dictionary<uint, PdfDecodedCharacter>>? usedCodes = null)
+        LineInsertion? insertion = null, Dictionary<object, Dictionary<uint, PdfDecodedCharacter>>? usedCodes = null,
+        RetiredContent? retired = null)
     {
         private static readonly PdfName FontCategory = Name("Font");
         private static readonly PdfName XObjectCategory = Name("XObject");
@@ -1181,6 +1278,10 @@ public static partial class PdfContentRedaction
         private int _instructions;
         private readonly Dictionary<(int Previous, string Name), int> _graphicsStateIds = [];
         private readonly List<string> _graphicsStateNames = [""];
+        // Retired content that the draw being rewritten must not hide.
+        private HiddenArea[] _hidden = [];
+        // How many draws of retired content have been met, to tell a form that holds none.
+        private int _retiredDraws;
 
         internal HashSet<string> Reasons { get; } = new(StringComparer.Ordinal);
         internal HashSet<int> RetiredSourceStreams { get; } = [];
@@ -1191,7 +1292,12 @@ public static partial class PdfContentRedaction
         internal int RemovedImages { get; private set; }
         internal int RedactedImages { get; private set; }
         internal int RemovedPaths { get; private set; }
+        internal bool ContentChanged { get; private set; }
+        internal PdfContentBounds[] HiddenPageAreas { get; private set; } = [];
         internal ResourceScope? PageScope { get; private set; }
+
+        private bool Recording => retired is { Sealed: false };
+        private bool Judging => retired is { Sealed: true };
 
         internal List<PdfContentInstruction> RewritePage(PdfPageTreeEntry page, PageGeometry geometry,
             IReadOnlyList<PdfRedactionRegion>? excludedCovers = null)
@@ -1217,7 +1323,37 @@ public static partial class PdfContentRedaction
             }
             var initial = new TextState(new Matrix(1, 0, 0, 1, -geometry.CropLeft, -geometry.CropBottom),
                 new PdfContentBounds(0, 0, geometry.Width, geometry.Height));
-            return Rewrite(bytes, PageScope, initial, 0, out _);
+            if (Recording) retired!.CoverPage(bytes, resources, regions.Select(region => new PdfContentBounds(
+                region.Left + geometry.CropLeft, region.Bottom + geometry.CropBottom,
+                region.Right + geometry.CropLeft, region.Top + geometry.CropBottom)));
+            else if (Judging)
+            {
+                HiddenPageAreas = retired!.PageAreas(bytes, resources, geometry);
+                _hidden = [.. HiddenPageAreas.Select(area => new HiddenArea(area, initial.Clip, true))];
+            }
+            List<PdfContentInstruction> content = Rewrite(bytes, PageScope, initial, 0, out bool changed);
+            ContentChanged = changed;
+            return content;
+        }
+
+        // The covered part of a draw in its own space: each region it overlaps, cut to what it shows,
+        // through the inverse of its matrix. A draw that cannot be inverted is covered whole.
+        private IEnumerable<PdfContentBounds> OwnAreas(PdfContentBounds visible, Matrix matrix)
+        {
+            if (visible.Width <= 0 || visible.Height <= 0) yield break;
+            foreach (PdfContentBounds region in regions)
+                if (Overlaps(visible, region)) yield return ThroughInverse(Intersect(visible, region), matrix);
+        }
+
+        private static PdfContentBounds ThroughInverse(PdfContentBounds area, Matrix matrix)
+        {
+            double determinant = matrix.A * matrix.D - matrix.B * matrix.C;
+            if (!double.IsFinite(determinant) || Math.Abs(determinant) < 1e-12)
+                return new PdfContentBounds(-1e9, -1e9, 1e9, 1e9);
+            var inverse = new Matrix(matrix.D / determinant, -matrix.B / determinant, -matrix.C / determinant,
+                matrix.A / determinant, (matrix.C * matrix.F - matrix.D * matrix.E) / determinant,
+                (matrix.B * matrix.E - matrix.A * matrix.F) / determinant);
+            return Transform(area, inverse);
         }
 
         private byte[] PageBytes(PdfObject contents)
@@ -1253,6 +1389,8 @@ public static partial class PdfContentRedaction
                 resolveColorComponents: name => ColorComponents(scope, name),
                 compatibilityRecovery: document.UsesCompatibilityRecovery, cancellationToken: cancellationToken);
             bool localChanged = false;
+            // A page with neither regions nor hidden areas here is only looked at for what it draws.
+            bool drawsOnly = Judging && regions.Length == 0 && _hidden.Length == 0 && !textOnly;
             foreach (PdfContentInstruction instruction in instructions)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -1402,7 +1540,7 @@ public static partial class PdfContentRedaction
                         Emit(instruction); break;
                     case "w": case "J": case "j": case "M":
                         if (textOnly) { localChanged = true; break; }
-                        if (!glyphsOnly) state = instruction.Operator switch
+                        if (!glyphsOnly || args.Count == 1 && args[0] is PdfInteger or PdfReal) state = instruction.Operator switch
                         {
                             "w" => state with { LineWidth = Arg(args, 0) },
                             "J" => state with { LineCap = Arg(args, 0) },
@@ -1422,7 +1560,10 @@ public static partial class PdfContentRedaction
             }
             while (marked.Count > 0) EndMarkedContent();
             if (!glyphsOnly && scope.KeepEverything && scope.ReplacedNamedDescription)
+            {
                 Reasons.Add("MarkedContentResource");
+                if (Judging) Reasons.Add(SharedContentReason);
+            }
             changed = localChanged;
             return output;
 
@@ -1510,7 +1651,7 @@ public static partial class PdfContentRedaction
 
             void ShowAndEmit(PdfContentInstruction instruction, PdfContentInstruction[] prefix, PdfObject value)
             {
-                if (!insideText || value is not PdfString source) { Emit(instruction); return; }
+                if (!insideText || drawsOnly || value is not PdfString source) { Emit(instruction); return; }
                 List<PdfObject>? items = Show(source, out bool removed);
                 if (!removed || items is null) { Emit(instruction); return; }
                 output.AddRange(prefix);
@@ -1520,7 +1661,7 @@ public static partial class PdfContentRedaction
 
             void ShowArray(PdfContentInstruction instruction, PdfArray array)
             {
-                if (!insideText) { Emit(instruction); return; }
+                if (!insideText || drawsOnly) { Emit(instruction); return; }
                 var items = new List<PdfObject>();
                 bool removedAny = false;
                 foreach (PdfObject item in array)
@@ -1551,7 +1692,11 @@ public static partial class PdfContentRedaction
                 PdfExtractionFont? font = state.Font;
                 if (font is null)
                 {
-                    if (source.Bytes.Length > 0) Reasons.Add("UnreadableFont");
+                    if (source.Bytes.Length > 0)
+                    {
+                        Reasons.Add("UnreadableFont");
+                        RefuseUnplacedText();
+                    }
                     return null;
                 }
                 IReadOnlyList<PdfDecodedCharacter> characters;
@@ -1559,11 +1704,13 @@ public static partial class PdfContentRedaction
                 catch (Exception error) when (error is FormatException or ArgumentException or NotSupportedException)
                 {
                     Reasons.Add("UndecodableText");
+                    RefuseUnplacedText();
                     return null;
                 }
                 if (characters.Sum(character => character.ByteLength) != source.Bytes.Length)
                 {
                     Reasons.Add("UndecodableText");
+                    RefuseUnplacedText();
                     return null;
                 }
                 var items = new List<PdfObject>();
@@ -1596,6 +1743,13 @@ public static partial class PdfContentRedaction
                     bool covered = glyphsOnly
                         ? regions.Any(region => ContainsCenter(bounds, region))
                         : regions.Any(region => Overlaps(bounds, region));
+                    // A glyph this draw shows stays, even with part of it past the edge of what it shows.
+                    if (!covered)
+                    {
+                        HiddenOverlap part = HiddenPart(bounds);
+                        if (part == HiddenOverlap.Whole) covered = true;
+                        else if (part == HiddenOverlap.Unclear) Reasons.Add(SharedContentReason);
+                    }
                     if (covered)
                     {
                         if (state.Size == 0) Reasons.Add("ZeroSizeText");
@@ -1709,6 +1863,7 @@ public static partial class PdfContentRedaction
                 {
                     PdfContentBounds bounds = Visible(Transform(new PdfContentBounds(0, 0, 1, 1), state.Ctm));
                     insertion?.Paint(bounds);
+                    if (Recording) retired!.CoverImage(xobject, OwnAreas(bounds, state.Ctm));
                     // A dropped or repainted image is retired with its masks, so the original samples
                     // cannot stay behind through a resource dictionary another page shares or inherits.
                     if (textOnly)
@@ -1727,13 +1882,14 @@ public static partial class PdfContentRedaction
                             if (update is not null) CollectImageStreams(document, value, RetiredSourceStreams);
                             return;
                         }
-                        if (PaintImage(xobject))
+                        if (PaintImage(xobject, bounds))
                         {
                             if (update is not null) CollectImageStreams(document, value, RetiredSourceStreams);
                             return;
                         }
                         Reasons.Add("Image");
                     }
+                    else if (HideSamples(value, xobject, bounds)) return;
                     scope.Use(XObjectCategory, name);
                     Emit(instruction);
                     return;
@@ -1747,6 +1903,11 @@ public static partial class PdfContentRedaction
                 if (depth >= 32 || !_activeForms.Add(xobject))
                 {
                     Reasons.Add("FormNesting");
+                    if (depth >= 32 && Judging)
+                    {
+                        _retiredDraws++;
+                        Reasons.Add(SharedContentReason);
+                    }
                     scope.Use(XObjectCategory, name);
                     Emit(instruction);
                     return;
@@ -1776,9 +1937,37 @@ public static partial class PdfContentRedaction
                             KeepEverything = glyphsOnly
                         }
                         : scope;
+                    // A form that holds no retired content is the same wherever it is drawn, so one look
+                    // does for all its draws. In a rewrite, one that shares this scope still has to
+                    // mark the names it uses.
+                    bool looksOnce = drawsOnly && (ownResources || update is null);
+                    if (looksOnce && retired!.HoldsNothingRetired(xobject, formScope.Resources))
+                    {
+                        scope.Use(XObjectCategory, name);
+                        Emit(instruction);
+                        return;
+                    }
+                    int retiredDraws = _retiredDraws;
                     byte[] formBytes = document.DecodeStream(xobject, PdfContentStreamReader.MaximumSourceBytes);
-                    List<PdfContentInstruction> rewritten = Rewrite(formBytes, formScope,
-                        state with { Ctm = formCtm, Clip = formClip }, depth + 1, out bool formChanged);
+                    if (Recording) retired!.CoverForm(xobject, formBytes, OwnAreas(formClip, formCtm));
+                    // Clips inside the form and its box are the same on every draw, so only the clip
+                    // this draw adds can hide part of what another draw showed.
+                    HiddenArea[] outerHidden = _hidden;
+                    if (Judging && retired!.FormAreas(xobject, formBytes) is { } formAreas)
+                    {
+                        _retiredDraws++;
+                        _hidden = [.. outerHidden, .. formAreas.Select(area =>
+                            new HiddenArea(Transform(area, formCtm), state.Clip, state.ClipIsRectangle))];
+                    }
+                    List<PdfContentInstruction> rewritten;
+                    bool formChanged;
+                    try
+                    {
+                        rewritten = Rewrite(formBytes, formScope, state with { Ctm = formCtm, Clip = formClip },
+                            depth + 1, out formChanged);
+                    }
+                    finally { _hidden = outerHidden; }
+                    if (looksOnce && retiredDraws == _retiredDraws) retired!.MarkHoldsNothingRetired(xobject, formScope.Resources);
                     if (!formChanged)
                     {
                         scope.Use(XObjectCategory, name);
@@ -1802,7 +1991,7 @@ public static partial class PdfContentRedaction
 
             // A partly covered image keeps its picture with the covered pixels painted over,
             // drawn from a new image so the original samples leave the page.
-            bool PaintImage(PdfStream xobject)
+            bool PaintImage(PdfStream xobject, PdfContentBounds bounds)
             {
                 if (PdfImageRedaction.Decode(document, xobject) is not PdfImageRedaction.Samples samples) return false;
                 PdfImageRedaction.Plan? plan = PdfImageRedaction.Covers(state.Ctm, samples,
@@ -1811,6 +2000,15 @@ public static partial class PdfContentRedaction
                 if (plan is null || plan.Image.Count == 0) return false;
                 RedactedImages++;
                 MarkRemoved();
+                // What this draw hides of the areas covered elsewhere goes from the same new image.
+                List<PdfContentBounds> elsewhere = Judging ? [.. CoveredSamples(xobject).Except(OwnAreas(bounds, state.Ctm))] : [];
+                if (elsewhere.Count != 0)
+                {
+                    PdfImageRedaction.Plan hidden = PdfImageRedaction.HiddenPlan(state.Ctm, samples, elsewhere, state.Clip,
+                        out bool shown);
+                    if (shown && !state.ClipIsRectangle) Reasons.Add(SharedContentReason);
+                    plan = hidden.Then(plan);
+                }
                 if (update is null) return true;
                 PdfImageRedaction.Paint(samples, plan);
                 PdfIndirectReference? mask = samples.Mask is PdfImageRedaction.Samples alpha
@@ -1821,11 +2019,72 @@ public static partial class PdfContentRedaction
                 return true;
             }
 
+            // The areas of this image's unit square that some draw covers or this content hides.
+            List<PdfContentBounds> CoveredSamples(PdfStream image)
+            {
+                List<PdfContentBounds> areas = [.. retired!.ImageAreas(image) ?? []];
+                PdfContentBounds placed = Transform(new PdfContentBounds(0, 0, 1, 1), state.Ctm);
+                foreach (HiddenArea hidden in _hidden)
+                    if (Overlaps(placed, hidden.Area)) areas.Add(ThroughInverse(Intersect(placed, hidden.Area), state.Ctm));
+                if (areas.Count != 0) _retiredDraws++;
+                return areas;
+            }
+
+            // A draw no region touches can still hold samples covered on another draw. It gets its own
+            // copy with only the samples it does not show painted, so its picture does not change. Paint
+            // that this cannot be done to is left for the page image, as with any other unsafe content.
+            bool HideSamples(PdfObject value, PdfStream image, PdfContentBounds bounds)
+            {
+                if (!Judging || glyphsOnly) return false;
+                List<PdfContentBounds> areas = CoveredSamples(image);
+                if (areas.Count == 0) return false;
+                if (bounds.Width <= 0 || bounds.Height <= 0)
+                {
+                    MarkRemoved();
+                    if (update is not null) CollectImageStreams(document, value, RetiredSourceStreams);
+                    return true;
+                }
+                if (PdfImageRedaction.Size(document, image) is not (int width, int height))
+                {
+                    Reasons.Add(SharedContentReason);
+                    return false;
+                }
+                bool any = PdfImageRedaction.HasHidden(state.Ctm, width, height, areas, state.Clip, out bool shown);
+                if (shown && !state.ClipIsRectangle)
+                {
+                    Reasons.Add(SharedContentReason);
+                    return false;
+                }
+                if (!any) return false;
+                if (PdfImageRedaction.Decode(document, image) is not PdfImageRedaction.Samples samples)
+                {
+                    Reasons.Add(SharedContentReason);
+                    return false;
+                }
+                MarkRemoved();
+                if (update is null) return true;
+                CollectImageStreams(document, value, RetiredSourceStreams);
+                PdfImageRedaction.Plan plan = PdfImageRedaction.HiddenPlan(state.Ctm, samples, areas, state.Clip, out _);
+                PdfIndirectReference copy = retired!.PrivateCopy(PdfImageRedaction.Identity(document, image) + plan.Key, () =>
+                {
+                    PdfImageRedaction.Paint(samples, plan);
+                    PdfIndirectReference? mask = samples.Mask is PdfImageRedaction.Samples alpha
+                        ? update.AddObject(PdfImageRedaction.Encode(alpha)) : null;
+                    return update.AddObject(PdfImageRedaction.Encode(samples, mask));
+                });
+                PdfName alias = scope.Add(XObjectCategory, PdfImageRedaction.ResourcePrefix, copy);
+                output.Add(new PdfContentInstruction("Do", 0, [alias]));
+                return true;
+            }
+
             void InlineImage(PdfContentInstruction instruction)
             {
                 if (textOnly) { MarkRemoved(); return; }
                 PdfContentBounds bounds = Visible(Transform(new PdfContentBounds(0, 0, 1, 1), state.Ctm));
                 insertion?.Paint(bounds);
+                HiddenOverlap part = HiddenPart(Transform(new PdfContentBounds(0, 0, 1, 1), state.Ctm));
+                if (part == HiddenOverlap.Whole) { MarkRemoved(); return; }
+                if (part != HiddenOverlap.None) Reasons.Add(SharedContentReason);
                 if (!glyphsOnly && bounds.Width > 0 && bounds.Height > 0
                     && regions.Any(region => Overlaps(bounds, region)))
                 {
@@ -1872,6 +2131,10 @@ public static partial class PdfContentRedaction
                     ? StrokeBounds(bounds, state) : bounds;
                 if (pathPoints.Count > 0 && paint.Operator is "f" or "F" or "f*" or "B" or "B*" or "b" or "b*")
                     insertion?.Paint(Visible(bounds));
+                // The stroke's own width, without the most a miter corner could reach: a rule beside the
+                // text is not over it. A hairline has no width in page units, so its path stands for it.
+                if (insertion is not null && pathPoints.Count > 0 && paint.Operator is "S" or "s" or "B" or "B*" or "b" or "b*")
+                    insertion.Paint(Visible(state.LineWidth == 0 ? bounds : StrokeBounds(bounds, state with { MiterLimit = 1 })));
                 if (textOnly)
                 {
                     if (paint.Operator != "n" || pendingPath.Count > 0) MarkRemoved();
@@ -1893,6 +2156,18 @@ public static partial class PdfContentRedaction
                         output.Add(paint);
                     }
                 }
+                // A path with a hidden part goes whole, and one that also shows cannot be split.
+                else if (paint.Operator != "n" && pathPoints.Count > 0
+                    && HiddenPart(paintedBounds) is var hiddenPart and not HiddenOverlap.None)
+                {
+                    if (hiddenPart == HiddenOverlap.Whole && !pendingClip) MarkRemoved();
+                    else
+                    {
+                        Reasons.Add(SharedContentReason);
+                        output.AddRange(pendingPath);
+                        output.Add(paint);
+                    }
+                }
                 else
                 {
                     output.AddRange(pendingPath);
@@ -1910,7 +2185,39 @@ public static partial class PdfContentRedaction
             }
 
             PdfContentBounds Visible(PdfContentBounds bounds) => Intersect(bounds, state.Clip);
+
+            // How content lies against the retired areas this draw does not show.
+            HiddenOverlap HiddenPart(PdfContentBounds bounds)
+            {
+                HiddenOverlap result = HiddenOverlap.None;
+                foreach (HiddenArea hidden in _hidden)
+                {
+                    if (!Overlaps(bounds, hidden.Area)) continue;
+                    if (hidden.Clip.Width <= 0 || hidden.Clip.Height <= 0 || !Overlaps(bounds, hidden.Clip))
+                        return HiddenOverlap.Whole;
+                    PdfContentBounds part = Intersect(bounds, hidden.Area);
+                    if (!hidden.ClipIsRectangle) result = HiddenOverlap.Unclear;
+                    else if (result == HiddenOverlap.None && (part.Left < hidden.Clip.Left - OverlapTolerance
+                        || part.Right > hidden.Clip.Right + OverlapTolerance
+                        || part.Bottom < hidden.Clip.Bottom - OverlapTolerance
+                        || part.Top > hidden.Clip.Top + OverlapTolerance)) result = HiddenOverlap.Crossing;
+                }
+                return result;
+            }
+
+            // Text that cannot be placed cannot be shown to be clear of the hidden areas.
+            void RefuseUnplacedText()
+            {
+                if (_hidden.Length != 0) Reasons.Add(SharedContentReason);
+            }
         }
+
+        // Whole lies past the clip, Crossing shows in part, and Unclear lies in the bounds of a clip
+        // that is not a rectangle, which say less than the real clip does.
+        private enum HiddenOverlap { None, Whole, Crossing, Unclear }
+
+        // A retired area of the page, and the clip of the draw that may or may not show it.
+        private readonly record struct HiddenArea(PdfContentBounds Area, PdfContentBounds Clip, bool ClipIsRectangle);
 
         // A path is one axis-aligned rectangle when it is a single re, or four straight sides that close
         // up, and every side runs along the page's horizontal or vertical.

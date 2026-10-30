@@ -87,6 +87,124 @@ public sealed class PdfContentRedactionTests
         AssertDescriptionAbsent(output, "VECTORSECRET");
     }
 
+    private static byte[] TaggedStamp(string element) => CreatePdf([
+        "<< /Type /Catalog /Pages 2 0 R /StructTreeRoot 7 0 R /MarkInfo << /Marked true >> >>",
+        "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R /Annots [6 0 R] /StructParents 0 >>",
+        Stream("BT /F1 12 Tf 20 300 Td (KEEP) Tj ET"),
+        Helvetica,
+        "<< /Type /Annot /Subtype /Stamp /Rect [100 100 200 200] /Contents (ANNOTSECRET) /P 3 0 R >>",
+        "<< /Type /StructTreeRoot /K [8 0 R] >>",
+        element,
+        "<< /Type /StructElem /S /Annot /P 8 0 R /Pg 3 0 R /Alt (ALTSECRET account 1234) /ActualText (ACTUALSECRET) /K [<< /Type /OBJR /Pg 3 0 R /Obj 6 0 R >>] >>"
+    ]);
+
+    [Theory]
+    [InlineData("<< /Type /StructElem /S /Annot /P 7 0 R /Pg 3 0 R /Alt (ALTSECRET account 1234) /ActualText (ACTUALSECRET) /K [<< /Type /OBJR /Pg 3 0 R /Obj 6 0 R >>] >>")]
+    [InlineData("<< /Type /StructElem /S /Annot /P 7 0 R /Pg 3 0 R /Alt (ALTSECRET account 1234) /ActualText (ACTUALSECRET) /K << /Type /OBJR /Pg 3 0 R /Obj 6 0 R >> >>")]
+    [InlineData("<< /Type /StructElem /S /Sect /P 7 0 R /Alt (ALTSECRET parent) /K [9 0 R] >>")]
+    public void RemovedAnnotationTakesItsStructureDescriptionWithIt(string element)
+    {
+        PdfDocument document = PdfDocument.Open(TaggedStamp(element));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(90, 90, 210, 210))]);
+
+        Assert.True(result.Verification.Succeeded);
+        Assert.Equal(1, Assert.Single(result.Plan.Pages).RemovedAnnotations);
+        PdfDocument output = PdfDocument.Open(result.Document);
+        AssertDescriptionAbsent(output, "ALTSECRET");
+        AssertDescriptionAbsent(output, "ACTUALSECRET");
+        AssertDescriptionAbsent(output, "ANNOTSECRET");
+    }
+
+    [Fact]
+    public void VerificationRejectsAnEmptyStructureElementThatKeepsItsDescription()
+    {
+        byte[] output = CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R /StructTreeRoot 6 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Contents 5 0 R >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Contents 5 0 R >>",
+            Stream("0 0 m"),
+            "<< /Type /StructTreeRoot /K [7 0 R 8 0 R] >>",
+            "<< /Type /StructElem /S /Annot /P 6 0 R /Pg 3 0 R /Alt (LEFTOVER) /K [] >>",
+            "<< /Type /StructElem /S /Annot /P 6 0 R /Pg 4 0 R /Alt (ELSEWHERE) /K [] >>"
+        ]);
+
+        PdfRedactionVerificationReport report = PdfContentRedaction.Verify(output,
+            [new PdfRedactionRegion(0, new PdfContentBounds(10, 10, 50, 50))], [], expectMetadataCleared: false);
+
+        PdfRedactionVerificationFinding finding = Assert.Single(report.Findings,
+            item => item.Code == "StructureDescription");
+        Assert.Equal(0, finding.PageIndex);
+    }
+
+    [Fact]
+    public void AnEmptyStructureElementOnARedactedPageLosesItsDescriptionAndElsewhereKeepsIt()
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R /StructTreeRoot 6 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Contents 5 0 R >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Contents 5 0 R >>",
+            Stream("0 0 m"),
+            "<< /Type /StructTreeRoot /K [7 0 R 8 0 R] >>",
+            "<< /Type /StructElem /S /Figure /P 6 0 R /Pg 3 0 R /Alt (LEFTOVER) /K [] >>",
+            "<< /Type /StructElem /S /Figure /P 6 0 R /Pg 4 0 R /Alt (ELSEWHERE) /K [] >>"
+        ]));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(10, 10, 50, 50))]);
+
+        Assert.True(result.Verification.Succeeded);
+        PdfDocument output = PdfDocument.Open(result.Document);
+        AssertDescriptionAbsent(output, "LEFTOVER");
+        Assert.Contains("ELSEWHERE", Encoding.Latin1.GetString(output.Source.Span));
+    }
+
+    private static byte[] DeepStructure(int levels)
+    {
+        var objects = new List<string>
+        {
+            "<< /Type /Catalog /Pages 2 0 R /StructTreeRoot 6 0 R /MarkInfo << /Marked true >> >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R /StructParents 0 >>",
+            Stream("/P << /MCID 0 >> BDC BT /F1 12 Tf 100 100 Td (STRUCTSECRET) Tj ET EMC"),
+            Helvetica,
+            "<< /Type /StructTreeRoot /K [7 0 R] >>"
+        };
+        for (int level = 0; level < levels; level++)
+        {
+            string kids = level == levels - 1 ? "[0]" : $"[{8 + level} 0 R]";
+            objects.Add($"<< /Type /StructElem /S /Div /P {(level == 0 ? 6 : 6 + level)} 0 R /Pg 3 0 R /ActualText (STRUCTSECRET{level}) /K {kids} >>");
+        }
+        return CreatePdf(objects);
+    }
+
+    [Theory]
+    [InlineData(85)]
+    [InlineData(86)]
+    [InlineData(100)]
+    [InlineData(200)]
+    public void DeepStructureTreesAreCleanedAtEveryLevel(int levels)
+    {
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(PdfDocument.Open(DeepStructure(levels)),
+            [new PdfRedactionRegion(0, new PdfContentBounds(90, 90, 300, 120))]);
+
+        Assert.True(result.Verification.Succeeded);
+        AssertDescriptionAbsent(PdfDocument.Open(result.Document), "STRUCTSECRET");
+    }
+
+    [Fact]
+    public void AStructureTreeTooDeepToCleanIsRefused()
+    {
+        var error = Assert.Throws<NotSupportedException>(() => PdfContentRedaction.Apply(
+            PdfDocument.Open(DeepStructure(300)), [new PdfRedactionRegion(0, new PdfContentBounds(90, 90, 300, 120))]));
+
+        Assert.Equal("The document structure is too deeply nested to redact safely.", error.Message);
+    }
+
     private static void AssertDescriptionAbsent(PdfDocument document, string secret)
     {
         foreach (var entry in document.CrossReferences.Values)
@@ -761,7 +879,8 @@ public sealed class PdfContentRedactionTests
 
         Assert.True(result.Verification.Succeeded);
         Assert.DoesNotContain("LATESECRET", Letters(PdfDocument.Open(result.Document), 0));
-        Assert.True(clock.Elapsed < TimeSpan.FromSeconds(6), $"Redaction took {clock.Elapsed.TotalSeconds:0.0} seconds.");
+        // About a second alone. The suite runs in parallel, and the quadratic walk this guards took minutes.
+        Assert.True(clock.Elapsed < TimeSpan.FromSeconds(30), $"Redaction took {clock.Elapsed.TotalSeconds:0.0} seconds.");
     }
 
     [Theory]
@@ -838,6 +957,104 @@ public sealed class PdfContentRedactionTests
         PdfRenderedPage rendered = new PdfPageRenderer(output).Render(1, new PdfRenderOptions(400, 400, includeAnnotations: true));
         (byte red, byte green, byte blue) = Pixel(rendered, 100, 200);
         Assert.True(red < 250 || green < 250 || blue < 250, "Page 2 no longer draws the shared image.");
+    }
+
+    private static string SolidImage(byte red, byte green, byte blue)
+    {
+        var samples = new byte[48];
+        for (int offset = 0; offset < samples.Length; offset += 3)
+            (samples[offset], samples[offset + 1], samples[offset + 2]) = (red, green, blue);
+        return "<< /Type /XObject /Subtype /Image /Width 4 /Height 4 /ColorSpace /DeviceRGB /BitsPerComponent 8 /Length 48 >>\nstream\n"
+            + Encoding.Latin1.GetString(samples) + "\nendstream";
+    }
+
+    // Page one draws /A under the region, and the given page still needs it through a route of its own.
+    private static void AssertSharedImageSurvives(List<string> objects, int page)
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf(objects));
+        (byte Red, byte Green, byte Blue) before = Pixel(new PdfPageRenderer(document).Render(page, new PdfRenderOptions(400, 400)), 200, 200);
+        Assert.NotEqual((byte)255, before.Red);
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(90, 90, 130, 130))]);
+
+        Assert.True(result.Verification.Succeeded);
+        Assert.Equal(before, Pixel(new PdfPageRenderer(PdfDocument.Open(result.Document))
+            .Render(page, new PdfRenderOptions(400, 400)), 200, 200));
+    }
+
+    [Fact]
+    public void AType3FontSelectedByAGraphicsStateStillDrawsItsSharedImage() => AssertSharedImageSurvives([
+        "<< /Type /Catalog /Pages 2 0 R >>",
+        "<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>",
+        "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] /Resources 8 0 R /Contents 5 0 R >>",
+        "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] /Resources 8 0 R /Contents 7 0 R >>",
+        Stream("q 20 0 0 20 100 100 cm /A Do Q"),
+        SolidImage(0, 0, 255),
+        Stream("/G0 gs BT 200 0 0 200 100 100 Tm (a) Tj ET"),
+        "<< /XObject << /A 6 0 R >> /ExtGState << /G0 << /Font [9 0 R 1] >> >> >>",
+        "<< /Type /Font /Subtype /Type3 /FontBBox [0 0 1 1] /FontMatrix [1 0 0 1 0 0] /CharProcs << /a 10 0 R >> /Encoding << /Type /Encoding /Differences [97 /a] >> /FirstChar 97 /LastChar 97 /Widths [1] >>",
+        Stream("1 0 0 0 1 1 d1 q 1 0 0 1 0 0 cm /A Do Q")
+    ], 1);
+
+    [Fact]
+    public void APatternWithoutResourcesIsWalkedForEveryPageThatBindsItsNames() => AssertSharedImageSurvives([
+        "<< /Type /Catalog /Pages 2 0 R >>",
+        "<< /Type /Pages /Kids [3 0 R 12 0 R 4 0 R] /Count 3 >>",
+        "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] /Resources 8 0 R /Contents 5 0 R >>",
+        "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] /Resources 9 0 R /Contents 7 0 R >>",
+        Stream("q 20 0 0 20 100 100 cm /A Do Q"),
+        SolidImage(0, 0, 255),
+        Stream("/Pattern cs /P scn 0 0 400 400 re f"),
+        "<< /XObject << /A 6 0 R /I 11 0 R >> /Pattern << /P 10 0 R >> >>",
+        "<< /XObject << /I 6 0 R >> /Pattern << /P 10 0 R >> >>",
+        Stream("q 100 0 0 100 0 0 cm /I Do Q", "/Type /Pattern /PatternType 1 /PaintType 1 /TilingType 1 /BBox [0 0 100 100] /XStep 100 /YStep 100"),
+        SolidImage(0, 255, 0),
+        "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] /Resources 8 0 R /Contents 7 0 R >>"
+    ], 2);
+
+    [Fact]
+    public void AnEntryAnUnwalkedFormStillNamesStaysAndIsRefused()
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R /Unwalked 8 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] /Resources 7 0 R /Contents 5 0 R >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 400] /Resources 7 0 R /Contents 9 0 R >>",
+            Stream("q 20 0 0 20 100 100 cm /A Do Q"),
+            SolidImage(0, 0, 255),
+            "<< /XObject << /A 6 0 R >> >>",
+            Stream("q 10 0 0 10 0 0 cm /A Do Q", "/Type /XObject /Subtype /Form /BBox [0 0 10 10] /Resources 7 0 R"),
+            Stream("0 0 m")
+        ]));
+
+        var error = Assert.Throws<PdfRedactionVerificationException>(() => PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(90, 90, 130, 130))]));
+
+        Assert.Contains(error.Report.Findings, finding => finding.Code == "RetainedSourceStream");
+    }
+
+    // The stroke lands on the new text after it is written, so only a refusal keeps the text visible.
+    [Theory]
+    [InlineData("20 w 1 0 0 RG 40 240 m 180 240 l S", true)]
+    [InlineData("60 w 1 0 0 RG 40 205 m 180 205 l S", true)]
+    [InlineData("1 0 0 RG 10 w 40 240 m 180 240 l 180 150 l h B", true)]
+    [InlineData("0 w 1 0 0 RG 40 240 m 180 240 l S", true)]
+    [InlineData("0 w 1 0 0 RG 40 100 m 180 100 l S", false)]
+    [InlineData("1 w 1 0 0 RG 40 100 m 180 100 l S", false)]
+    public void AStrokeOverTheNewParagraphIsRefusedAndOneClearOfItIsNot(string after, bool refused)
+    {
+        PdfDocument source = PdfDocument.Open(SinglePage(
+            $"BT /F1 10 Tf 1 0 0 1 30 250 Tm (OLD line) Tj ET BT /F1 10 Tf 1 0 0 1 30 238 Tm (OLD next) Tj ET {after}",
+            "/MediaBox [0 0 300 300]"));
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+
+        Exception? error = Record.Exception(() => PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            new PdfContentBounds(30, 200, 200, 262), "AAAA AAAA\nAAAA\nAAAA",
+            KillerPdf.Engine.Fonts.PdfStandardFontSubstitutes.OcrTrainingFonts()[0], 10, 12, PdfParagraphAlignment.Left));
+
+        if (refused) Assert.Contains("painted after", Assert.IsType<NotSupportedException>(error).Message);
+        else Assert.Null(error);
     }
 
     private static string SecretImage(string entries) =>

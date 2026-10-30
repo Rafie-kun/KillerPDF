@@ -91,6 +91,7 @@ public static partial class PdfContentRedaction
         private readonly HashSet<PdfStream> active = new(ReferenceEqualityComparer.Instance);
         private readonly HashSet<int> walkedNumbers = [];
         private readonly HashSet<PdfObject> walkedObjects = new(ReferenceEqualityComparer.Instance);
+        private readonly HashSet<(PdfStream, PdfDictionary)> walkedInherited = [];
         private readonly ContentRewriter context = new(document, null, [], false, [], cancellationToken);
         private int instructionCount;
 
@@ -158,35 +159,46 @@ public static partial class PdfContentRedaction
                         Credit(scope.Lookup(Name("XObject"), first), resources, depth, content: false);
                         break;
                     case "gs" when instruction.Operands.Count == 1 && first is not null:
-                        if (scope.Lookup(Name("ExtGState"), first) is PdfObject gsValue
-                            && Resolve(document, gsValue) is PdfDictionary gs
-                            && gs.TryGetValue(Name("SMask"), out PdfObject? maskValue)
+                        if (scope.Lookup(Name("ExtGState"), first) is not PdfObject gsValue
+                            || Resolve(document, gsValue) is not PdfDictionary gs) break;
+                        if (gs.TryGetValue(Name("SMask"), out PdfObject? maskValue)
                             && Resolve(document, maskValue) is PdfDictionary mask
                             && mask.TryGetValue(Name("G"), out PdfObject? groupValue))
                             Credit(groupValue, resources, depth, content: false);
+                        // The renderer honors a font selected by a graphics state as it does one set by Tf.
+                        if (gs.TryGetValue(Name("Font"), out PdfObject? fontEntry)
+                            && Resolve(document, fontEntry) is PdfArray { Count: 2 } selected)
+                            CreditFont(selected[0], resources, depth);
                         break;
                     case "scn" or "SCN" when last is not null:
-                        // A tiling pattern's cell draws resources of its own; each pattern is walked once.
+                        // A tiling pattern's cell draws resources of its own, so it is walked once. One without
+                        // any draws with the resources that selected it, so it is walked once for each.
                         if (scope.Lookup(Name("Pattern"), last) is PdfObject patternValue
                             && Resolve(document, patternValue) is PdfStream pattern
-                            && FirstWalk(patternValue, pattern))
+                            && (pattern.Dictionary.TryGetValue(ResourcesName, out PdfObject? patternResources)
+                                && Resolve(document, patternResources) is PdfDictionary
+                                ? FirstWalk(patternValue, pattern) : walkedInherited.Add((pattern, resources))))
                             Credit(patternValue, resources, depth, content: true);
                         break;
                     case "Tf" when first is not null:
-                        // Type 3 glyph procedures draw with the font's resources, or the page's when it has none.
-                        if (scope.Lookup(Name("Font"), first) is not PdfObject fontValue
-                            || Resolve(document, fontValue) is not PdfDictionary font
-                            || !IsNamed(font, SubtypeName, "Type3")
-                            || !font.TryGetValue(Name("CharProcs"), out PdfObject? proceduresValue)
-                            || Resolve(document, proceduresValue) is not PdfDictionary procedures) break;
-                        bool ownResources = font.TryGetValue(ResourcesName, out PdfObject? fontResourcesValue)
-                            && Resolve(document, fontResourcesValue) is PdfDictionary;
-                        if (ownResources && !FirstWalk(fontValue, font)) break;
-                        PdfDictionary glyphResources = ownResources ? (PdfDictionary)Resolve(document, fontResourcesValue!) : resources;
-                        foreach (PdfObject procedure in procedures.Values) Credit(procedure, glyphResources, depth, content: true);
+                        CreditFont(scope.Lookup(Name("Font"), first), resources, depth);
                         break;
                 }
             }
+        }
+
+        // Type 3 glyph procedures draw with the font's resources, or the page's when it has none.
+        private void CreditFont(PdfObject? fontValue, PdfDictionary resources, int depth)
+        {
+            if (fontValue is null || Resolve(document, fontValue) is not PdfDictionary font
+                || !IsNamed(font, SubtypeName, "Type3")
+                || !font.TryGetValue(Name("CharProcs"), out PdfObject? proceduresValue)
+                || Resolve(document, proceduresValue) is not PdfDictionary procedures) return;
+            bool ownResources = font.TryGetValue(ResourcesName, out PdfObject? fontResourcesValue)
+                && Resolve(document, fontResourcesValue) is PdfDictionary;
+            if (ownResources && !FirstWalk(fontValue, font)) return;
+            PdfDictionary glyphResources = ownResources ? (PdfDictionary)Resolve(document, fontResourcesValue!) : resources;
+            foreach (PdfObject procedure in procedures.Values) Credit(procedure, glyphResources, depth, content: true);
         }
 
         // Credits a drawn stream and, for a form or other content stream, walks what it draws in turn.
@@ -218,8 +230,10 @@ public static partial class PdfContentRedaction
     // page, as LibreOffice exports do, and so still list an original image or form that nothing draws.
     // Those entries leave every XObject dictionary, so only what some page really draws stays reachable.
     // The caller verifies the result as strictly as any other, and gets null back when nothing was listed.
-    private static PdfDocument? DropUndrawnRetiredResources(PdfDocument document, HashSet<int> retired,
-        CancellationToken cancellationToken)
+    // An entry that a form, pattern or glyph procedure of the written file still names stays, so a route
+    // the walker misses ends in that verification's refusal instead of a silent deletion.
+    private static PdfDocument? DropUndrawnRetiredResources(PdfDocument document, PdfDocument written,
+        HashSet<int> retired, CancellationToken cancellationToken)
     {
         PdfName xObjectName = Name("XObject");
         int[] numbers = [.. document.CrossReferences.Values.Where(entry => entry.Type is
@@ -238,6 +252,7 @@ public static partial class PdfContentRedaction
         foreach (PdfPageTreeEntry page in PdfPageTree.Read(document).Pages) walker.WalkPage(page);
         HashSet<int> undrawn = [.. listed.Except(walker.Used)];
         if (undrawn.Count == 0) return null;
+        if (DrawnNames(written, undrawn, cancellationToken) is not HashSet<PdfName> drawnNames) return null;
 
         var update = new PdfIncrementalUpdateBuilder(document);
         bool replaced = false;
@@ -295,7 +310,7 @@ public static partial class PdfContentRedaction
             {
                 var targets = new HashSet<int>();
                 CollectImageStreams(document, entry.Value, targets);
-                if (!targets.Overlaps(undrawn)) kept[entry.Key] = entry.Value;
+                if (!targets.Overlaps(undrawn) || drawnNames.Contains(entry.Key)) kept[entry.Key] = entry.Value;
             }
             return kept.Count == xObjects.Count ? null : new PdfDictionary(kept);
         }
@@ -324,6 +339,46 @@ public static partial class PdfContentRedaction
             }
             return null;
         }
+    }
+
+    // The names every form, tiling pattern and Type 3 glyph procedure invokes with Do, apart from the
+    // undrawn streams themselves, which leave with their entries. Null means one could not be read.
+    private static HashSet<PdfName>? DrawnNames(PdfDocument document, HashSet<int> undrawn,
+        CancellationToken cancellationToken)
+    {
+        var streams = new List<PdfStream>();
+        foreach (var entry in document.CrossReferences.Values)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (entry.Type is not (CrossReference.PdfCrossReferenceEntryType.InUse
+                or CrossReference.PdfCrossReferenceEntryType.Compressed) || undrawn.Contains(entry.ObjectNumber)) continue;
+            PdfObject value = document.Resolve(entry.ObjectNumber);
+            if (value is PdfStream stream)
+            {
+                if (IsNamed(stream.Dictionary, SubtypeName, "Form")
+                    || stream.Dictionary.TryGetValue(Name("PatternType"), out PdfObject? kind)
+                    && Resolve(document, kind) is PdfInteger { Value: 1 }) streams.Add(stream);
+            }
+            else if (value is PdfDictionary font && font.TryGetValue(Name("CharProcs"), out PdfObject? proceduresValue)
+                && Resolve(document, proceduresValue) is PdfDictionary procedures)
+                streams.AddRange(procedures.Values.Select(item => Resolve(document, item)).OfType<PdfStream>());
+        }
+        var names = new HashSet<PdfName>();
+        foreach (PdfStream stream in streams)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                foreach (PdfContentInstruction instruction in PdfContentStreamReader.Read(
+                    document.DecodeStream(stream, PdfContentStreamReader.MaximumSourceBytes),
+                    compatibilityRecovery: document.UsesCompatibilityRecovery, cancellationToken: cancellationToken))
+                    if (instruction.Operator == "Do" && instruction.Operands.Count == 1
+                        && instruction.Operands[0] is PdfName name) names.Add(name);
+            }
+            catch (Exception error) when (error is FormatException or NotSupportedException
+                or InvalidDataException or Filters.PdfFilterException) { return null; }
+        }
+        return names;
     }
 
     private static void MaterializeInheritedResources(PdfDocument document, PdfPageTree tree,

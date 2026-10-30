@@ -44,7 +44,15 @@ internal static class PdfImageRedaction
     internal readonly record struct Cover(int Left, int Top, int Right, int Bottom, byte[] Fill);
 
     /// <summary>The pixel rectangles to paint in an image and in its soft mask.</summary>
-    internal sealed record Plan(IReadOnlyList<Cover> Image, IReadOnlyList<Cover> Mask);
+    internal sealed record Plan(IReadOnlyList<Cover> Image, IReadOnlyList<Cover> Mask)
+    {
+        /// <summary>Text equal for two plans that paint the same rectangles.</summary>
+        internal string Key => string.Join(';', Image.Concat(Mask).Select(cover =>
+            $"{cover.Left},{cover.Top},{cover.Right},{cover.Bottom}"));
+
+        /// <summary>This plan and then another, so that the other's paint wins where they meet.</summary>
+        internal Plan Then(Plan next) => new([.. Image, .. next.Image], [.. Mask, .. next.Mask]);
+    }
 
     /// <summary>Decodes an image whose pixels can be painted directly, or returns null.</summary>
     internal static Samples? Decode(PdfDocument document, PdfStream image)
@@ -149,6 +157,143 @@ internal static class PdfImageRedaction
         }
         return covers;
     }
+
+    /// <summary>
+    /// Plans the samples under the covered areas, given in the image's unit square, that a draw does
+    /// not show. A sample shows if any of it lies in the clip, so painting the rest cannot change the draw.
+    /// </summary>
+    /// <param name="placement">The draw's matrix.</param>
+    /// <param name="image">The decoded image.</param>
+    /// <param name="covered">The covered areas.</param>
+    /// <param name="clip">The bounds of what the draw shows.</param>
+    /// <param name="shown">Set when a covered sample does lie in the clip.</param>
+    internal static Plan HiddenPlan(Matrix placement, Samples image, IReadOnlyList<PdfContentBounds> covered,
+        PdfContentBounds clip, out bool shown)
+    {
+        List<Cover> colors = Hidden(placement, image.Width, image.Height, covered, clip, FillSamples(image, default), out shown);
+        List<Cover> alpha = image.Mask is Samples mask
+            ? Hidden(placement, mask.Width, mask.Height, covered, clip, OpaqueSamples(mask), out _) : [];
+        return new Plan(colors, alpha);
+    }
+
+    /// <summary>True when a draw hides a sample under the covered areas of an image this many samples in size.</summary>
+    internal static bool HasHidden(Matrix placement, int width, int height, IReadOnlyList<PdfContentBounds> covered,
+        PdfContentBounds clip, out bool shown) =>
+        Hidden(placement, width, height, covered, clip, [], out shown).Count != 0;
+
+    private static List<Cover> Hidden(Matrix placement, int width, int height, IReadOnlyList<PdfContentBounds> covered,
+        PdfContentBounds clip, byte[] fill, out bool shown)
+    {
+        shown = false;
+        var hidden = new List<Cover>();
+        var rows = new Dictionary<(int Left, int Right), int>();
+        double determinant = placement.A * placement.D - placement.B * placement.C;
+        bool invertible = clip.Right > clip.Left && clip.Top > clip.Bottom
+            && double.IsFinite(determinant) && Math.Abs(determinant) >= 1e-12;
+        bool upright = Math.Abs(placement.B) < 1e-8 && Math.Abs(placement.C) < 1e-8
+            || Math.Abs(placement.A) < 1e-8 && Math.Abs(placement.D) < 1e-8;
+        // Two boxes tell a sample from the clip: the clip's own box mapped into the unit square, and,
+        // when the draw turns the image by anything but a quarter, the sample's box on the page.
+        double clipMinU = double.MaxValue, clipMaxU = double.MinValue, clipMinV = double.MaxValue, clipMaxV = double.MinValue;
+        if (invertible)
+            foreach ((double x, double y) in new[] { (clip.Left, clip.Bottom), (clip.Right, clip.Bottom),
+                (clip.Left, clip.Top), (clip.Right, clip.Top) })
+            {
+                double dx = x - placement.E, dy = y - placement.F;
+                double u = (placement.D * dx - placement.C * dy) / determinant;
+                double v = (-placement.B * dx + placement.A * dy) / determinant;
+                clipMinU = Math.Min(clipMinU, u); clipMaxU = Math.Max(clipMaxU, u);
+                clipMinV = Math.Min(clipMinV, v); clipMaxV = Math.Max(clipMaxV, v);
+            }
+        double toleranceU = PdfContentRedaction.OverlapTolerance / Math.Max(1e-12, Math.Sqrt(placement.A * placement.A + placement.B * placement.B));
+        double toleranceV = PdfContentRedaction.OverlapTolerance / Math.Max(1e-12, Math.Sqrt(placement.C * placement.C + placement.D * placement.D));
+        double sampleWidth = 1d / width, sampleHeight = 1d / height;
+        foreach (PdfContentBounds area in covered)
+        {
+            int left = Math.Clamp((int)Math.Floor(Math.Clamp(area.Left, 0, 1) * width), 0, width);
+            int right = Math.Clamp((int)Math.Ceiling(Math.Clamp(area.Right, 0, 1) * width), 0, width);
+            int top = Math.Clamp((int)Math.Floor((1 - Math.Clamp(area.Top, 0, 1)) * height), 0, height);
+            int bottom = Math.Clamp((int)Math.Ceiling((1 - Math.Clamp(area.Bottom, 0, 1)) * height), 0, height);
+            for (int y = top; y < bottom; y++)
+            {
+                double v0 = 1 - (y + 1) * sampleHeight, v1 = 1 - y * sampleHeight;
+                bool rowShown = invertible && v1 > clipMinV + toleranceV && v0 < clipMaxV - toleranceV;
+                int start = -1;
+                for (int x = left; x < right; x++)
+                {
+                    double u0 = x * sampleWidth, u1 = (x + 1) * sampleWidth;
+                    bool shows = rowShown && u1 > clipMinU + toleranceU && u0 < clipMaxU - toleranceU
+                        && (upright || SampleBoxMeetsClip(placement, u0, v0, u1, v1, clip));
+                    if (shows)
+                    {
+                        shown = true;
+                        if (start >= 0) Add(start, x, y);
+                        start = -1;
+                    }
+                    else if (start < 0) start = x;
+                }
+                if (start >= 0) Add(start, right, y);
+            }
+        }
+        return hidden;
+
+        // One rectangle for each run of rows with the same span, rather than one for each row.
+        void Add(int from, int to, int y)
+        {
+            if (rows.TryGetValue((from, to), out int index) && hidden[index].Bottom == y)
+                hidden[index] = hidden[index] with { Bottom = y + 1 };
+            else
+            {
+                rows[(from, to)] = hidden.Count;
+                hidden.Add(new Cover(from, y, to, y + 1, fill));
+            }
+        }
+    }
+
+    private static bool SampleBoxMeetsClip(Matrix placement, double u0, double v0, double u1, double v1, PdfContentBounds clip)
+    {
+        double a = placement.A * u0 + placement.C * v0 + placement.E, b = placement.B * u0 + placement.D * v0 + placement.F;
+        double c = placement.A * u1 + placement.C * v0 + placement.E, d = placement.B * u1 + placement.D * v0 + placement.F;
+        double e = placement.A * u0 + placement.C * v1 + placement.E, f = placement.B * u0 + placement.D * v1 + placement.F;
+        double g = placement.A * u1 + placement.C * v1 + placement.E, h = placement.B * u1 + placement.D * v1 + placement.F;
+        double tolerance = PdfContentRedaction.OverlapTolerance;
+        return Math.Max(a, Math.Max(c, Math.Max(e, g))) > clip.Left + tolerance
+            && Math.Min(a, Math.Min(c, Math.Min(e, g))) < clip.Right - tolerance
+            && Math.Max(b, Math.Max(d, Math.Max(f, h))) > clip.Bottom + tolerance
+            && Math.Min(b, Math.Min(d, Math.Min(f, h))) < clip.Top - tolerance;
+    }
+
+    /// <summary>The image's size in samples, or null when its dictionary does not say.</summary>
+    internal static (int Width, int Height)? Size(PdfDocument document, PdfStream image) =>
+        Integer(document, image.Dictionary, "Width") is int width and > 0
+        && Integer(document, image.Dictionary, "Height") is int height and > 0 ? (width, height) : null;
+
+    /// <summary>True when the image is stored with no filter.</summary>
+    internal static bool IsUnfiltered(PdfDocument document, PdfStream image) => Filters(document, image.Dictionary).Length == 0;
+
+    /// <summary>True when the image is stored the way the writer compresses an unfiltered one.</summary>
+    internal static bool IsFlate(PdfDocument document, PdfStream image) =>
+        Filters(document, image.Dictionary) is ["FlateDecode" or "Fl"];
+
+    /// <summary>
+    /// Gets the bytes that identify a stream's content, the same for a byte-identical copy and for
+    /// the compressed form the writer can give an unfiltered stream.
+    /// </summary>
+    internal static byte[] ContentBytes(PdfDocument document, PdfStream stream)
+    {
+        if (Filters(document, stream.Dictionary).All(filter => filter is "FlateDecode" or "Fl" or "LZWDecode" or "LZW"
+            or "ASCII85Decode" or "A85" or "ASCIIHexDecode" or "AHx" or "RunLengthDecode" or "RL"))
+            try { return document.DecodeStream(stream); }
+            catch (Exception error) when (error is PdfFilterException or FormatException or InvalidDataException
+                or NotSupportedException or InvalidOperationException or OverflowException) { }
+        return stream.EncodedData.ToArray();
+    }
+
+    /// <summary>Text equal for two images of the same size holding the same content.</summary>
+    internal static string Identity(PdfDocument document, PdfStream image) => string.Join(':',
+        Integer(document, image.Dictionary, "Width"), Integer(document, image.Dictionary, "Height"),
+        Integer(document, image.Dictionary, "BitsPerComponent"),
+        Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(ContentBytes(document, image))));
 
     /// <summary>Paints the plan into the image and its soft mask.</summary>
     internal static void Paint(Samples image, Plan plan)
