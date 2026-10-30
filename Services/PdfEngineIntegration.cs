@@ -1536,9 +1536,45 @@ internal static class PdfEngineIntegration
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         byte[] original = File.ReadAllBytes(path);
-        byte[] result = PdfSaveSanitizer.RepairHarmlessArtifacts(PdfDocument.Open(original));
+        PdfDocument document;
+        try { document = PdfDocument.Open(original); }
+        catch (Exception error) when (error is not OutOfMemoryException)
+        {
+            if (!TryNormalizeDamagedCopy(path, original)) throw;
+            original = File.ReadAllBytes(path);
+            document = PdfDocument.Open(original);
+        }
+        byte[] result = PdfSaveSanitizer.RepairHarmlessArtifacts(document);
         if (result.AsSpan().SequenceEqual(original)) return;
         ReplaceWithBuiltResult(path, result);
+    }
+
+    // The viewer opens damaged files through recovery and keeps their bytes, so every way out of
+    // the app meets them here. Only this working copy changes: the file is rewritten at save time,
+    // never at open, and a signed or encrypted file keeps its original failure.
+    private static bool TryNormalizeDamagedCopy(string path, byte[] source)
+    {
+        try
+        {
+            PdfDocument recovered = PdfDocument.OpenWithCompatibilityRecovery(source);
+            if (recovered.IsEncrypted || PdfSignatureReader.Read(recovered).Any(signature => signature.IsSigned))
+                return false;
+            try
+            {
+                byte[] rewritten = PdfDocumentWriter.Write(recovered,
+                    new PdfDocumentWriteOptions { ReplaceDanglingReferences = true });
+                _ = PdfDocument.Open(rewritten);
+                ReplaceWithBuiltResult(path, rewritten);
+                return true;
+            }
+            catch (Exception error) when (error is not OutOfMemoryException)
+            {
+                RebuildDocument(path, path);
+                _ = PdfDocument.Open(File.ReadAllBytes(path));
+                return true;
+            }
+        }
+        catch (Exception error) when (error is not OutOfMemoryException) { return false; }
     }
 
     /// <summary>Proportionally normalizes selected pages into a compatible dimension range.</summary>

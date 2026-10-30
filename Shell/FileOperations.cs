@@ -1101,9 +1101,14 @@ namespace KillerPDF.Shell
             if (_doc is null) { KillerDialog.Show(this, Loc("Str_Msg_OpenFirst")); return; }
             CommitActiveTextBox();
             string? path = _originalFile ?? _currentFile;
-            KillerPdf.Engine.Documents.PdfDocumentInformation info =
-                KillerPdf.Engine.Documents.PdfDocumentInformation.Read(
-                    EnsureEngineDocumentSession().Document);
+            KillerPdf.Engine.Documents.PdfDocumentInformation info;
+            try { info = KillerPdf.Engine.Documents.PdfDocumentInformation.Read(EnsureEngineDocumentSession().Document); }
+            catch (Exception ex) when (ex is not OutOfMemoryException)
+            {
+                // A bad date or title in an otherwise valid PDF is not worth a crash dialog.
+                KillerDialog.Show(this, ex.Message, "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             KillerPdf.Engine.Authoring.PdfDocumentMetadata? editedMetadata = null;
             var dlg = new DocumentInfoDialog(this, info, metadata => editedMetadata = metadata, path);
             dlg.ShowDialog();   // fade-close dialogs don't reliably return true; rely on the Saved flag

@@ -482,6 +482,7 @@ namespace KillerPDF.Shell
                     {
                         if (tgt.Initials) _activeInitialsChoice = sigCopy; else _activeSignatureChoice = sigCopy;
                         var t = tgt; _pendingSignField = null;
+                        _pendingSignature = null;   // a signature just added here must not stamp again on the next click
                         DropSignatureInField(t.ObjNum, sigCopy, t.Page, t.X, t.Y, t.W, t.H);
                         return;
                     }

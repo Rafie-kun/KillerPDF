@@ -20,6 +20,29 @@ public sealed class DamagedSourcePageOperationsTests : IDisposable
         try { Directory.Delete(_directory, recursive: true); } catch (IOException) { }
     }
 
+    // Save, Save As, Print, Extract and Reduce all start here, so a file the viewer shows has to
+    // come out strict-readable or none of them can finish.
+    [Fact]
+    public void TheSavePipelineNormalizesAFileTheViewerRecovers()
+    {
+        string path = Write("damaged.pdf", DamagedTwoPagePdf());
+
+        PdfEngineIntegration.RepairHarmlessSaveArtifacts(path);
+
+        Assert.Equal(2, PdfPageInformation.Read(PdfDocument.Open(File.ReadAllBytes(path))).Count);
+    }
+
+    [Fact]
+    public void TheSavePipelineLeavesAHealthyFileAlone()
+    {
+        byte[] healthy = new PdfDocumentBuilder().AddBlankPage().Build();
+        string path = Write("healthy.pdf", healthy);
+
+        PdfEngineIntegration.RepairHarmlessSaveArtifacts(path);
+
+        Assert.Equal(healthy, File.ReadAllBytes(path));
+    }
+
     [Fact]
     public void ExtractPages_ReadsASourceTheViewerRecovers()
     {
