@@ -165,8 +165,6 @@ internal static class TableExportSmoke
                 return WatchReadinessSmoke.Run(owner, folder, unsupportedStep: true);
             if (windowSessionCase == "--verify-paragraph-refusal")
                 return ParagraphRefusalSmoke.Run(owner, folder);
-            if (windowSessionCase == "--verify-paragraph-refusal-tagged")
-                return ParagraphRefusalSmoke.Run(owner, folder, tagged: true);
             if (windowSessionCase == "--verify-search-prerequisites")
                 return ToolSearchPrerequisitesSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-search-certificates")

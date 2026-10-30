@@ -331,11 +331,11 @@ internal static class ParagraphEditSmoke
     }
     private static void Pump() => Application.Current.Dispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
 
-    internal static byte[] Fixture(bool rotated = false, bool tagged = false)
+    internal static byte[] Fixture(bool rotated = false)
     {
         const string first = "BT /F1 12 Tf 16 TL 40 220 Td (Original paragraph first line.) Tj T* (Original paragraph second line.) Tj ET\nBT /F1 12 Tf 40 100 Td (Unchanged lower paragraph.) Tj ET\n";
         const string second = "BT /F1 12 Tf 40 220 Td (Unchanged second page.) Tj ET\n";
-        string[] objects = [$"<< /Type /Catalog /Pages 2 0 R {(tagged ? "/StructTreeRoot << /Type /StructTreeRoot /K [] >>" : "")} >>", "<< /Type /Pages /Kids [3 0 R 6 0 R] /Count 2 >>",
+        string[] objects = ["<< /Type /Catalog /Pages 2 0 R >>", "<< /Type /Pages /Kids [3 0 R 6 0 R] /Count 2 >>",
             $"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 300] /Rotate {(rotated ? 90 : 0)} /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
             "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>", $"<< /Length {first.Length} >>\nstream\n{first}endstream",
             "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 300] /Resources << /Font << /F1 4 0 R >> >> /Contents 7 0 R >>",

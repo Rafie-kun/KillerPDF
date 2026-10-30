@@ -1979,7 +1979,6 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_ExportLoss_Unknown">Деякий вміст неможливо повністю представити в цьому експорті.</sys:String>
     <sys:String x:Key="Str_Watch_MissingOcrModels">Для кроку {0} потрібні мовні моделі OCR: {1}. Установіть їх через меню мов OCR перед запуском.</sys:String>
     <sys:String x:Key="Str_Paragraph_Rotated">На повернутих сторінках не можна редагувати абзаци. Спочатку встановіть обертання сторінки на 0°.</sys:String>
-    <sys:String x:Key="Str_Paragraph_Tagged">У документах із тегами не можна редагувати абзаци, оскільки неможливо зберегти їхню структуру.</sys:String>
     <sys:String x:Key="Str_Dlg_KeepOnePage">Залиште в документі принаймні одну сторінку.</sys:String>
     <sys:String x:Key="Str_Dlg_PageRange">Номери сторінок або діапазони (від 1 до {0})</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">Крок {0}: {1}</sys:String>

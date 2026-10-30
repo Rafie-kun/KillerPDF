@@ -1979,7 +1979,6 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_ExportLoss_Unknown">Alcuni contenuti non possono essere rappresentati completamente in questa esportazione.</sys:String>
     <sys:String x:Key="Str_Watch_MissingOcrModels">Il passaggio {0} richiede modelli linguistici OCR: {1}. Installarli dal menu delle lingue OCR prima di avviare.</sys:String>
     <sys:String x:Key="Str_Paragraph_Rotated">La modifica dei paragrafi non è disponibile sulle pagine ruotate. Impostare prima la rotazione della pagina su 0°.</sys:String>
-    <sys:String x:Key="Str_Paragraph_Tagged">La modifica dei paragrafi non è disponibile nei documenti con tag perché non può conservarne la struttura.</sys:String>
     <sys:String x:Key="Str_Dlg_KeepOnePage">Mantieni almeno una pagina nel documento.</sys:String>
     <sys:String x:Key="Str_Dlg_PageRange">Numeri di pagina o intervalli (da 1 a {0})</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">Passaggio {0}: {1}</sys:String>

@@ -1979,7 +1979,6 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_ExportLoss_Unknown">このエクスポートでは一部の内容を完全に表現できません。</sys:String>
     <sys:String x:Key="Str_Watch_MissingOcrModels">手順 {0} には OCR 言語モデルが必要です: {1}。開始する前に OCR 言語メニューからインストールしてください。</sys:String>
     <sys:String x:Key="Str_Paragraph_Rotated">回転したページでは段落を編集できません。先にページの回転を 0° に設定してください。</sys:String>
-    <sys:String x:Key="Str_Paragraph_Tagged">タグ付き文書では文書構造を保持できないため、段落を編集できません。</sys:String>
     <sys:String x:Key="Str_Dlg_KeepOnePage">文書には少なくとも1ページを残してください。</sys:String>
     <sys:String x:Key="Str_Dlg_PageRange">ページ番号または範囲（1から{0}）</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">手順 {0}: {1}</sys:String>

@@ -7,7 +7,7 @@ using static DocumentStateSmoke;
 
 internal static class ParagraphRefusalSmoke
 {
-    internal static int Run(Window owner, string folder, bool tagged = false)
+    internal static int Run(Window owner, string folder)
     {
         Assembly engine = Assembly.Load("KillerPdf.Engine");
         Type documentType = engine.GetType("KillerPdf.Engine.Documents.PdfDocument", true)!;
@@ -16,8 +16,8 @@ internal static class ParagraphRefusalSmoke
             .Invoke(null, [new ReadOnlyMemory<byte>(bytes)])!;
         int Candidates(object document) => ((System.Collections.IEnumerable)editor.GetMethod("FindParagraphs")!
             .Invoke(null, [document, 0])!).Cast<object>().Count();
-        string kind = tagged ? "tagged" : "rotated";
-        byte[] original = ParagraphEditSmoke.Fixture(), unsupported = ParagraphEditSmoke.Fixture(rotated: !tagged, tagged: tagged);
+        const string kind = "rotated";
+        byte[] original = ParagraphEditSmoke.Fixture(), unsupported = ParagraphEditSmoke.Fixture(rotated: true);
         if (Candidates(Open(original)) != 2 || Candidates(Open(unsupported)) != 0)
             throw new InvalidOperationException("Independent ordinary/" + kind + " paragraph candidate controls failed.");
         Console.WriteLine("CONTROL ordinary fixture offers two paragraphs; " + kind + " first page offers none.");
@@ -53,7 +53,7 @@ internal static class ParagraphRefusalSmoke
         if (failure is not null) throw failure;
         if (!File.ReadAllBytes(path).AsSpan().SequenceEqual(unsupported)) throw new InvalidOperationException("Paragraph refusal modified its source.");
         File.WriteAllText(Path.Combine(folder, "refusal.txt"), message);
-        if (!message.Contains(tagged ? "tagged" : "rotat", StringComparison.OrdinalIgnoreCase))
+        if (!message.Contains("rotat", StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException("UI-004: " + kind + " paragraph refusal discarded the specific reason.");
         string result = "PASS verify-paragraph-refusal: " + kind + " page shows a specific refusal and preserves source bytes.";
         File.WriteAllText(Path.Combine(folder, "result.txt"), result); Console.WriteLine(result);

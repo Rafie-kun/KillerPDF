@@ -1967,7 +1967,6 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_ExportLoss_Unknown">Niektórych treści nie można w pełni odwzorować w tym eksporcie.</sys:String>
     <sys:String x:Key="Str_Watch_MissingOcrModels">Krok {0} wymaga modeli językowych OCR: {1}. Zainstaluj je z menu języków OCR przed rozpoczęciem.</sys:String>
     <sys:String x:Key="Str_Paragraph_Rotated">Nie można edytować akapitów na obróconych stronach. Najpierw ustaw obrót strony na 0°.</sys:String>
-    <sys:String x:Key="Str_Paragraph_Tagged">Nie można edytować akapitów w dokumentach ze znacznikami, ponieważ nie można zachować ich struktury.</sys:String>
     <sys:String x:Key="Str_Dlg_KeepOnePage">Pozostaw w dokumencie co najmniej jedną stronę.</sys:String>
     <sys:String x:Key="Str_Dlg_PageRange">Numery stron lub zakresy (od 1 do {0})</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">Krok {0}: {1}</sys:String>

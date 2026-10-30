@@ -6,11 +6,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ## [1.9.1] - Unreleased
 
-1.9.1 makes Edit paragraph work on everyday PDFs, including untagged Word exports, and clears the way to placing a new signature.
+1.9.1 makes Edit paragraph work on everyday PDFs, including Word exports and tagged documents, and clears the way to placing a new signature.
 
 ### Fixed
 
-- Edit paragraph no longer refuses a whole page because of a clip, graphics state, marked content or form somewhere on it, and it edits paragraphs written one line at a time, as Word exports them. It still refuses a paragraph that is clipped, soft masked, on a layer, inside a form, or painted in mixed styles.
+- Edit paragraph no longer refuses a whole page because of a clip, graphics state, marked content or form somewhere on it, and it edits paragraphs written one line at a time, as Word exports them. Tagged documents can be edited too, with the new text kept in the paragraph's own element. It still refuses a paragraph that is clipped, soft masked, on a layer, inside a form, or painted in mixed styles.
 - Importing or drawing a signature closes the picker, so the next click on the page places it. The picker used to reopen over the page with the signature already waiting.
 
 ## [1.9.0] - 2026-10-29

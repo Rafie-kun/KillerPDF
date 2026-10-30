@@ -401,7 +401,6 @@ then checks missing-model feedback before Start in Watched folders. Its input mu
 contain no matching PDFs. It never runs a macro or OCR job, loads native OCR,
 downloads a model or writes output. Bundled English extraction is confined to the
 isolated data root.
-`--verify-paragraph-refusal` checks rotated-page guidance through actual tool search;
-`--verify-paragraph-refusal-tagged` checks tagged-document guidance. Both require
-ordinary fixture candidates, refusal for the unsupported fixture and unchanged
-source bytes. Each case uses a fresh process and evidence directory.
+`--verify-paragraph-refusal` checks rotated-page guidance through actual tool search.
+It requires ordinary fixture candidates, refusal for the unsupported fixture and
+unchanged source bytes, and uses a fresh process and evidence directory.

@@ -1959,7 +1959,6 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_ExportLoss_Unknown">কিছু বিষয়বস্তু এই রপ্তানিতে সম্পূর্ণভাবে উপস্থাপন করা যায় না।</sys:String>
     <sys:String x:Key="Str_Watch_MissingOcrModels">ধাপ {0}-এর জন্য OCR ভাষার মডেল প্রয়োজন: {1}। শুরু করার আগে OCR ভাষার মেনু থেকে সেগুলো ইনস্টল করুন।</sys:String>
     <sys:String x:Key="Str_Paragraph_Rotated">ঘোরানো পৃষ্ঠায় অনুচ্ছেদ সম্পাদনা করা যায় না। আগে পৃষ্ঠার ঘূর্ণন 0° করুন।</sys:String>
-    <sys:String x:Key="Str_Paragraph_Tagged">ট্যাগযুক্ত নথিতে অনুচ্ছেদ সম্পাদনা করা যায় না, কারণ এতে নথির কাঠামো সংরক্ষণ করা সম্ভব নয়।</sys:String>
     <sys:String x:Key="Str_Dlg_KeepOnePage">নথিতে অন্তত একটি পৃষ্ঠা রাখুন।</sys:String>
     <sys:String x:Key="Str_Dlg_PageRange">পৃষ্ঠা নম্বর বা পরিসর (1 থেকে {0})</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">ধাপ {0}: {1}</sys:String>

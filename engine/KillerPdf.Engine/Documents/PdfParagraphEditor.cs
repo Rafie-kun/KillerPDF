@@ -38,7 +38,8 @@ public enum PdfParagraphRefusalCode
     Unsupported,
     /// <summary>The page has a nonzero rotation.</summary>
     RotatedPage,
-    /// <summary>The document contains tagged structure that paragraph editing cannot preserve.</summary>
+    /// <summary>No longer reported, since tagged paragraphs can be edited within their own element.</summary>
+    [Obsolete("Tagged documents are supported, so this code is no longer reported.")]
     TaggedDocument
 }
 
@@ -99,10 +100,10 @@ public sealed class PdfParagraphPlan
 
 /// <summary>Plans and replaces simple horizontal paragraphs without moving other page content.</summary>
 /// <remarks>The initial slice accepts uniform left-to-right source lines painted in one graphics
-/// state, across any number of top-level text objects. Tagged, encrypted, signed and rotated pages
-/// are refused, as are paragraphs that are clipped, transformed, soft masked, on an optional content
-/// layer, carrying replacement text, or inside reusable form content; the rest of the page does not
-/// matter. Replacement text uses one explicitly supplied embeddable font, Latin glyphs, and a
+/// state, across any number of top-level text objects; in a tagged document they must share one
+/// element. Encrypted, signed and rotated pages are refused, as are paragraphs that are clipped,
+/// transformed, soft masked, on an optional content layer, carrying replacement text, or inside
+/// reusable form content; the rest of the page does not matter. Replacement text uses one explicitly supplied embeddable font, Latin glyphs, and a
 /// small explicit set of ordinary typographic punctuation and symbols.</remarks>
 public static class PdfParagraphEditor
 {
@@ -118,6 +119,7 @@ public static class PdfParagraphEditor
         var result = new List<PdfParagraphCandidate>();
         var refusals = new List<PdfParagraphInspection>();
         var group = new List<PdfExtractedLine>();
+        bool tagged = IsTagged(PdfPageTree.Read(document));
         foreach (PdfExtractedLine line in page.Lines)
         {
             if (line.Runs.Count == 0 || line.Runs.Any(run => run.Letters.Count == 0)) { Flush(); continue; }
@@ -129,7 +131,8 @@ public static class PdfParagraphEditor
                 if (Math.Abs(previous.BoundingBox.Left - line.BoundingBox.Left) > 1
                     || gap < size * 0.8 || gap > size * 1.8
                     || previous.Runs[0].FontName != line.Runs[0].FontName
-                    || Math.Abs(size - line.Runs[0].PointSize) > 0.01) Flush();
+                    || Math.Abs(size - line.Runs[0].PointSize) > 0.01
+                    || tagged && previous.Runs[0].Letters[0].MarkedContentId != line.Runs[0].Letters[0].MarkedContentId) Flush();
             }
             group.Add(line);
         }
@@ -170,9 +173,6 @@ public static class PdfParagraphEditor
         if (pageIndex < 0 || pageIndex >= tree.Pages.Count) throw new ArgumentOutOfRangeException(nameof(pageIndex));
         if (document.IsEncrypted)
             throw new NotSupportedException("Remove document encryption before editing paragraphs.");
-        if (tree.Catalog.ContainsKey(Name("StructTreeRoot")))
-            return new PdfParagraphInspection(false, "Paragraph editing is not supported in tagged documents.", null)
-                { RefusalCode = PdfParagraphRefusalCode.TaggedDocument };
         if (tree.Catalog.ContainsKey(Name("Perms")))
             throw new NotSupportedException("Paragraph editing is not supported in documents with certification or usage rights.");
         if (PdfSignatureReader.Read(document).Any(signature => signature.IsSigned))
@@ -189,6 +189,9 @@ public static class PdfParagraphEditor
         var selected = page.Letters.Where(letter => CenterInside(letter.BoundingBox, region)).ToArray();
         if (selected.Length == 0) throw new NotSupportedException("Select a complete paragraph of readable text.");
         if (selected.Length > 100_000) throw new NotSupportedException("The source paragraph exceeds the size limit.");
+        // The replacement goes into the first glyph's element, so one element keeps the structure true.
+        if (IsTagged(tree) && selected.Select(letter => letter.MarkedContentId).Distinct().Skip(1).Any())
+            throw new NotSupportedException("The selection spans several tagged elements.");
         var selectedSet = new HashSet<PdfExtractedLetter>(selected, ReferenceEqualityComparer.Instance);
         PdfExtractedLine[] lines = [.. page.Lines.Where(line => line.Runs.SelectMany(run => run.Letters)
             .Any(selectedSet.Contains))];
@@ -330,6 +333,7 @@ public static class PdfParagraphEditor
         (glyph.Left + glyph.Right) / 2 >= area.Left && (glyph.Left + glyph.Right) / 2 <= area.Right
         && (glyph.Bottom + glyph.Top) / 2 >= area.Bottom && (glyph.Bottom + glyph.Top) / 2 <= area.Top;
     private static PdfName Name(string text) => new(Encoding.ASCII.GetBytes(text));
+    private static bool IsTagged(PdfPageTree tree) => tree.Catalog.ContainsKey(Name("StructTreeRoot"));
     private static PdfObject Resolve(PdfDocument document, PdfObject value)
     {
         for (int depth = 0; value is PdfIndirectReference reference; depth++)

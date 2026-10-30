@@ -290,7 +290,6 @@ internal sealed class ParagraphEditDialog : Window
     internal static string RefusalText(PdfParagraphRefusalCode? code) => L(code switch
     {
         PdfParagraphRefusalCode.RotatedPage => "Str_Paragraph_Rotated",
-        PdfParagraphRefusalCode.TaggedDocument => "Str_Paragraph_Tagged",
         _ => "Str_Paragraph_Unsupported"
     });
     private static string L(string key) => Application.Current.TryFindResource(key) as string ?? key;

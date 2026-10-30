@@ -13,17 +13,36 @@ public sealed class PdfParagraphEditorTests
 {
     private static TrueTypeFont Font() => PdfStandardFontSubstitutes.OcrTrainingFonts()[0];
 
+    private const string StructureRoot = "/StructTreeRoot << /Type /StructTreeRoot /K [] >>";
+
     [Fact]
-    public void CandidateInspectionRetainsTaggedDocumentRefusalWithoutChangingSource()
+    public void EditsATaggedParagraphAndKeepsItsTextInTheSameElement()
     {
-        PdfDocument tagged = Raw("BT /F1 10 Tf 30 250 Td (OLD) Tj ET", catalogExtra:
-            "/StructTreeRoot << /Type /StructTreeRoot /K [] >>");
-        byte[] before = tagged.Source.ToArray();
-        var inspection = PdfParagraphEditor.InspectCandidates(tagged, 0);
-        Assert.Empty(inspection.Candidates);
-        Assert.NotEmpty(inspection.Refusals);
-        Assert.All(inspection.Refusals, item => Assert.Equal("TaggedDocument", item.RefusalCode.ToString()));
-        Assert.Equal(before, tagged.Source.ToArray());
+        PdfDocument source = Raw(
+            "/P <</MCID 0>> BDC q 0 0 300 300 re W* n BT /F1 10 Tf 1 0 0 1 30 250 Tm (OLD line) Tj ET Q " +
+            "q 0 0 300 300 re W* n BT /F1 10 Tf 1 0 0 1 30 238 Tm (OLD next) Tj ET Q EMC " +
+            "/P <</MCID 1>> BDC q 0 0 300 300 re W* n BT /F1 10 Tf 1 0 0 1 30 200 Tm (Second) Tj ET Q EMC",
+            catalogExtra: StructureRoot);
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0),
+            item => item.Text.Contains("OLD", StringComparison.Ordinal));
+        var plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            new PdfContentBounds(30, 215, 250, 262), "AAAA", Font(), 10, 12, PdfParagraphAlignment.Left);
+        PdfDocument changed = PdfDocument.Open(PdfParagraphEditor.Apply(source, plan));
+        Assert.Contains(PdfPageTree.Read(changed).Catalog.Keys, key => key.ValueAsLatin1() == "StructTreeRoot");
+        PdfPageContent page = new PdfPageContentReader(changed).Read(0);
+        Assert.DoesNotContain("OLD", page.Text, StringComparison.Ordinal);
+        Assert.All(page.Letters.Where(letter => letter.Value == "A"), letter => Assert.Equal(0, letter.MarkedContentId));
+        Assert.All(page.Letters.Where(letter => letter.Value == "S"), letter => Assert.Equal(1, letter.MarkedContentId));
+    }
+
+    [Fact]
+    public void LinesInDifferentTaggedElementsStaySeparateParagraphs()
+    {
+        PdfDocument source = Raw(
+            "/P <</MCID 0>> BDC BT /F1 10 Tf 1 0 0 1 30 250 Tm (One) Tj ET EMC " +
+            "/P <</MCID 1>> BDC BT /F1 10 Tf 1 0 0 1 30 238 Tm (Two) Tj ET EMC", catalogExtra: StructureRoot);
+        Assert.Equal(["One", "Two"], PdfParagraphEditor.FindParagraphs(source, 0).Select(item => item.Text));
+        Assert.False(PdfParagraphEditor.Inspect(source, 0, new PdfContentBounds(20, 220, 100, 280)).CanEdit);
     }
 
     [Fact]
@@ -157,7 +176,6 @@ public sealed class PdfParagraphEditorTests
     [InlineData("BT /F1 10 Tf 30 250 Td (OLD) Tj 1 0 0 rg 0 -12 Td (OLD) Tj ET", "", "")]
     [InlineData("BT /F1 10 Tf 30 250 Td (OLD) Tj ET 1 0 0 rg BT /F1 10 Tf 30 238 Td (OLD) Tj ET", "", "")]
     [InlineData("BT /F1 10 Tf 30 250 Td (OLD) Tj ET", "/Rotate 90", "")]
-    [InlineData("BT /F1 10 Tf 30 250 Td (OLD) Tj ET", "", "/StructTreeRoot << /Type /StructTreeRoot /K [] >>")]
     [InlineData("BT /F1 10 Tf 30 250 Td (OLD) Tj ET", "", "/Perms << >>")]
     [InlineData("BT /F1 10 Tf 30 250 Td (OLD) Tj ET", "", "/AcroForm << /Fields [<< /FT /Sig /T (Signed) /V << /Type /Sig /ByteRange [0 1 2 3] /Contents <010203> >> >>] >>")]
     public void RefusesUnsafeSourceContent(string content, string pageExtra, string catalogExtra)

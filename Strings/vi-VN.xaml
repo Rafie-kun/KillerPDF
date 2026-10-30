@@ -1979,7 +1979,6 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_ExportLoss_Unknown">Một số nội dung không thể được thể hiện đầy đủ trong bản xuất này.</sys:String>
     <sys:String x:Key="Str_Watch_MissingOcrModels">Bước {0} cần các mô hình ngôn ngữ OCR: {1}. Hãy cài đặt chúng từ menu ngôn ngữ OCR trước khi bắt đầu.</sys:String>
     <sys:String x:Key="Str_Paragraph_Rotated">Không thể chỉnh sửa đoạn văn trên trang đã xoay. Trước tiên, hãy đặt góc xoay của trang về 0°.</sys:String>
-    <sys:String x:Key="Str_Paragraph_Tagged">Không thể chỉnh sửa đoạn văn trong tài liệu có thẻ vì không thể giữ nguyên cấu trúc tài liệu.</sys:String>
     <sys:String x:Key="Str_Dlg_KeepOnePage">Giữ lại ít nhất một trang trong tài liệu.</sys:String>
     <sys:String x:Key="Str_Dlg_PageRange">Số trang hoặc phạm vi (từ 1 đến {0})</sys:String>
     <sys:String x:Key="Str_Watch_FailedStep">Bước {0}: {1}</sys:String>
