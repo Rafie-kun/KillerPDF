@@ -97,6 +97,12 @@ namespace KillerPDF.Shell
                 CrashReporter.Capture(new IOException("No recovery folder could be created."), "Render recovery folder");
             }
 
+            // The snapshots are written, so a line being edited can give the tool its own look back. The
+            // settings saved next would otherwise keep the page's ink as the default for new text.
+            foreach (Controls.PdfViewer pane in new[] { Viewer, ViewerB })
+                try { pane.RestoreTextToolDefaultsForExit(); }
+                catch (Exception ex) when (ex is not OutOfMemoryException) { CrashReporter.Capture(ex, "Recovery text defaults"); }
+
             // The open tabs are remembered first, so a restart with only clean tabs reopens them
             // instead of the set left by the last normal close.
             try { SaveWindowSettings(); }

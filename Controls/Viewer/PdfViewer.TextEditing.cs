@@ -174,6 +174,9 @@ namespace KillerPDF.Controls
                 if (placed is not null)
                 {
                     var pcol = placed.GetColor();
+                    // A replacement for edited page text carries the page's ink, which must not stay as
+                    // the tool's color once the edit ends. An ordinary text box keeps syncing the bar.
+                    if (placed.PairId.Length > 0) RememberTextToolDefaults();
                     _textColor = pcol;
                     _textOpacity = pcol.A;   // keep the opacity slider in sync with the edited text
                     _textFillColor = placed.GetFill();   // and the fill swatches in sync with the box
@@ -1129,21 +1132,69 @@ namespace KillerPDF.Controls
 
         // Editing a line of the page borrows its look for the edit box and the text bar. The tool's
         // own settings return when the edit ends, so page ink never becomes the default for new text.
+        // Selecting a replacement for edited page text borrows the same way until it is deselected.
         private sealed record TextToolDefaults(Color Color, byte Opacity, double FontSize, string FontName,
-            bool Bold, bool Italic, bool Strike, bool Underline, double LetterSpacing);
+            bool Bold, bool Italic, bool Strike, bool Underline, double LetterSpacing, Color Fill);
         private TextToolDefaults? _defaultsBeforePageEdit;
+        private TextToolDefaults? _selectedTextLook;   // the look the selection put on the bar, when it borrowed
 
-        private void RememberTextToolDefaults() => _defaultsBeforePageEdit ??= new(_textColor, _textOpacity,
-            _textFontSize, _textFontName, _textBold, _textItalic, _textStrike, _textUnderline, _textLetterSpacing);
+        private TextToolDefaults CurrentTextToolDefaults() => new(_textColor, _textOpacity,
+            _textFontSize, _textFontName, _textBold, _textItalic, _textStrike, _textUnderline, _textLetterSpacing,
+            _textFillColor);
 
-        private void RestoreTextToolDefaults()
+        // A page edit that starts while a replacement is still selected takes over the borrowed look.
+        private void RememberTextToolDefaults()
+        {
+            _defaultsBeforePageEdit ??= CurrentTextToolDefaults();
+            _selectedTextLook = null;
+        }
+
+        private void RestoreTextToolDefaults(bool refreshBar = true)
         {
             if (_defaultsBeforePageEdit is not { } saved) return;
             _defaultsBeforePageEdit = null;
             (_textColor, _textOpacity, _textFontSize, _textFontName) = (saved.Color, saved.Opacity, saved.FontSize, saved.FontName);
             (_textBold, _textItalic, _textStrike, _textUnderline) = (saved.Bold, saved.Italic, saved.Strike, saved.Underline);
-            _textLetterSpacing = saved.LetterSpacing;
-            if (_currentTool == EditTool.Text) ShowTextSettings();
+            (_textLetterSpacing, _textFillColor) = (saved.LetterSpacing, saved.Fill);
+            if (refreshBar && _currentTool == EditTool.Text) ShowTextSettings();
+        }
+
+        // Selecting a replacement for edited page text puts its look on the bar so it can be restyled.
+        // Deselecting returns the tool's own look, except for anything the user changed on the bar
+        // meanwhile, which is a deliberate choice. A page edit that is open owns the borrowed look.
+        // The caller records _selectedTextLook once the bar is synced, because that is what release
+        // compares against: recording it here would hold the tool's look and restore nothing.
+        private bool BorrowSelectedTextLook()
+        {
+            if (_defaultsBeforePageEdit is not null) return false;
+            RememberTextToolDefaults();
+            return true;
+        }
+
+        private void ReleaseSelectedTextLook(bool refreshBar = true)
+        {
+            if (_selectedTextLook is not { } synced) return;
+            _selectedTextLook = null;
+            if (_activeTextBox is not null || _defaultsBeforePageEdit is not { } saved) return;
+            _defaultsBeforePageEdit = null;
+            if (_textColor == synced.Color && _textOpacity == synced.Opacity) (_textColor, _textOpacity) = (saved.Color, saved.Opacity);
+            if (_textFontSize == synced.FontSize) _textFontSize = saved.FontSize;
+            if (_textFontName == synced.FontName) _textFontName = saved.FontName;
+            if (_textBold == synced.Bold) _textBold = saved.Bold;
+            if (_textItalic == synced.Italic) _textItalic = saved.Italic;
+            if (_textStrike == synced.Strike) _textStrike = saved.Strike;
+            if (_textUnderline == synced.Underline) _textUnderline = saved.Underline;
+            if (_textLetterSpacing == synced.LetterSpacing) _textLetterSpacing = saved.LetterSpacing;
+            if (_textFillColor == synced.Fill) _textFillColor = saved.Fill;
+            if (refreshBar && _currentTool == EditTool.Text) ShowTextSettings();
+        }
+
+        // For a window that is about to restart: puts the tool's own look back so persisting the tool
+        // settings cannot save page ink. It leaves the bar alone because nothing may draw there.
+        internal void RestoreTextToolDefaultsForExit()
+        {
+            ReleaseSelectedTextLook(refreshBar: false);
+            RestoreTextToolDefaults(refreshBar: false);
         }
 
         private void CommitActiveTextBox()

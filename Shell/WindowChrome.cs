@@ -710,6 +710,7 @@ namespace KillerPDF.Shell
                 ((Features.IViewerHost)this).RunWithViewerContext(pane, () =>
                 {
                     pane.CommitActiveTextBoxExt();
+                    pane.RestoreTextToolDefaultsForExit();   // settings are saved next, and page ink must not be
                     pane.CaptureActiveIfAny();
                 });
         }

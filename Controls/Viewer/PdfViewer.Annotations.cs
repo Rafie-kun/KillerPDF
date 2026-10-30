@@ -348,6 +348,7 @@ namespace KillerPDF.Controls
             _dragGroupOrig.Clear();
             _selectedAnnotation = null;
             _selectedFormFieldName = null;
+            ReleaseSelectedTextLook();
             // If the text bar was opened for a now-cleared text-box selection (not because the Text tool
             // is active), close it again.
             if (_currentTool != EditTool.Text && _annotBarTool == EditTool.Text)
@@ -592,6 +593,7 @@ namespace KillerPDF.Controls
 
         private void SelectAnnotation(PageAnnotation annot, Rect bounds)
         {
+            ReleaseSelectedTextLook();   // a look borrowed for the previous selection does not carry over
             _selectedAnnotation = annot;
             // Recovery: if an annotation's corners drifted off-page (placed before the on-page guard),
             // pull it back on selection so its handles become reachable again. Only acts when it's
@@ -705,6 +707,9 @@ namespace KillerPDF.Controls
             // can be changed without re-typing. The bar's swatches/sliders then apply to the selection.
             if (annot is TextAnnotation tsel)
             {
+                // Replacement text for edited page text carries the page's ink, which the bar shows only
+                // while it is selected; an ordinary text box's look stays on the bar as the new default.
+                bool borrowing = tsel.PairId.Length > 0 && BorrowSelectedTextLook();
                 var col = tsel.GetColor();
                 _textColor = col;
                 _textOpacity = col.A;
@@ -714,6 +719,7 @@ namespace KillerPDF.Controls
                     sy = PointsPerCanvasUnit(tsel.PageIndex, rd.h);
                 _textFontSize = Math.Max(1, Math.Round(tsel.FontSize * sy));
                 _textLetterSpacing = tsel.LetterSpacing * sy;
+                if (borrowing) _selectedTextLook = CurrentTextToolDefaults();
                 ShowTextSettings();
             }
             // Selecting a highlight / strikethrough / underline opens the draw bar synced to it, so its
