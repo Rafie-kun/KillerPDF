@@ -1856,6 +1856,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Paragraph_Overflow">Tekst się nie mieści. Powiększ ramkę lub zmniejsz rozmiar czcionki albo interlinię.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Podgląd gotowy. Zastosowanie zmian zastąpi oryginalny tekst akapitu.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Nie znaleziono obsługiwanego akapitu.</sys:String>
+    <sys:String x:Key="Str_Paragraph_NoText">Ta strona nie zawiera tekstu do edycji. Zeskanowana strona wymaga najpierw OCR.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Tego akapitu nie można edytować: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Ten akapit łączy różne czcionki, rozmiary lub kolory. Nowy tekst używa jednego stylu, więc to formatowanie nie zostanie zachowane.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Czcionka podglądu: {0}. Ta czcionka zostanie osadzona w edytowanym pliku PDF.</sys:String>

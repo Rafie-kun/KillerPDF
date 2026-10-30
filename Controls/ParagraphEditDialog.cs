@@ -323,11 +323,12 @@ internal sealed class ParagraphEditDialog : Window
     internal static string RefusalText(PdfParagraphRefusalCode? code) => L(code switch
     {
         PdfParagraphRefusalCode.RotatedPage => "Str_Paragraph_Rotated",
+        PdfParagraphRefusalCode.NoText => "Str_Paragraph_NoText",
         _ => "Str_Paragraph_Unsupported"
     });
     // The engine has already said why, so a page with no candidates reports that and not a general note.
     internal static string RefusalMessage(PdfParagraphCandidateInspection inspection) => string.Join("\n", inspection.Refusals.Select(item =>
-        item.RefusalCode == PdfParagraphRefusalCode.RotatedPage || item.Reason.Length == 0 ? RefusalText(item.RefusalCode)
+        item.RefusalCode is PdfParagraphRefusalCode.RotatedPage or PdfParagraphRefusalCode.NoText || item.Reason.Length == 0 ? RefusalText(item.RefusalCode)
             : string.Format(L("Str_Paragraph_Refused"), item.Reason)).Distinct());
     private static string L(string key) => Application.Current.TryFindResource(key) as string ?? key;
 }

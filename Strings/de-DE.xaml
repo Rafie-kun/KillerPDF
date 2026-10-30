@@ -1857,6 +1857,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Paragraph_Overflow">Der Text passt nicht in den Rahmen. Vergrößern Sie ihn oder verringern Sie Schriftgröße oder Zeilenabstand.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Vorschau bereit. Anwenden ersetzt den ursprünglichen Absatztext.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Kein unterstützter Absatz gefunden.</sys:String>
+    <sys:String x:Key="Str_Paragraph_NoText">Diese Seite enthält keinen bearbeitbaren Text. Eine gescannte Seite benötigt zuerst OCR.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Dieser Absatz kann nicht bearbeitet werden: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Dieser Absatz enthält verschiedene Schriftarten, Schriftgrößen oder Farben. Der neue Text verwendet einen einheitlichen Stil, daher wird diese Formatierung nicht übernommen.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Vorschauschrift: {0}. Diese Schrift wird in die bearbeitete PDF eingebettet.</sys:String>

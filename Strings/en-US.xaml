@@ -1879,6 +1879,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Paragraph_Overflow">The text does not fit. Enlarge the box or reduce the font size or line spacing.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Preview ready. Apply replaces the original paragraph text.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">No supported paragraph was found.</sys:String>
+    <sys:String x:Key="Str_Paragraph_NoText">This page has no text to edit. A scanned page needs OCR first.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">This paragraph cannot be edited: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">This paragraph mixes fonts, sizes or colors. The new text uses one style, so that styling will not carry over.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Preview font: {0}. This font will be embedded in the edited PDF.</sys:String>

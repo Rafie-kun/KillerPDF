@@ -81,7 +81,9 @@ public enum PdfParagraphRefusalCode
     RotatedPage,
     /// <summary>No longer reported, since tagged paragraphs can be edited within their own element.</summary>
     [Obsolete("Tagged documents are supported, so this code is no longer reported.")]
-    TaggedDocument
+    TaggedDocument,
+    /// <summary>The page has no text to edit, such as a scan or a page of pictures.</summary>
+    NoText
 }
 
 /// <summary>Supported candidates and retained refusals from page inspection.</summary>
@@ -192,6 +194,9 @@ public static class PdfParagraphEditor
         Flush();
         if (result.Count == 0 && refusals.Count == 0)
         {
+            if (page.Letters.Count == 0)
+                return new([], Array.AsReadOnly(new[] { new PdfParagraphInspection(false, "The page has no text to edit.", null)
+                    { RefusalCode = PdfParagraphRefusalCode.NoText } }));
             PdfParagraphInspection emptyPage = Inspect(document, pageIndex, new PdfContentBounds(0, 0, page.Width, page.Height));
             if (!emptyPage.CanEdit) refusals.Add(emptyPage);
         }

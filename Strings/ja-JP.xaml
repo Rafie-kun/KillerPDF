@@ -1868,6 +1868,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Paragraph_Overflow">テキストが収まりません。枠を広げるか、フォントサイズまたは行間隔を小さくしてください。</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">プレビューの準備ができました。適用すると元の段落テキストが置き換えられます。</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">対応する段落が見つかりませんでした。</sys:String>
+    <sys:String x:Key="Str_Paragraph_NoText">このページには編集できるテキストがありません。スキャンしたページは、先に OCR が必要です。</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">この段落は編集できません: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">この段落には複数のフォント、サイズ、または色が混在しています。新しいテキストは単一のスタイルを使用するため、この書式は引き継がれません。</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">プレビューのフォント: {0}。このフォントは編集後のPDFに埋め込まれます。</sys:String>

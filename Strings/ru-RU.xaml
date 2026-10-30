@@ -1871,6 +1871,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Paragraph_Overflow">Текст не помещается. Увеличьте рамку или уменьшите размер шрифта либо межстрочный интервал.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Предпросмотр готов. Применение заменит исходный текст абзаца.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Поддерживаемый абзац не найден.</sys:String>
+    <sys:String x:Key="Str_Paragraph_NoText">На этой странице нет текста для редактирования. Для отсканированной страницы сначала нужно выполнить OCR.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Этот абзац нельзя редактировать: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">В этом абзаце смешаны разные шрифты, размеры или цвета. Новый текст использует один стиль, поэтому это форматирование не сохранится.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Шрифт предпросмотра: {0}. Этот шрифт будет встроен в отредактированный PDF.</sys:String>

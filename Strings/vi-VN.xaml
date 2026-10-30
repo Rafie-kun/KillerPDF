@@ -1868,6 +1868,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Paragraph_Overflow">Văn bản không vừa khung. Hãy mở rộng khung hoặc giảm cỡ chữ hay khoảng cách dòng.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Bản xem trước đã sẵn sàng. Thao tác áp dụng sẽ thay thế văn bản của đoạn gốc.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Không tìm thấy đoạn văn được hỗ trợ.</sys:String>
+    <sys:String x:Key="Str_Paragraph_NoText">Trang này không có văn bản để chỉnh sửa. Trang quét cần được OCR trước.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Không thể chỉnh sửa đoạn văn này: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Đoạn văn này dùng nhiều phông chữ, cỡ chữ hoặc màu sắc khác nhau. Văn bản mới chỉ dùng một kiểu, nên định dạng này sẽ không được giữ lại.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Phông chữ xem trước: {0}. Phông chữ này sẽ được nhúng vào PDF đã chỉnh sửa.</sys:String>

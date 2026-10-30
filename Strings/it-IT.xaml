@@ -1868,6 +1868,7 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Paragraph_Overflow">Il testo non entra nel riquadro. Ingrandiscilo o riduci la dimensione del carattere o l’interlinea.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Anteprima pronta. Applica sostituisce il testo del paragrafo originale.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Nessun paragrafo supportato trovato.</sys:String>
+    <sys:String x:Key="Str_Paragraph_NoText">Questa pagina non contiene testo da modificare. Una pagina scansionata richiede prima l’OCR.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Questo paragrafo non può essere modificato: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Questo paragrafo combina caratteri, dimensioni o colori diversi. Il nuovo testo usa un solo stile, quindi questa formattazione non verrà mantenuta.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Carattere dell’anteprima: {0}. Questo carattere verrà incorporato nel PDF modificato.</sys:String>

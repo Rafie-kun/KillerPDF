@@ -1852,6 +1852,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Paragraph_Overflow">文本无法容纳。请增大文本框，或减小字号或行距。</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">预览已就绪。应用后将替换原段落文本。</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">未找到支持的段落。</sys:String>
+    <sys:String x:Key="Str_Paragraph_NoText">此页面没有可编辑的文本。扫描页面需要先进行 OCR。</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">无法编辑此段落：{0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">此段落混用了多种字体、字号或颜色。新文本仅使用单一样式，因此不会保留该样式设置。</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">预览字体：{0}。此字体将嵌入编辑后的 PDF。</sys:String>

@@ -1848,6 +1848,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Paragraph_Overflow">পাঠ্য বাক্সে ধরছে না। বাক্স বড় করুন অথবা ফন্টের আকার বা লাইন ব্যবধান কমান।</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">পূর্বরূপ প্রস্তুত। প্রয়োগ করলে মূল অনুচ্ছেদের পাঠ্য প্রতিস্থাপিত হবে।</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">সমর্থিত কোনো অনুচ্ছেদ পাওয়া যায়নি।</sys:String>
+    <sys:String x:Key="Str_Paragraph_NoText">এই পৃষ্ঠায় সম্পাদনার মতো কোনো পাঠ্য নেই। স্ক্যান করা পৃষ্ঠায় আগে OCR করতে হবে।</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">এই অনুচ্ছেদটি সম্পাদনা করা যাবে না: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">এই অনুচ্ছেদে একাধিক ফন্ট, আকার বা রঙ মিশ্রিত আছে। নতুন পাঠ্যে একটিমাত্র শৈলী ব্যবহৃত হয়, তাই এই বিন্যাস বহাল থাকবে না।</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">পূর্বরূপের ফন্ট: {0}। এই ফন্টটি সম্পাদিত PDF-এ সংযুক্ত করা হবে।</sys:String>

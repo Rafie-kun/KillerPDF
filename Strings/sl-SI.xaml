@@ -1758,6 +1758,7 @@
     <sys:String x:Key="Str_Paragraph_Overflow">Besedilo se ne prilega. Povečajte okvir ali zmanjšajte velikost pisave oziroma razmik med vrsticami.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Predogled je pripravljen. Uporabi nadomesti izvirno besedilo odstavka.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Ni podprtega odstavka.</sys:String>
+    <sys:String x:Key="Str_Paragraph_NoText">Ta stran nima besedila za urejanje. Skenirana stran najprej potrebuje OCR.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Tega odstavka ni mogoče urejati: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Ta odstavek vsebuje različne pisave, velikosti ali barve. Novo besedilo uporablja en slog, zato se to oblikovanje ne bo ohranilo.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Pisava predogleda: {0}. Ta pisava bo vdelana v urejeni PDF.</sys:String>

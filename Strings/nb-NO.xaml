@@ -1868,6 +1868,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Paragraph_Overflow">Teksten får ikke plass. Utvid rammen eller reduser skriftstørrelsen eller linjeavstanden.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Forhåndsvisningen er klar. Bruk erstatter den opprinnelige avsnittsteksten.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Fant ingen støttede avsnitt.</sys:String>
+    <sys:String x:Key="Str_Paragraph_NoText">Denne siden har ingen tekst å redigere. En skannet side må først behandles med OCR.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Dette avsnittet kan ikke redigeres: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Dette avsnittet blander skrifttyper, størrelser eller farger. Den nye teksten bruker én stil, så denne formateringen blir ikke med videre.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Skrift i forhåndsvisningen: {0}. Denne skriften bygges inn i den redigerte PDF-filen.</sys:String>

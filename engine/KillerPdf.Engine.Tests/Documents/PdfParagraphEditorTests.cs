@@ -84,6 +84,16 @@ public sealed class PdfParagraphEditorTests
         Assert.Equal(before, rotated.Source.ToArray());
     }
 
+    // A page of pictures or a scan has no paragraph to complain about, so it says so.
+    [Fact]
+    public void APageWithNoTextSaysSo()
+    {
+        var inspection = PdfParagraphEditor.InspectCandidates(Raw("0 0 m 100 100 l S"), 0);
+
+        Assert.Empty(inspection.Candidates);
+        Assert.Equal(PdfParagraphRefusalCode.NoText, Assert.Single(inspection.Refusals).RefusalCode);
+    }
+
     [Fact]
     public void PreviewAndApplyMatchAndReplaceOnlyTheSelectedParagraph()
     {

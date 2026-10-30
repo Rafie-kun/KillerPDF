@@ -13,7 +13,7 @@ The 1.9.1 engine clears redacted content from every copy that hides it, edits at
 - Added `RemoveAttachmentByKey`, `RenameAttachmentByKey`, `ReplaceAttachmentByKey`, `SetAttachmentDescriptionByKey` and `SetAttachmentClassificationByKey` to `PdfIncrementalPageEditor`. Keys match exactly, and the name-based methods now refuse a name that several files share.
 - Added `includeBookmarks` overloads of `AddImportedDocument` and `InsertImportedDocument`, plus `DropTargetBookmarks` and `FailedBookmarksInTarget`, so a damaged outline costs only the document it belongs to.
 - Added `PdfDocumentInformation.UnreadableKeys` and `PdfDocumentMetadata.PreservedInfoKeys`, so a save keeps entries it could not read.
-- Added `PdfParagraphEditor.DefaultBox`, the `PdfParagraphCandidate` members `TextLeft`, `FirstBaseline`, `TextRight`, `FirstLineIndent` and `RowTexts`, a `PdfTextReflow.Wrap` overload with a first-line indent, and `PdfExtractionFont.IsType3`.
+- Added `PdfParagraphEditor.DefaultBox`, the `PdfParagraphCandidate` members `TextLeft`, `FirstBaseline`, `TextRight`, `FirstLineIndent` and `RowTexts`, a `PdfTextReflow.Wrap` overload with a first-line indent, `PdfExtractionFont.IsType3`, and `PdfParagraphRefusalCode.NoText`.
 
 ### Changed
 

@@ -1868,6 +1868,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Paragraph_Overflow">O texto não cabe. Aumente a caixa ou reduza o tamanho da fonte ou o espaçamento entre linhas.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Prévia pronta. Aplicar substitui o texto do parágrafo original.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Nenhum parágrafo compatível foi encontrado.</sys:String>
+    <sys:String x:Key="Str_Paragraph_NoText">Esta página não tem texto para editar. Uma página digitalizada precisa primeiro de OCR.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Este parágrafo não pode ser editado: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Este parágrafo mistura fontes, tamanhos ou cores diferentes. O novo texto usa um único estilo, então essa formatação não será mantida.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Fonte da prévia: {0}. Esta fonte será incorporada ao PDF editado.</sys:String>

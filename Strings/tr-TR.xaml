@@ -1848,6 +1848,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Paragraph_Overflow">Metin sığmıyor. Kutuyu büyütün veya yazı tipi boyutunu ya da satır aralığını azaltın.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Önizleme hazır. Uygulama işlemi özgün paragraf metnini değiştirir.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Desteklenen bir paragraf bulunamadı.</sys:String>
+    <sys:String x:Key="Str_Paragraph_NoText">Bu sayfada düzenlenecek metin yok. Taranmış bir sayfa için önce OCR gerekir.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Bu paragraf düzenlenemez: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Bu paragraf farklı yazı tiplerini, boyutlarını veya renklerini bir arada kullanıyor. Yeni metin tek bir stil kullanır, bu nedenle bu biçimlendirme korunmaz.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Önizleme yazı tipi: {0}. Bu yazı tipi düzenlenen PDF'ye gömülecektir.</sys:String>
