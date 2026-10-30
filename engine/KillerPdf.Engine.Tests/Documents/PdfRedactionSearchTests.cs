@@ -29,6 +29,18 @@ public sealed class PdfRedactionSearchTests
         Assert.Single(original.Included);
     }
 
+    // A review numbers pages by position, so a page that could not be read must still take its slot.
+    [Fact]
+    public void APageThatCouldNotBeReadKeepsTheLaterPagesOnTheirOwnNumbers()
+    {
+        PdfPageContent page = Read("Account number 12345 remains");
+
+        PdfRedactionMatch match = Assert.Single(PdfRedactionSearch.Find([null, page],
+            new PdfRedactionSearchOptions { Kind = PdfRedactionSearchKind.ExactText, Query = "12345" }).Matches);
+
+        Assert.Equal(1, match.PageIndex);
+    }
+
     [Fact]
     public void MatchAreasCoverOnlyTheMatchedLettersOnTheLine()
     {

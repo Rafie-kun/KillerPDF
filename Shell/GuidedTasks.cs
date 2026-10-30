@@ -55,11 +55,8 @@ public partial class MainWindow
                         List<PdfRedactionRegion> regions = [.. marked];
                         if (request.Search)
                         {
-                            var find = new RedactionFindDialog(owner, () =>
-                            {
-                                using PdfContentDocument content = PdfContentDocument.Open(snapshot);
-                                return [.. Enumerable.Range(1, content.NumberOfPages).Select(content.GetPage)];
-                            }, () => PdfEngineIntegration.OpenForReading(File.ReadAllBytes(snapshot)));
+                            var find = new RedactionFindDialog(owner, () => SearchService.LoadPagesForReview(snapshot),
+                                () => PdfEngineIntegration.OpenForReading(File.ReadAllBytes(snapshot)));
                             if (find.ShowDialog() != true) throw new OperationCanceledException();
                             Current(token);
                             foreach (PdfRedactionMatch match in find.Checked)

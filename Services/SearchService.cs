@@ -176,6 +176,32 @@ namespace KillerPDF.Services
         }
 
         /// <summary>
+        /// Every page's content for a review search such as Find and Redact. A page the reader refuses stays
+        /// in the list as null, because the review numbers pages by position, and its zero-based number is
+        /// returned for the caller to show the user. Throws when the file cannot be opened or no page can be read.
+        /// </summary>
+        internal static (IReadOnlyList<KillerPdf.Engine.Documents.PdfPageContent?> Pages, IReadOnlyList<int> Unreadable)
+            LoadPagesForReview(string filePath)
+        {
+            using var doc = PdfDocument.Open(filePath);
+            var pages = new List<KillerPdf.Engine.Documents.PdfPageContent?>(doc.NumberOfPages);
+            var unreadable = new List<int>();
+            Exception? firstFailure = null;
+            for (int pi = 0; pi < doc.NumberOfPages; pi++)
+            {
+                try { pages.Add(doc.GetPage(pi + 1)); }
+                catch (Exception ex) when (CanSkipPage(ex))
+                {
+                    pages.Add(null);
+                    unreadable.Add(pi);
+                    firstFailure ??= ex;
+                }
+            }
+            RequireAReadablePage(doc.NumberOfPages, unreadable.Count, firstFailure);
+            return (pages, unreadable);
+        }
+
+        /// <summary>
         /// The areas a redaction of <paramref name="term"/> covers: its page-text matches, plus every form
         /// field and annotation whose value or text contains it, which the page content does not include.
         /// Case-insensitive, like <see cref="FindExactMatches"/>.

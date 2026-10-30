@@ -91,6 +91,7 @@ namespace KillerPDF.Controls
             public Stack<UndoEntry> RedoStack = new();
             public Dictionary<int, List<(double left, double bottom, double right, double top)>> AllSearchRects = [];
             public List<int> SearchResultPages = [];
+            public IReadOnlyList<int> SearchUnreadablePages = [];
 
             // Sidebar decoding belongs to the document tab, not merely the pane. A pane can host
             // several documents, and sharing one cache/token let a newly opened tab replace or
@@ -244,6 +245,7 @@ namespace KillerPDF.Controls
             s.RedoStack        = _redoStack;
             s.AllSearchRects   = Search.AllSearchRects;
             s.SearchResultPages = Search.ResultPages;
+            s.SearchUnreadablePages = Search.UnreadablePages;
             // Persist this document's fit/zoom/view/page so reopening it (even after a restart) restores it.
             // Two-pane guard: DocStates is keyed by file path, so the SAME file open in BOTH panes
             // (two independent copies) is two writers on one entry - whichever pane captured last
@@ -367,6 +369,7 @@ namespace KillerPDF.Controls
             _navForward.Clear();
             Search.AllSearchRects = s.AllSearchRects;
             Search.ResultPages    = s.SearchResultPages;
+            Search.UnreadablePages = s.SearchUnreadablePages;
             TouchRenderLru(s);   // this tab is now active: keep its render cache, evict tabs beyond the window
         }
 

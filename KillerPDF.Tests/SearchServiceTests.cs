@@ -134,6 +134,33 @@ namespace KillerPDF.Tests
                 Assert.ThrowsAny<Exception>(() => SearchService.FindExactMatches(path, "Conventional", out _)));
         }
 
+        // Find and Redact numbers pages by position, so dropping a page would mark the wrong pages.
+        [Fact]
+        public void LoadPagesForReview_AnUnreadablePageKeepsItsSlotSoLaterMarksLandOnTheRightPage()
+        {
+            WithPdf([GoodPage, BadPage, GoodPage], path =>
+            {
+                var (pages, unreadable) = SearchService.LoadPagesForReview(path);
+                Assert.Equal(3, pages.Count);
+                Assert.Null(pages[1]);
+                Assert.Equal([1], unreadable);
+                var review = KillerPdf.Engine.Documents.PdfRedactionSearch.Find(pages,
+                    new KillerPdf.Engine.Documents.PdfRedactionSearchOptions
+                    {
+                        Kind = KillerPdf.Engine.Documents.PdfRedactionSearchKind.ExactText,
+                        Query = "Conventional"
+                    });
+                Assert.Equal([0, 2], review.Matches.Select(match => match.PageIndex));
+            });
+        }
+
+        [Fact]
+        public void LoadPagesForReview_EveryPageUnreadable_Throws()
+        {
+            WithPdf([BadPage, BadPage], path =>
+                Assert.ThrowsAny<Exception>(() => SearchService.LoadPagesForReview(path)));
+        }
+
         // The strict form is for callers that must not proceed past a page they could not search.
         [Fact]
         public void FindExactMatches_WithoutAReport_StillThrowsOnAPageTheReaderRefuses()
@@ -179,6 +206,24 @@ namespace KillerPDF.Tests
             Assert.Contains("sr.UnreadablePages", source);
             Assert.Contains("Str_Search_PagesSkipped", source);
             Assert.Contains("Str_Search_NoMatchesPartial", source);
+        }
+
+        [Fact]
+        public void SkippedPagesStayWithTheTabThatSearched()
+        {
+            string tabs = ReadSource("Controls/Viewer/PdfViewer.Tabs.cs");
+            Assert.Contains("s.SearchUnreadablePages = Search.UnreadablePages", tabs);
+            Assert.Contains("Search.UnreadablePages = s.SearchUnreadablePages", tabs);
+        }
+
+        [Fact]
+        public void TheRedactFindDialogNamesThePagesItCouldNotSearch()
+        {
+            string dialog = ReadSource("Controls/RedactionFindDialog.cs");
+            Assert.Contains("Str_Search_PagesSkipped", dialog);
+            Assert.Contains("UnreadableAnnotationPages", dialog);
+            Assert.Contains("SearchService.LoadPagesForReview(path)", ReadSource("Controls/Viewer/PdfViewer.Redaction.cs"));
+            Assert.Contains("SearchService.LoadPagesForReview(snapshot)", ReadSource("Shell/GuidedTasks.cs"));
         }
 
         [Fact]

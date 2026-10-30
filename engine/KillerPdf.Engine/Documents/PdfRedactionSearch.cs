@@ -340,16 +340,21 @@ public static class PdfRedactionSearch
         return Array.AsReadOnly(results.ToArray());
     }
 
-    /// <summary>Builds a reviewable match list from extracted pages.</summary>
-    public static PdfRedactionReview Find(IEnumerable<PdfPageContent> pages,
+    /// <summary>
+    /// Builds a reviewable match list from extracted pages, numbered by their position. A null entry
+    /// is a page that could not be read: it has no matches and the later pages keep their numbers.
+    /// </summary>
+    public static PdfRedactionReview Find(IEnumerable<PdfPageContent?> pages,
         PdfRedactionSearchOptions options, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(pages);
         Regex expression = Expression(options);
         var results = new List<PdfRedactionMatch>();
-        int pageIndex = 0;
-        foreach (PdfPageContent page in pages)
+        int pageIndex = -1;
+        foreach (PdfPageContent? page in pages)
         {
+            pageIndex++;
+            if (page is null) continue;
             cancellationToken.ThrowIfCancellationRequested();
             var spans = new List<(PdfExtractedWord Word, int Start, int End)>();
             string text = string.Join(' ', page.Words.Select(word => word.Text));
@@ -374,7 +379,6 @@ public static class PdfRedactionSearch
                     Areas = MatchAreas(words.Select(item => item.span), match.Index, match.Index + match.Length)
                 });
             }
-            pageIndex++;
         }
         return new PdfRedactionReview(results);
     }

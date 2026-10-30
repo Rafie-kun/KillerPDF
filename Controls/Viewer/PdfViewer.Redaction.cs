@@ -423,11 +423,8 @@ namespace KillerPDF.Controls
         {
             if (_doc is null || _currentFile is null || Window.GetWindow(this) is not Window owner) return;
             string path = _currentFile;
-            var dialog = new RedactionFindDialog(owner, () =>
-            {
-                using PdfContentDocument document = PdfContentDocument.Open(path);
-                return [.. Enumerable.Range(1, document.NumberOfPages).Select(document.GetPage)];
-            }, () => PdfEngineIntegration.OpenForReading(System.IO.File.ReadAllBytes(path)));
+            var dialog = new RedactionFindDialog(owner, () => SearchService.LoadPagesForReview(path),
+                () => PdfEngineIntegration.OpenForReading(System.IO.File.ReadAllBytes(path)));
             if (dialog.ShowDialog() != true) return;
             int added = 0;
             foreach (PdfRedactionMatch match in dialog.Checked)

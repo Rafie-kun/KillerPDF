@@ -26,7 +26,7 @@ namespace KillerPDF.Features
 
         /// <summary>Zero-based pages the last search could not read. A search that found nothing on the
         /// others has not shown the term is absent from these, so every result view names them.</summary>
-        internal IReadOnlyList<int> UnreadablePages { get; private set; } = [];
+        internal IReadOnlyList<int> UnreadablePages { get; set; } = [];
 
         // Flat, reading-ordered list of every match (page + rect) so Enter steps word-by-word rather
         // than page-by-page; _matchCursor indexes it and that match is drawn with extra emphasis.

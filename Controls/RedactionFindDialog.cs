@@ -11,17 +11,19 @@ namespace KillerPDF;
 // the checked results come back to be marked.
 internal sealed class RedactionFindDialog : Window
 {
-    private readonly Func<IReadOnlyList<PdfPageContent>> _loadPages;
+    private readonly Func<(IReadOnlyList<PdfPageContent?> Pages, IReadOnlyList<int> Unreadable)> _loadPages;
     private readonly ComboBox _kind;
     private readonly TextBlock _queryLabel;
     private readonly TextBox _query;
     private readonly CheckBox _matchCase;
     private readonly TextBlock _summary;
+    private readonly TextBlock _skippedPages;
     private readonly StackPanel _list;
     private readonly StackPanel _checkLinks;
     private readonly Button _mark;
     private readonly List<(PdfRedactionMatch Match, CheckBox Include)> _rows = [];
-    private IReadOnlyList<PdfPageContent>? _pages;
+    private IReadOnlyList<PdfPageContent?>? _pages;
+    private IReadOnlyList<int> _unreadablePages = [];
     // Form field values and annotation text are shown from their own appearances, not the page content,
     // so the search also reads them from the document.
     private readonly Func<PdfDocument>? _loadDocument;
@@ -30,7 +32,8 @@ internal sealed class RedactionFindDialog : Window
     /// <summary>The results the user left checked, in page order.</summary>
     internal IReadOnlyList<PdfRedactionMatch> Checked { get; private set; } = [];
 
-    internal RedactionFindDialog(Window owner, Func<IReadOnlyList<PdfPageContent>> loadPages,
+    internal RedactionFindDialog(Window owner,
+        Func<(IReadOnlyList<PdfPageContent?> Pages, IReadOnlyList<int> Unreadable)> loadPages,
         Func<PdfDocument>? loadDocument = null)
     {
         _loadPages = loadPages;
@@ -114,6 +117,18 @@ internal sealed class RedactionFindDialog : Window
         };
         body.Children.Add(results);
 
+        // A page left out of the search must never read as a page without the term.
+        _skippedPages = new TextBlock
+        {
+            Foreground = UiKit.Brush("TextBrush"),
+            FontFamily = UiKit.UiFont,
+            FontSize = 12,
+            TextWrapping = TextWrapping.Wrap,
+            Visibility = Visibility.Collapsed,
+            Margin = new Thickness(0, 8, 0, 0)
+        };
+        body.Children.Add(_skippedPages);
+
         body.Children.Add(new TextBlock
         {
             Text = L("Str_RedactFind_Hint"),
@@ -171,10 +186,12 @@ internal sealed class RedactionFindDialog : Window
         }
 
         var found = new Dictionary<string, PdfRedactionMatch>();
+        var skipped = new SortedSet<int>();
         try
         {
             Mouse.OverrideCursor = Cursors.Wait;
-            _pages ??= _loadPages();
+            if (_pages is null) (_pages, _unreadablePages) = _loadPages();
+            skipped.UnionWith(_unreadablePages);
             if (_loadDocument is not null) _document ??= _loadDocument();
             foreach (string query in queries)
             {
@@ -187,15 +204,17 @@ internal sealed class RedactionFindDialog : Window
                 };
                 foreach (PdfRedactionMatch match in PdfRedactionSearch.Find(_pages, options).Matches)
                     found.TryAdd(match.Id, match);
-                if (_document is not null)
-                    foreach (PdfRedactionMatch match in PdfRedactionSearch.FindInAnnotations(_document, options).Matches)
-                        found.TryAdd(match.Id, match);
+                if (_document is null) continue;
+                PdfRedactionReview annotations = PdfRedactionSearch.FindInAnnotations(_document, options);
+                foreach (PdfRedactionMatch match in annotations.Matches)
+                    found.TryAdd(match.Id, match);
+                skipped.UnionWith(annotations.UnreadableAnnotationPages);
             }
         }
-        catch (Exception ex) when (ex is ArgumentException or RegexMatchTimeoutException
-            or FormatException or InvalidOperationException or NotSupportedException)
+        catch (Exception ex) when (ex is not OutOfMemoryException)
         {
             ShowResults([]);
+            ShowSkippedPages([]);
             _summary.Text = string.Format(L("Str_RedactFind_Error"), ex.Message);
             return;
         }
@@ -205,6 +224,14 @@ internal sealed class RedactionFindDialog : Window
             .OrderBy(match => match.PageIndex)
             .ThenByDescending(match => match.Bounds.Top)
             .ThenBy(match => match.Bounds.Left)]);
+        ShowSkippedPages(skipped);
+    }
+
+    private void ShowSkippedPages(IReadOnlyCollection<int> pages)
+    {
+        _skippedPages.Text = pages.Count == 0 ? string.Empty
+            : string.Format(L("Str_Search_PagesSkipped"), Services.SearchService.SkippedPagesText(pages));
+        _skippedPages.Visibility = pages.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
     }
 
     private void ShowResults(IReadOnlyList<PdfRedactionMatch> matches)
