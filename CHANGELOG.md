@@ -10,10 +10,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Fixed
 
+- The Text tool keeps working in Single, Two-Page and Grid views. After a page turn, a tab switch or closing the last tab, clicking the page showed no edit box and typing did nothing, in new and existing documents alike.
+- Redaction removes the marked-content descriptions Acrobat's Header & Footer tool writes. The redacted wording stayed in the file while verification reported success.
 - Edit paragraph no longer refuses a whole page because of a clip, graphics state, marked content or form somewhere on it, and it edits justified paragraphs and paragraphs written one line at a time, as Word exports them. Tagged documents can be edited too, with the new text kept in the paragraph's own element. It still refuses a paragraph that is clipped, soft masked, on a layer, inside a form, or painted in mixed styles.
 - Document Info, Initial View, Page Labels and metadata repair no longer fail on a PDF whose opening view has a zoom of zero, which the PDF standard allows, or another malformed view.
 - A page whose tiling pattern needs an impossibly large number of cells reports that instead of failing with an arithmetic error.
 - Importing or drawing a signature closes the picker, so the next click on the page places it. The picker used to reopen over the page with the signature already waiting.
+- Escape cancels a text edit instead of committing it, and AltGr+Z and AltGr+Enter type their characters instead of closing the edit box.
+
+### Changed
+
+- The text bar takes less room: Edit paragraph is a normal-sized button under the color swatches, and the opacity sliders fold into one row in a narrow window.
 
 ## [1.9.0] - 2026-10-29
 

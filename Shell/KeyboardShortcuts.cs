@@ -122,6 +122,8 @@ namespace KillerPDF.Shell
             if (editableTextFocused && key == Key.Escape
                 && mods == ModifierKeys.None)
             {
+                // Escape abandons a page edit. Losing focus alone would commit it.
+                if (_activeTextBox is { IsFocused: true }) ActiveViewer.CancelActiveTextEditExt();
                 Keyboard.ClearFocus();
                 Focus();
                 e.Handled = true;

@@ -658,11 +658,23 @@ namespace KillerPDF.Shell
             fontPair.Children.Add(sizeStack);
             fontPair.Children.Add(spacingStack);
 
+            // Edit paragraph takes the free third row under the swatches, so it adds no width.
+            var paragraphButton = UiKit.Make(Loc("Str_Paragraph_Title"), false);
+            paragraphButton.HorizontalAlignment = HorizontalAlignment.Left;
+            paragraphButton.MinHeight = 22;
+            paragraphButton.Padding = new Thickness(10, 1, 10, 1);
+            paragraphButton.Margin = new Thickness(0, 3, 0, 0);
+            paragraphButton.ToolTip = ShortcutTip("Str_Paragraph_Title", "AltShift:P");
+            paragraphButton.Click += (_, _) => EditParagraph(PageList.SelectedIndex);
+
             var colorPair = new StackPanel();
             colorPair.Children.Add(grpColor);
             colorPair.Children.Add(grpFill);
+            colorPair.Children.Add(paragraphButton);
 
-            var opacityPair = new StackPanel();
+            // Side by side once the bar is too narrow to keep them in the first row, so the
+            // wrapped row stays one line deep.
+            var opacityPair = new WrapPanel { Orientation = Orientation.Horizontal };
             opacityPair.Children.Add(grpOpacity);
             opacityPair.Children.Add(grpFillOp);
 
@@ -673,11 +685,6 @@ namespace KillerPDF.Shell
                 Background = Brushes.Transparent
             };
             pairHost.Children.Add(textGrip);
-            var paragraphButton = UiKit.Make(Loc("Str_Paragraph_Title"), false);
-            paragraphButton.Margin = new Thickness(0, 3, 12, 3);
-            paragraphButton.ToolTip = ShortcutTip("Str_Paragraph_Title", "AltShift:P");
-            paragraphButton.Click += (_, _) => EditParagraph(PageList.SelectedIndex);
-            pairHost.Children.Add(paragraphButton);
             pairHost.Children.Add(fontPair);
             pairHost.Children.Add(colorPair);
             pairHost.Children.Add(opacityPair);

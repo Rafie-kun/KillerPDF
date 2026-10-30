@@ -28,7 +28,10 @@ namespace KillerPDF.Controls
         private SafeCanvas TextEditorLayerFor(Canvas pageCanvas)
         {
             if (_textEditorLayers.TryGetValue(pageCanvas, out SafeCanvas? existing))
+            {
+                EditableTextShortcutPolicy.AttachEditorLayer(pageCanvas, existing);
                 return existing;
+            }
             var layer = new SafeCanvas
             {
                 Width = pageCanvas.Width,
@@ -42,7 +45,7 @@ namespace KillerPDF.Controls
                 layer.Width = pageCanvas.ActualWidth > 0 ? pageCanvas.ActualWidth : pageCanvas.Width;
                 layer.Height = pageCanvas.ActualHeight > 0 ? pageCanvas.ActualHeight : pageCanvas.Height;
             };
-            pageCanvas.Children.Add(layer);
+            EditableTextShortcutPolicy.AttachEditorLayer(pageCanvas, layer);
             _textEditorLayers.Add(pageCanvas, layer);
             return layer;
         }
@@ -985,7 +988,7 @@ namespace KillerPDF.Controls
                 CancelActiveTextEdit();
                 e.Handled = true;
             }
-            else if (e.Key == Key.Z && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control
+            else if (EditableTextShortcutPolicy.BacksOutOfEdit(e.Key, Keyboard.Modifiers)
                      && sender is TextBox ztb && !ztb.CanUndo)
             {
                 // The box has no typed text left to undo, so Ctrl+Z backs out of the whole in-place edit

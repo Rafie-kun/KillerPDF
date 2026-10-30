@@ -6,7 +6,21 @@ namespace KillerPDF.Services;
 internal static class EditableTextShortcutPolicy
 {
     internal static bool CommitsTextBox(Key key, ModifierKeys modifiers) =>
-        key == Key.Enter && (modifiers & ModifierKeys.Control) == ModifierKeys.Control;
+        key == Key.Enter && IsControlChord(modifiers);
+
+    internal static bool BacksOutOfEdit(Key key, ModifierKeys modifiers) =>
+        key == Key.Z && IsControlChord(modifiers);
+
+    // Windows reports AltGr as Ctrl+Alt, and those keys type text on many layouts.
+    private static bool IsControlChord(ModifierKeys modifiers) =>
+        (modifiers & ModifierKeys.Control) != 0 && (modifiers & ModifierKeys.Alt) == 0;
+
+    // Views that reuse one page canvas clear its children on a page turn or tab change, so the
+    // layer can come back detached. A box added to a detached layer is never seen and never focused.
+    internal static void AttachEditorLayer(System.Windows.Controls.Canvas page, System.Windows.Controls.Canvas layer)
+    {
+        if (layer.Parent is null) page.Children.Add(layer);
+    }
 
     internal static double TextBoxTop(double pointerY, double fontSize) =>
         Math.Max(0, pointerY - Math.Max(0, fontSize) / 2.0);

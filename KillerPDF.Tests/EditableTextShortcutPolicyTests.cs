@@ -17,6 +17,44 @@ public sealed class EditableTextShortcutPolicyTests
             EditableTextShortcutPolicy.CommitsTextBox(Key.Enter, modifiers));
     }
 
+    // Windows reports AltGr as Ctrl+Alt, and on some layouts AltGr+Z and AltGr+Enter type text.
+    [Theory]
+    [InlineData(ModifierKeys.Control, true)]
+    [InlineData(ModifierKeys.Control | ModifierKeys.Shift, true)]
+    [InlineData(ModifierKeys.Control | ModifierKeys.Alt, false)]
+    public void AltGrIsNotAControlChord(ModifierKeys modifiers, bool expected)
+    {
+        Assert.Equal(expected, EditableTextShortcutPolicy.CommitsTextBox(Key.Enter, modifiers));
+        Assert.Equal(expected, EditableTextShortcutPolicy.BacksOutOfEdit(Key.Z, modifiers));
+    }
+
+    // Page turns, tab switches and closing the last tab clear the page canvas in the views that
+    // reuse it, and the cached editor layer has to come back or every new box is off-screen.
+    [Fact]
+    public void ACachedEditorLayerReturnsToAPageThatWasCleared()
+    {
+        Exception? failure = null;
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                var page = new System.Windows.Controls.Canvas();
+                var layer = new System.Windows.Controls.Canvas();
+                EditableTextShortcutPolicy.AttachEditorLayer(page, layer);
+                page.Children.Clear();
+                EditableTextShortcutPolicy.AttachEditorLayer(page, layer);
+                EditableTextShortcutPolicy.AttachEditorLayer(page, layer);
+                Assert.Single(page.Children);
+                Assert.Same(page, layer.Parent);
+            }
+            catch (Exception error) { failure = error; }
+        });
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+        Assert.Null(failure);
+    }
+
     [Theory]
     [InlineData(100, 20, 90)]
     [InlineData(5, 20, 0)]
