@@ -194,7 +194,11 @@ public static partial class PdfContentRedaction
 
         var writer = new LineWriter(encoded, substituteReference, sizeFactor, edit.FillColor, characterSpacing,
             edit.Underline, edit.Strike, edit.ParagraphLines);
-        var insertion = new LineInsertion { Writer = writer };
+        var insertion = new LineInsertion
+        {
+            Writer = writer,
+            WriteAtGlyph = edit.ParagraphLines is null ? 0 : probe.Insertion.Glyphs
+        };
         PdfPageTreeEntry page = probe.Tree.Pages[edit.PageIndex];
         var rewriter = new ContentRewriter(document, update, [edit.Region], false,
             new Dictionary<PdfDictionary, PdfExtractionFont?>(ReferenceEqualityComparer.Instance),
@@ -479,6 +483,7 @@ public static partial class PdfContentRedaction
 
         internal bool InspectParagraph { get; init; }
         internal List<ParagraphGlyph>? Recording { get; init; }
+        internal int WriteAtGlyph { get; init; }
         internal LineWriter? Writer { get; init; }
         internal TextState? State { get; private set; }
         internal Matrix Glyph { get; private set; }
@@ -513,10 +518,13 @@ public static partial class PdfContentRedaction
                     || !PdfContentStreamWriter.Write(first.Fill).AsSpan().SequenceEqual(PdfContentStreamWriter.Write(state.Fill))))
                     ParagraphUnsafe = true;
             }
+            // A paragraph can span text objects with other content painted between them, so its
+            // replacement waits for the last source glyph and paints over all of that content.
+            if (Glyphs == WriteAtGlyph) _pending = true;
             if (State is not null) return;
             State = state;
             Glyph = glyph;
-            _pending = Writer is not null;
+            if (WriteAtGlyph == 0) _pending = Writer is not null;
         }
 
         internal void WritePending(List<PdfContentInstruction> output, TextState state, Matrix text, Matrix line,

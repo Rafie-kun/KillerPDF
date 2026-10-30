@@ -180,7 +180,44 @@ public static class PdfParagraphEditor
         { return new PdfParagraphInspection(false, error.Message, null); }
     }
 
-    private sealed record ParagraphPage(PdfPageTree Tree, PdfPageContent Content, PdfContentRedaction.ParagraphPaintMap Paint);
+    private sealed record ParagraphPage(PdfPageTree Tree, PdfPageContent Content, PdfContentRedaction.ParagraphPaintMap Paint,
+        IReadOnlySet<int> DescribedElements);
+
+    // Marked content ids on this page whose structure element, or an ancestor, carries replacement
+    // text. Assistive technology reads that in place of the page text, so an edit would leave it stale.
+    private static HashSet<int> DescribedElements(PdfDocument document, PdfPageTree tree, int pageIndex)
+    {
+        var described = new HashSet<int>();
+        if (!IsTagged(tree)) return described;
+        int page = tree.Pages[pageIndex].Reference.ObjectNumber;
+        var visited = new HashSet<int>();
+        Visit(tree.Catalog[Name("StructTreeRoot")], false, true, 0);
+        return described;
+
+        void Visit(PdfObject value, bool covered, bool onPage, int depth)
+        {
+            if (depth > 256) throw new NotSupportedException("The document structure is too deeply nested to edit a paragraph.");
+            if (value is PdfIndirectReference reference && !visited.Add(reference.ObjectNumber)) return;
+            switch (Resolve(document, value))
+            {
+                case PdfInteger id when covered && onPage:
+                    described.Add((int)id.Value);
+                    break;
+                case PdfArray array:
+                    foreach (PdfObject item in array) Visit(item, covered, onPage, depth + 1);
+                    break;
+                case PdfDictionary element:
+                    bool here = onPage;
+                    if (element.TryGetValue(Name("Pg"), out PdfObject? pageValue))
+                        here = pageValue is PdfIndirectReference pageReference && pageReference.ObjectNumber == page;
+                    bool carries = covered || element.ContainsKey(Name("ActualText")) || element.ContainsKey(Name("Alt"))
+                        || element.ContainsKey(Name("E"));
+                    if (element.TryGetValue(Name("MCID"), out PdfObject? content)) Visit(content, carries, here, depth + 1);
+                    if (element.TryGetValue(Name("K"), out PdfObject? kids)) Visit(kids, carries, here, depth + 1);
+                    break;
+            }
+        }
+    }
 
     private static bool IsRefusal(Exception error) =>
         error is NotSupportedException or FormatException or InvalidOperationException or ArgumentException;
@@ -203,18 +240,19 @@ public static class PdfParagraphEditor
         {
             blocked = new PdfParagraphInspection(false, "Paragraph editing is not supported on rotated pages.", null)
                 { RefusalCode = PdfParagraphRefusalCode.RotatedPage };
-            return new ParagraphPage(tree, null!, null!);
+            return new ParagraphPage(tree, null!, null!, null!);
         }
         PdfPageContent content = new PdfPageContentReader(document).Read(pageIndex);
         if (content.Diagnostics.Count != 0)
             throw new NotSupportedException("The page has extraction diagnostics and cannot be edited as a paragraph.");
-        return new ParagraphPage(tree, content, new PdfContentRedaction.ParagraphPaintMap(document, pageIndex));
+        return new ParagraphPage(tree, content, new PdfContentRedaction.ParagraphPaintMap(document, pageIndex),
+            DescribedElements(document, tree, pageIndex));
     }
 
     private static PdfParagraphInspection InspectRegion(PdfDocument document, int pageIndex, PdfContentBounds region,
         ParagraphPage context)
     {
-        (PdfPageTree tree, PdfPageContent page, _) = context;
+        (PdfPageTree tree, PdfPageContent page, _, _) = context;
         ValidateBounds(region, page.Width, page.Height);
         var selected = page.Letters.Where(letter => CenterInside(letter.BoundingBox, region)).ToArray();
         if (selected.Length == 0) throw new NotSupportedException("Select a complete paragraph of readable text.");
@@ -222,6 +260,8 @@ public static class PdfParagraphEditor
         // The replacement goes into the first glyph's element, so one element keeps the structure true.
         if (IsTagged(tree) && selected.Select(letter => letter.MarkedContentId).Distinct().Skip(1).Any())
             throw new NotSupportedException("The selection spans several tagged elements.");
+        if (selected[0].MarkedContentId is int element && context.DescribedElements.Contains(element))
+            throw new NotSupportedException("The tagged element carries its own replacement text.");
         var selectedSet = new HashSet<PdfExtractedLetter>(selected, ReferenceEqualityComparer.Instance);
         PdfExtractedLine[] lines = [.. page.Lines.Where(line => line.Runs.SelectMany(run => run.Letters)
             .Any(selectedSet.Contains))];

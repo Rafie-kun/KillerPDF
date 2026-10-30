@@ -2,6 +2,7 @@ using System.Text;
 using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Fonts;
+using KillerPdf.Engine.Rendering;
 using KillerPdf.Engine.Tests.Fonts;
 using KillerPdf.Engine.Security;
 using KillerPdf.Engine.Writing;
@@ -33,6 +34,21 @@ public sealed class PdfParagraphEditorTests
         Assert.DoesNotContain("OLD", page.Text, StringComparison.Ordinal);
         Assert.All(page.Letters.Where(letter => letter.Value == "A"), letter => Assert.Equal(0, letter.MarkedContentId));
         Assert.All(page.Letters.Where(letter => letter.Value == "S"), letter => Assert.Equal(1, letter.MarkedContentId));
+    }
+
+    // Assistive technology reads these instead of the page text, so an edit would leave them stale.
+    [Theory]
+    [InlineData("<< /S /P /K 0 /ActualText (OLD) >>", false)]
+    [InlineData("<< /S /P /K 0 /Alt (OLD) >>", false)]
+    [InlineData("<< /S /P /K [<< /Type /MCR /MCID 0 >>] /E (OLD) >>", false)]
+    [InlineData("<< /S /Div /Alt (OLD) /K [<< /S /P /K 0 >>] >>", false)]
+    [InlineData("<< /S /P /K 0 >>", true)]
+    [InlineData("<< /S /Div /K [<< /S /P /K 0 >> << /S /P /K 1 /ActualText (OTHER) >>] >>", true)]
+    public void ATaggedParagraphWithReplacementTextOnItsElementIsRefused(string element, bool editable)
+    {
+        PdfDocument source = Raw("/P <</MCID 0>> BDC BT /F1 10 Tf 1 0 0 1 30 250 Tm (OLD line) Tj ET EMC",
+            catalogExtra: $"/StructTreeRoot << /Type /StructTreeRoot /K {element} >>");
+        Assert.Equal(editable, PdfParagraphEditor.FindParagraphs(source, 0).Count == 1);
     }
 
     [Fact]
@@ -239,6 +255,29 @@ public sealed class PdfParagraphEditorTests
         Assert.DoesNotContain("OLD", page.Text, StringComparison.Ordinal);
         Assert.Contains("AAAA AAAA", page.Text, StringComparison.Ordinal);
         Assert.Contains("Footer", page.Text, StringComparison.Ordinal);
+    }
+
+    // Extraction reports hidden text as present, so only rendered pixels can catch this.
+    [Theory]
+    [InlineData("q 1 1 0 rg 20 234 200 13 re f Q")]
+    [InlineData("q 0.9 0.9 0.9 rg 0 0 300 245 re f Q")]
+    public void AReplacementIsNotPaintedUnderContentBetweenTheSourceLines(string between)
+    {
+        PdfDocument source = Raw($"BT /F1 10 Tf 1 0 0 1 30 250 Tm (OLD line) Tj ET {between} BT /F1 10 Tf 1 0 0 1 30 238 Tm (OLD next) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        var plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            new PdfContentBounds(30, 200, 200, 262), "AAAA AAAA\nAAAA AAAA\nAAAA AAAA", Font(), 10, 12, PdfParagraphAlignment.Left);
+        var page = new PdfPageRenderer(PdfDocument.Open(PdfParagraphEditor.Apply(source, plan)))
+            .Render(0, new PdfRenderOptions(300, 300));
+        byte[] pixels = page.Pixels.ToArray();
+        foreach (PdfParagraphLine line in plan.Lines)
+        {
+            int dark = 0;
+            for (int y = 300 - (int)line.Baseline - 8; y < 300 - (int)line.Baseline; y++)
+                for (int x = 30; x < 120; x++)
+                    if (pixels[(y * page.Width + x) * 4 + 1] < 90) dark++;
+            Assert.True(dark > 20, $"Line at {line.Baseline} has {dark} dark pixels.");
+        }
     }
 
     // Word justifies text with word and character spacing, which changes from line to line.
