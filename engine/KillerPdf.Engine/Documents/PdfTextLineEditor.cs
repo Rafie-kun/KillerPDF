@@ -24,7 +24,7 @@ public enum PdfTextLineBlocker
 }
 
 /// <summary>What a line edit would replace.</summary>
-/// <param name="Glyphs">The glyphs whose centers lie in the area.</param>
+/// <param name="Glyphs">The glyphs of the line the area holds.</param>
 /// <param name="Blocker">Why the line cannot be rewritten, or <see cref="PdfTextLineBlocker.None"/>.</param>
 /// <param name="FontName">The PostScript name of the font the line starts in.</param>
 /// <param name="FontSize">The size the line starts at on the page, in points.</param>
@@ -37,7 +37,8 @@ public sealed record PdfTextLineInspection(int Glyphs, PdfTextLineBlocker Blocke
 /// <summary>A replacement for the text drawn in one area of a page.</summary>
 /// <param name="PageIndex">The zero-based page.</param>
 /// <param name="Region">The area in unrotated points relative to the page's crop box corner. A
-/// glyph is replaced when its center lies inside.</param>
+/// glyph is replaced when its center lies inside and it belongs to the line the area holds, so a
+/// numeral or watermark that also reaches the area stays.</param>
 /// <param name="Text">The new text; line breaks start new lines below the first.</param>
 public sealed record PdfTextLineEdit(int PageIndex, PdfContentBounds Region, string Text)
 {
@@ -80,9 +81,9 @@ public sealed record PdfTextLineEditResult(byte[] Document, PdfTextLineFont Font
 
 /// <summary>
 /// Rewrites a line of text inside the page content itself. The old glyphs leave the content stream
-/// and the new text is written in their place, in the same text object, so it keeps the original
-/// font, size, color, clipping and stacking order unless the edit changes them. No cover or other
-/// drawing is added over the page.
+/// and the new text is written after the last of them, so it keeps the original font, size, color
+/// and stacking order unless the edit changes them. No cover or other drawing is added over the
+/// page, and an edit that later content would hide or a clip would cut off is refused.
 /// </summary>
 public static class PdfTextLineEditor
 {
@@ -92,8 +93,9 @@ public static class PdfTextLineEditor
         PdfContentRedaction.InspectLine(document, pageIndex, region, cancellationToken);
 
     /// <summary>Replaces the text in an area and returns the document with an incremental update.</summary>
-    /// <exception cref="NotSupportedException">The line cannot be rewritten, or the new text needs a
-    /// substitute font that was not given or cannot be used.</exception>
+    /// <exception cref="NotSupportedException">The line cannot be rewritten, the new text needs a
+    /// substitute font that was not given or cannot be used, or the page would hide or cut off the
+    /// new text.</exception>
     public static PdfTextLineEditResult Replace(PdfDocument document, PdfTextLineEdit edit,
         CancellationToken cancellationToken = default) =>
         PdfContentRedaction.ReplaceLine(document, edit, cancellationToken);
@@ -102,6 +104,12 @@ public static class PdfTextLineEditor
 public static partial class PdfContentRedaction
 {
     private const double ReplacementSpaceUnits = 250;
+    private const string LineCutOff = "The new text would be cut off by the area this line is clipped to.";
+    // The part of the em a line's letters fill, around the baseline.
+    private const double LineInkAscent = 0.7, LineInkDescent = 0.15;
+    // A shape thinner than this share of the em crosses a line without hiding its letters, and
+    // one narrower than a letter hides no more than a letter's middle.
+    private const double ThinShare = 0.15, LetterShare = 0.6;
 
     internal static PdfTextLineInspection InspectLine(PdfDocument document, int pageIndex, PdfContentBounds region,
         CancellationToken cancellationToken)
@@ -128,7 +136,8 @@ public static partial class PdfContentRedaction
             throw new ArgumentException("A substitute font is required.", nameof(edit));
 
         var used = new Dictionary<object, Dictionary<uint, PdfDecodedCharacter>>();
-        LineProbe probe = Probe(document, edit.PageIndex, edit.Region, used, cancellationToken);
+        LineProbe probe = Probe(document, edit.PageIndex, edit.Region, used, cancellationToken,
+            paragraph: edit.ParagraphLines is not null);
         if (!probe.Inspection.CanEdit)
             throw new NotSupportedException(probe.Inspection.Blocker switch
             {
@@ -181,6 +190,10 @@ public static partial class PdfContentRedaction
                 ?? throw new NotSupportedException("The original font cannot show the new text.");
             if (font.IsVertical)
                 throw new NotSupportedException("Vertical text can only be rewritten in its original font.");
+            // A Type 3 font sets its own glyph space, so its size means nothing to another font.
+            if (font.IsType3 && fontDictionary?.TryGetValue(Name("FontMatrix"), out PdfObject? glyphSpace) == true
+                && Resolve(document, glyphSpace) is PdfArray { Count: 6 } matrix && Math.Abs(Number(document, matrix[3]) - 0.001) > 1e-6)
+                throw new NotSupportedException("The font of this line has no letters for the new text, and its size does not carry over to another font.");
             if (!substitute.EmbeddingAllowed)
                 throw new NotSupportedException($"The embedding permissions in {substitute.PostScriptName} prohibit PDF embedding.");
             var usage = new EmbeddedFontUsage(substitute, Name("KPEF"));
@@ -204,25 +217,44 @@ public static partial class PdfContentRedaction
         double? characterSpacing = edit.CharacterSpacing is double tracking && horizontal > 0 && first.Scale != 0
             ? tracking / (horizontal * first.Scale) : null;
 
+        double newSize = first.Size * (sizeFactor ?? 1);
+        double leading = first.Leading > 0 ? first.Leading * (sizeFactor ?? 1) : Math.Abs(newSize) * 1.2;
         var writer = new LineWriter(encoded, substituteReference, sizeFactor, edit.FillColor, characterSpacing,
             edit.Underline, edit.Strike, edit.ParagraphLines,
-            edit.ParagraphLines is null ? null : probe.Insertion.DominantFill);
+            edit.ParagraphLines is null ? null : probe.Insertion.DominantFill, leading);
+        PdfContentBounds? newBox = edit.ParagraphBox;
+        double emOnPage = Math.Abs(newSize) * vertical;
+        bool outgrowsClip = false;
+        if (edit.ParagraphLines is null)
+        {
+            newBox = NewLineBox(encoded, device, first, newSize, leading, characterSpacing, probe.Insertion.SourceBox);
+            // A line drawn wholly outside its clip never showed, so the edit cuts nothing off.
+            outgrowsClip = newBox is { } measured && Overlaps(probe.Insertion.SourceBox, probe.Insertion.LastClip)
+                && !LetterClipHolds(probe.Insertion.LastClip, measured, emOnPage);
+        }
         var insertion = new LineInsertion
         {
             Writer = writer,
-            WriteAtGlyph = edit.ParagraphLines is null ? 0 : probe.Insertion.Glyphs,
-            ProtectedBox = edit.ParagraphBox,
-            SourceRows = edit.ParagraphRows
+            WriteAtGlyph = probe.Insertion.Glyphs,
+            ProtectedBox = newBox,
+            SourceRows = edit.ParagraphRows,
+            LineEm = edit.ParagraphLines is null ? emOnPage : 0,
+            LookGlyph = probe.Insertion.LookGlyph,
+            AfterPieces = outgrowsClip
         };
         PdfPageTreeEntry page = probe.Tree.Pages[edit.PageIndex];
         var rewriter = new ContentRewriter(document, update, [edit.Region], false,
             new Dictionary<PdfDictionary, PdfExtractionFont?>(ReferenceEqualityComparer.Instance),
-            cancellationToken, glyphsOnly: true, insertion: insertion);
+            cancellationToken, glyphsOnly: true, insertion: insertion,
+            glyphFilter: probe.Line is { } lineGlyphs ? (_, state, text) => lineGlyphs.Holds(state, text) : null);
         List<PdfContentInstruction> content = rewriter.RewritePage(page, probe.Geometry);
         if (!insertion.Written)
             throw new InvalidOperationException("The page changed while its text was being rewritten.");
         if (insertion.Covered)
-            throw new NotSupportedException("Content painted after the paragraph would cover the new box. Make the box smaller or move it clear of that content.");
+            throw new NotSupportedException(edit.ParagraphLines is null
+                ? "Content painted after this line would cover the new text."
+                : "Content painted after the paragraph would cover the new box. Make the box smaller or move it clear of that content.");
+        if (insertion.AfterPieces) PlaceAfterPieces(content, insertion, newBox!.Value, emOnPage, probe.Geometry);
         if (insertion.AfterText is { } rules) content.AddRange(rules);
         if (edit.ParagraphRows is { } sourceRows) content = WithoutUnderlines(content, sourceRows, probe.Geometry);
 
@@ -255,50 +287,255 @@ public static partial class PdfContentRedaction
         IReadOnlyList<PdfParagraphRowSpan> rows, PageGeometry geometry)
     {
         var result = new List<PdfContentInstruction>(content.Count);
-        var saved = new Stack<Matrix>();
+        var saved = new Stack<(Matrix Ctm, double Width)>();
         var ctm = new Matrix(1, 0, 0, 1, -geometry.CropLeft, -geometry.CropBottom);
+        double lineWidth = 1;
         for (int index = 0; index < content.Count; index++)
         {
             PdfContentInstruction instruction = content[index];
             switch (instruction.Operator)
             {
-                case "q": saved.Push(ctm); break;
-                case "Q": if (saved.TryPop(out Matrix restored)) ctm = restored; break;
+                case "q": saved.Push((ctm, lineWidth)); break;
+                case "Q": if (saved.TryPop(out (Matrix Ctm, double Width) restored)) (ctm, lineWidth) = restored; break;
                 case "cm" when Numbers(instruction, 6) is { } values:
                     ctm = new Matrix(values[0], values[1], values[2], values[3], values[4], values[5]).Then(ctm);
                     break;
-                case "re" when index + 1 < content.Count && content[index + 1].Operator is "f" or "F" or "f*"
-                    && (index == 0 || content[index - 1].Operator is not ("m" or "l" or "c" or "v" or "y" or "re" or "h"))
-                    && Numbers(instruction, 4) is { } box && ctm.B == 0 && ctm.C == 0:
-                    PdfPoint start = ctm.Point(box[0], box[1]), end = ctm.Point(box[0] + box[2], box[1] + box[3]);
-                    if (IsUnderline(new PdfContentBounds(Math.Min(start.X, end.X), Math.Min(start.Y, end.Y),
-                        Math.Max(start.X, end.X), Math.Max(start.Y, end.Y)), rows))
-                    {
-                        index++;
-                        continue;
-                    }
-                    break;
+                case "w" when Numbers(instruction, 1) is { } width: lineWidth = width[0]; break;
+                case "re" or "m" when SimpleShape(content, index, ctm, lineWidth) is { } shape && IsUnderline(shape.Area, rows):
+                    index = shape.Paint;
+                    continue;
             }
             result.Add(instruction);
         }
         return result;
+    }
 
-        static double[]? Numbers(PdfContentInstruction instruction, int count)
+    // The path starting here, when it is a shape a line's underline is drawn with: a filled box, a
+    // filled four-point outline or one stroked line. A path with more to it is not an underline.
+    private static (int Paint, PdfContentBounds Area)? SimpleShape(List<PdfContentInstruction> content, int start,
+        Matrix ctm, double lineWidth)
+    {
+        if (ctm.B != 0 || ctm.C != 0
+            || start > 0 && content[start - 1].Operator is "m" or "l" or "c" or "v" or "y" or "re" or "h") return null;
+        var points = new List<PdfPoint>();
+        int index = start;
+        if (content[index].Operator == "re")
         {
-            if (instruction.Operands.Count != count) return null;
-            var values = new double[count];
-            for (int index = 0; index < count; index++)
+            if (Numbers(content[index], 4) is not { } box) return null;
+            points.Add(ctm.Point(box[0], box[1]));
+            points.Add(ctm.Point(box[0] + box[2], box[1] + box[3]));
+            index++;
+        }
+        else
+        {
+            for (; index < content.Count && content[index].Operator is "m" or "l"; index++)
             {
-                if (instruction.Operands[index] is PdfInteger integer) values[index] = integer.Value;
-                else if (instruction.Operands[index] is PdfReal real) values[index] = real.Value;
-                else return null;
+                if (index > start && content[index].Operator == "m" || Numbers(content[index], 2) is not { } point) return null;
+                points.Add(ctm.Point(point[0], point[1]));
             }
-            return values;
+            if (index < content.Count && content[index].Operator == "h") index++;
+        }
+        if (index >= content.Count) return null;
+        string paint = content[index].Operator;
+        bool filled = paint is "f" or "F" or "f*" && (content[start].Operator == "re" || points.Count is 4 or 5);
+        bool stroked = paint is "S" or "s" && content[start].Operator == "m" && points.Count == 2;
+        if (!filled && !stroked) return null;
+        double reach = stroked ? Math.Abs(lineWidth * ctm.D) / 2 : 0;
+        return (index, new PdfContentBounds(points.Min(point => point.X), points.Min(point => point.Y) - reach,
+            points.Max(point => point.X), points.Max(point => point.Y) + reach));
+    }
+
+    private static double[]? Numbers(PdfContentInstruction instruction, int count)
+    {
+        if (instruction.Operands.Count != count) return null;
+        var values = new double[count];
+        for (int index = 0; index < count; index++)
+        {
+            if (instruction.Operands[index] is PdfInteger integer) values[index] = integer.Value;
+            else if (instruction.Operands[index] is PdfReal real) values[index] = real.Value;
+            else return null;
+        }
+        return values;
+    }
+
+    // Where the new text lands on the page, measured from its encoded widths. Vertical text has no
+    // widths to go by, so its old place stands for it.
+    private static PdfContentBounds? NewLineBox(List<EncodedLine> lines, Matrix device, TextState first, double size,
+        double leading, double? characterSpacing, PdfContentBounds source)
+    {
+        if (first.Font?.IsVertical == true) return source;
+        double em = Math.Abs(size), spacing = characterSpacing ?? first.CharacterSpacing;
+        var rows = new List<PdfContentBounds>();
+        for (int index = 0; index < lines.Count; index++)
+        {
+            EncodedLine line = lines[index];
+            double width = (line.Units / 1000 * size + line.Glyphs * spacing + line.Spaces * first.WordSpacing) * first.Scale;
+            if (width == 0) continue;
+            double baseline = first.Rise - index * leading;
+            PdfPoint[] corners = [device.Point(0, baseline - em * LineInkDescent), device.Point(width, baseline - em * LineInkDescent),
+                device.Point(0, baseline + em * LineInkAscent), device.Point(width, baseline + em * LineInkAscent)];
+            rows.Add(new PdfContentBounds(corners.Min(point => point.X), corners.Min(point => point.Y),
+                corners.Max(point => point.X), corners.Max(point => point.Y)));
+        }
+        return rows.Count == 0 ? null : PdfContentBounds.Union(rows);
+    }
+
+    // Side bearings are not ink, so a clip that only shaves the ends of the advances cuts nothing.
+    private static bool LetterClipHolds(PdfContentBounds clip, PdfContentBounds box, double em) =>
+        ClipHolds(clip, new PdfContentBounds(Math.Min(box.Left + em * ThinShare, box.Right), box.Bottom,
+            Math.Max(box.Right - em * ThinShare, box.Left), box.Top));
+
+    private static Matrix Inverse(Matrix matrix)
+    {
+        double determinant = matrix.A * matrix.D - matrix.B * matrix.C;
+        if (!double.IsFinite(determinant) || Math.Abs(determinant) < 1e-12)
+            throw new NotSupportedException("The line is drawn under a transformation that cannot be undone.");
+        return new Matrix(matrix.D / determinant, -matrix.B / determinant, -matrix.C / determinant, matrix.A / determinant,
+            (matrix.C * matrix.F - matrix.D * matrix.E) / determinant, (matrix.B * matrix.E - matrix.A * matrix.F) / determinant);
+    }
+
+    private sealed record GraphicsLevel(Matrix Ctm, PdfContentBounds Clip, PdfContentInstruction[] States);
+
+    // A line drawn in pieces can give each piece a clip of its own, as browsers do, and then no
+    // piece's clip holds the whole line. The graphics state the pieces share does, so the new text
+    // goes in a block of its own right after the last piece closes, with the first glyph's
+    // transformation and graphics states put back.
+    private static void PlaceAfterPieces(List<PdfContentInstruction> content, LineInsertion insertion,
+        PdfContentBounds box, double em, PageGeometry geometry)
+    {
+        var level = new GraphicsLevel(new Matrix(1, 0, 0, 1, -geometry.CropLeft, -geometry.CropBottom),
+            new PdfContentBounds(0, 0, geometry.Width, geometry.Height), []);
+        var saved = new Stack<GraphicsLevel>();
+        var path = new List<PdfPoint>();
+        GraphicsLevel? firstLevel = null;
+        bool clipping = false, lastSeen = false;
+        int shared = -1;
+        for (int index = 0; index < content.Count; index++)
+        {
+            PdfContentInstruction instruction = content[index];
+            if (ReferenceEquals(instruction, insertion.FirstMark))
+            {
+                firstLevel = level;
+                shared = saved.Count;
+            }
+            else if (ReferenceEquals(instruction, insertion.LastMark))
+            {
+                if (firstLevel is null || saved.Count <= shared) break;
+                lastSeen = true;
+            }
+            switch (instruction.Operator)
+            {
+                case "q": saved.Push(level); break;
+                case "Q":
+                    if (saved.TryPop(out GraphicsLevel? restored)) level = restored;
+                    if (!lastSeen)
+                    {
+                        if (firstLevel is not null) shared = Math.Min(shared, saved.Count);
+                        break;
+                    }
+                    if (saved.Count > shared) break;
+                    if (!LetterClipHolds(level.Clip, box, em)) throw new NotSupportedException(LineCutOff);
+                    Matrix move = insertion.State!.Ctm.Then(Inverse(level.Ctm));
+                    content.InsertRange(index + 1, [Op("q"), .. firstLevel!.States.Skip(level.States.Length),
+                        Op("cm", move.A, move.B, move.C, move.D, move.E, move.F), .. insertion.Block, Op("Q")]);
+                    content.RemoveAll(item => ReferenceEquals(item, insertion.FirstMark) || ReferenceEquals(item, insertion.LastMark));
+                    return;
+                case "cm" when Numbers(instruction, 6) is { } values:
+                    level = level with { Ctm = new Matrix(values[0], values[1], values[2], values[3], values[4], values[5]).Then(level.Ctm) };
+                    break;
+                case "gs":
+                    level = level with { States = [.. level.States, instruction] };
+                    break;
+                case "re" when Numbers(instruction, 4) is { } rectangle:
+                    path.Add(level.Ctm.Point(rectangle[0], rectangle[1]));
+                    path.Add(level.Ctm.Point(rectangle[0] + rectangle[2], rectangle[1] + rectangle[3]));
+                    break;
+                case "m" or "l" when Numbers(instruction, 2) is { } point:
+                    path.Add(level.Ctm.Point(point[0], point[1]));
+                    break;
+                case "c" when Numbers(instruction, 6) is { } curve:
+                    path.Add(level.Ctm.Point(curve[0], curve[1]));
+                    path.Add(level.Ctm.Point(curve[2], curve[3]));
+                    path.Add(level.Ctm.Point(curve[4], curve[5]));
+                    break;
+                case "v" or "y" when Numbers(instruction, 4) is { } curve:
+                    path.Add(level.Ctm.Point(curve[0], curve[1]));
+                    path.Add(level.Ctm.Point(curve[2], curve[3]));
+                    break;
+                case "W" or "W*": clipping = true; break;
+                case "n" or "S" or "s" or "f" or "F" or "f*" or "B" or "B*" or "b" or "b*":
+                    if (clipping && path.Count > 0)
+                        level = level with
+                        {
+                            Clip = new PdfContentBounds(Math.Max(level.Clip.Left, path.Min(point => point.X)),
+                                Math.Max(level.Clip.Bottom, path.Min(point => point.Y)),
+                                Math.Min(level.Clip.Right, path.Max(point => point.X)),
+                                Math.Min(level.Clip.Top, path.Max(point => point.Y)))
+                        };
+                    path.Clear();
+                    clipping = false;
+                    break;
+            }
+        }
+        throw new NotSupportedException(LineCutOff);
+    }
+
+    // The line an area holds: the largest group of glyphs on one baseline at one size. A glyph riding
+    // on that baseline belongs with them, as a superscript or a word in another size does, and a
+    // glyph that only reaches the area, as a large numeral or a watermark behind the line does, is
+    // left alone. Invisible text and zero sizes stay in the group because they stop the edit.
+    private sealed record LineBaseline(PdfPoint Origin, double AxisX, double AxisY, double Size)
+    {
+        // Null when the area needs no narrowing, or when nothing in it looks like one line, as on
+        // text set along a curve.
+        internal static LineBaseline? Dominant(List<ParagraphGlyph> glyphs, PdfContentBounds region)
+        {
+            var groups = new List<(LineBaseline Line, int Inside, int Count)>();
+            var reach = new PdfContentBounds(region.Left - 1, region.Bottom - 1, region.Right + 1, region.Top + 1);
+            foreach (ParagraphGlyph glyph in glyphs)
+            {
+                LineBaseline placed = Of(glyph.State, glyph.Glyph);
+                int inside = PdfContentRedaction.Inside(glyph.Bounds, reach) ? 1 : 0;
+                int group = groups.FindIndex(item => item.Line.SameLine(placed));
+                if (group < 0) groups.Add((placed, inside, 1));
+                else groups[group] = (groups[group].Line, groups[group].Inside + inside, groups[group].Count + 1);
+            }
+            if (groups.Count < 2) return null;
+            // A glyph that fits the area says more than one that only has its center there.
+            LineBaseline line = groups.MaxBy(item => (item.Inside, item.Count)).Line;
+            return glyphs.Count(glyph => line.Holds(glyph.State, glyph.Glyph)) * 3 < glyphs.Count ? null : line;
+        }
+
+        internal bool Holds(TextState state, Matrix glyph)
+        {
+            if (state.RenderMode is 3 or 7 || state.Size == 0) return true;
+            LineBaseline placed = Of(state, glyph);
+            if (!Parallel(placed)) return false;
+            double across = Across(placed);
+            return across <= Math.Max(1, Math.Min(placed.Size, Size) * 0.35) || placed.Size < Size && across <= Size * 0.6;
+        }
+
+        private bool SameLine(LineBaseline other) => Parallel(other) && Math.Abs(other.Size - Size) <= Size * 0.02
+            && Across(other) <= Math.Max(0.1, Size * 0.02);
+
+        private bool Parallel(LineBaseline other) => Math.Abs(AxisX * other.AxisY - AxisY * other.AxisX) < 0.05;
+
+        private double Across(LineBaseline other) =>
+            Math.Abs((other.Origin.Y - Origin.Y) * AxisX - (other.Origin.X - Origin.X) * AxisY);
+
+        private static LineBaseline Of(TextState state, Matrix glyph)
+        {
+            Matrix device = glyph.Then(state.Ctm);
+            bool vertical = state.Font?.IsVertical == true;
+            double x = vertical ? device.C : device.A, y = vertical ? device.D : device.B;
+            double length = Math.Sqrt(x * x + y * y);
+            return new LineBaseline(device.Point(0, state.Rise), length > 0 ? x / length : 1, length > 0 ? y / length : 0,
+                Math.Abs(state.Size) * Math.Sqrt(device.C * device.C + device.D * device.D));
         }
     }
 
     private sealed record LineProbe(PdfTextLineInspection Inspection, LineInsertion Insertion,
-        PdfPageTree Tree, PageGeometry Geometry);
+        PdfPageTree Tree, PageGeometry Geometry, LineBaseline? Line);
 
     private static LineProbe Probe(PdfDocument document, int pageIndex, PdfContentBounds region,
         Dictionary<object, Dictionary<uint, PdfDecodedCharacter>>? used, CancellationToken cancellationToken,
@@ -311,18 +548,43 @@ public static partial class PdfContentRedaction
         if (pageIndex < 0 || pageIndex >= tree.Pages.Count) throw new ArgumentOutOfRangeException(nameof(pageIndex));
         PdfPageTreeEntry page = tree.Pages[pageIndex];
         PageGeometry geometry = Geometry(document, page);
-        var insertion = new LineInsertion { InspectParagraph = paragraph };
+        // A paragraph takes all its area holds, and a line only the glyphs of that line.
+        List<ParagraphGlyph>? recorded = paragraph ? null : [];
+        var insertion = new LineInsertion { InspectParagraph = paragraph, Recording = recorded };
         var rewriter = new ContentRewriter(document, null, [region], false,
             new Dictionary<PdfDictionary, PdfExtractionFont?>(ReferenceEqualityComparer.Instance),
             cancellationToken, glyphsOnly: true, insertion: insertion, usedCodes: used);
         rewriter.RewritePage(page, geometry);
-        return Summarize(insertion, Unreadable(rewriter), tree, geometry);
+        if (recorded is null) return Summarize(insertion, Unreadable(rewriter), tree, geometry);
+        LineBaseline? line = LineBaseline.Dominant(recorded, region);
+        ParagraphGlyph[] held = [.. recorded.Where(glyph => line?.Holds(glyph.State, glyph.Glyph) != false)];
+        var lineGlyphs = new LineInsertion { LookGlyph = FirstShown(held) };
+        foreach (ParagraphGlyph glyph in held) lineGlyphs.Observe(glyph.State, glyph.Glyph, glyph.Barred, glyph.Bounds);
+        return Summarize(lineGlyphs, Unreadable(rewriter), tree, geometry, line);
+    }
+
+    // A line drawn twice, as text with a shadow is, shows its last copy, so the first glyph that no
+    // later glyph lands on is where the look comes from. Counted from one.
+    private static int FirstShown(ParagraphGlyph[] glyphs)
+    {
+        for (int index = 0; index < glyphs.Length - 1; index++)
+        {
+            Matrix device = glyphs[index].Glyph.Then(glyphs[index].State.Ctm);
+            double reach = Math.Abs(glyphs[index].State.Size) * Math.Sqrt(device.C * device.C + device.D * device.D) * 0.2;
+            if (!glyphs.Skip(index + 1).Any(later =>
+            {
+                Matrix other = later.Glyph.Then(later.State.Ctm);
+                return Math.Abs(other.E - device.E) < reach && Math.Abs(other.F - device.F) < reach;
+            })) return index + 1;
+        }
+        return Math.Max(1, glyphs.Length);
     }
 
     private static bool Unreadable(ContentRewriter rewriter) =>
         rewriter.Reasons.Contains("UnreadableFont") || rewriter.Reasons.Contains("UndecodableText");
 
-    private static LineProbe Summarize(LineInsertion insertion, bool unreadable, PdfPageTree tree, PageGeometry geometry)
+    private static LineProbe Summarize(LineInsertion insertion, bool unreadable, PdfPageTree tree, PageGeometry geometry,
+        LineBaseline? line = null)
     {
         PdfTextLineBlocker blocker = insertion.Glyphs == 0
             ? unreadable ? PdfTextLineBlocker.UnreadableText : PdfTextLineBlocker.NoText
@@ -336,7 +598,7 @@ public static partial class PdfContentRedaction
             Matrix device = insertion.Glyph.Then(state.Ctm);
             size = Math.Abs(state.Size) * Math.Sqrt(device.C * device.C + device.D * device.D);
         }
-        return new LineProbe(new PdfTextLineInspection(insertion.Glyphs, blocker, fontName, size), insertion, tree, geometry);
+        return new LineProbe(new PdfTextLineInspection(insertion.Glyphs, blocker, fontName, size), insertion, tree, geometry, line);
     }
 
     private sealed record ParagraphGlyph(PdfContentBounds Bounds, TextState State, Matrix Glyph, bool Barred);
@@ -401,7 +663,7 @@ public static partial class PdfContentRedaction
                 || descriptor.ContainsKey(Name("FontFile3")));
     }
 
-    private sealed record EncodedLine(IReadOnlyList<PdfObject> Items, double Units, int Glyphs);
+    private sealed record EncodedLine(IReadOnlyList<PdfObject> Items, double Units, int Glyphs, int Spaces = 0);
 
     // An embedded font can only show the glyphs its program holds, and a subset holds the ones the
     // document draws, so only codes already drawn in that font are used. A font that is not
@@ -435,7 +697,7 @@ public static partial class PdfContentRedaction
             var items = new List<PdfObject>();
             var pending = new List<byte>();
             double units = 0;
-            int glyphs = 0;
+            int glyphs = 0, spaces = 0;
             int index = 0;
             while (index < line.Length)
             {
@@ -456,6 +718,7 @@ public static partial class PdfContentRedaction
                         pending.Add((byte)(character.Code >> shift));
                     units += font.GetWidth(character.Code);
                     glyphs++;
+                    if (character.ByteLength == 1 && character.Code == 32) spaces++;
                     index += length;
                     continue;
                 }
@@ -470,7 +733,7 @@ public static partial class PdfContentRedaction
                 index++;
             }
             if (pending.Count > 0) items.Add(new PdfString(pending.ToArray(), PdfStringForm.Hexadecimal));
-            result.Add(new EncodedLine(Merge(items), units, glyphs));
+            result.Add(new EncodedLine(Merge(items), units, glyphs, spaces));
         }
         return result;
 
@@ -538,13 +801,14 @@ public static partial class PdfContentRedaction
 
     private sealed record LineWriter(IReadOnlyList<EncodedLine> Lines, PdfIndirectReference? Substitute,
         double? SizeFactor, PdfRgbColor? Fill, double? CharacterSpacing, bool Underline, bool Strike,
-        IReadOnlyList<PdfParagraphLine>? ParagraphLines, PdfContentInstruction[]? ParagraphFill);
+        IReadOnlyList<PdfParagraphLine>? ParagraphLines, PdfContentInstruction[]? ParagraphFill, double Leading);
 
     /// <summary>
-    /// Follows the glyphs of an edited line through the content. The first one marks where the new
-    /// text goes: right after the text-showing operator that held it, inside the same text object,
-    /// so it inherits the state the old text was drawn with. After the new text the text state and
-    /// position are put back exactly, so everything drawn later in that text object stays in place.
+    /// Follows the glyphs of an edited line through the content. The first one gives the new text
+    /// its look and its place. The last one marks where it goes: right after the text-showing
+    /// operator that held that glyph, inside the same text object, so it paints over anything drawn
+    /// between the pieces of the line. After the new text the text state and position are put back
+    /// exactly, so everything drawn later in that text object stays in place.
     /// </summary>
     private sealed class LineInsertion
     {
@@ -553,8 +817,11 @@ public static partial class PdfContentRedaction
         private PdfContentInstruction[]? _lastFill;
         private string _lastFillKey = string.Empty;
         private bool _pending;
+        private ResourceScope? _firstScope;
 
         internal bool InspectParagraph { get; init; }
+        // Which glyph gives the new text its look and place, counted from one.
+        internal int LookGlyph { get; init; } = 1;
         internal List<ParagraphGlyph>? Recording { get; init; }
         internal int WriteAtGlyph { get; init; }
         internal LineWriter? Writer { get; init; }
@@ -571,7 +838,16 @@ public static partial class PdfContentRedaction
         internal bool MixedFills => _fills.Count > 1;
         internal PdfContentBounds? ProtectedBox { get; init; }
         internal IReadOnlyList<PdfParagraphRowSpan>? SourceRows { get; init; }
+        // The em of a line's new text on the page. A paragraph has none, and any overlap covers it.
+        internal double LineEm { get; init; }
         internal bool Covered { get; private set; }
+        internal PdfContentBounds LastClip { get; private set; }
+        internal PdfContentBounds SourceBox { get; private set; }
+        // The new text outgrows the last glyph's clip, so it is held back as a block for after the pieces.
+        internal bool AfterPieces { get; init; }
+        internal PdfContentInstruction FirstMark { get; } = new("%first", 0, []);
+        internal PdfContentInstruction LastMark { get; } = new("%last", 0, []);
+        internal List<PdfContentInstruction> Block { get; } = [];
         internal bool Written { get; private set; }
         internal List<PdfContentInstruction>? AfterText { get; set; }
         internal int AfterTextDepth { get; private set; }
@@ -622,65 +898,122 @@ public static partial class PdfContentRedaction
             // A paragraph can span text objects with other content painted between them, so its
             // replacement waits for the last source glyph and paints over all of that content.
             if (Glyphs == WriteAtGlyph) _pending = true;
-            if (State is not null) return;
+            LastClip = state.Clip;
+            SourceBox = Glyphs == 1 ? bounds : new PdfContentBounds(Math.Min(SourceBox.Left, bounds.Left),
+                Math.Min(SourceBox.Bottom, bounds.Bottom), Math.Max(SourceBox.Right, bounds.Right), Math.Max(SourceBox.Top, bounds.Top));
+            if (Glyphs != LookGlyph) return;
             State = state;
             Glyph = glyph;
-            if (WriteAtGlyph == 0) _pending = Writer is not null;
         }
 
         // Called for each fill, image and shading. Once the replacement is written, anything drawn over
         // its box paints on top of it, and the page would show that content instead of the new text.
         internal void Paint(PdfContentBounds area)
         {
-            if (Written && ProtectedBox is { } box && Overlaps(area, box)
+            if (Written && ProtectedBox is { } box && Overlaps(area, box) && !SparesLetters(area, box)
                 && !(SourceRows is { } rows && IsUnderline(area, rows))) Covered = true;
+        }
+
+        // A rule across a line or a neighbor's letter leaves the new letters readable. So does
+        // whatever lay over the old text: it let that text show or hid it already, and the edit
+        // changes nothing there.
+        private bool SparesLetters(PdfContentBounds area, PdfContentBounds box)
+        {
+            if (LineEm == 0) return false;
+            var overlap = new PdfContentBounds(Math.Max(area.Left, box.Left), Math.Max(area.Bottom, box.Bottom),
+                Math.Min(area.Right, box.Right), Math.Min(area.Top, box.Top));
+            double slack = LineEm * ThinShare;
+            return overlap.Width < LineEm * LetterShare || overlap.Height < slack || Inside(overlap, new PdfContentBounds(
+                SourceBox.Left - slack, SourceBox.Bottom - slack, SourceBox.Right + slack, SourceBox.Top + slack));
         }
 
         internal void WritePending(List<PdfContentInstruction> output, TextState state, Matrix text, Matrix line,
             ResourceScope scope, int depth)
         {
+            // This runs after every operator that lost a glyph, so this is the look glyph's scope.
+            if (_firstScope is null && State is not null)
+            {
+                _firstScope = scope;
+                if (AfterPieces && depth == 0) output.Add(FirstMark);
+            }
             if (!_pending) return;
             _pending = false;
             LineWriter writer = Writer!;
+            TextState first = State!;
+            bool lineEdit = writer.ParagraphLines is null;
+            List<PdfContentInstruction> target = AfterPieces ? Block : output;
+            if (AfterPieces)
+            {
+                if (depth == 0) output.Add(LastMark);
+                target.Add(Op("BT"));
+            }
             double size0 = state.Size;
             double factor = writer.SizeFactor ?? 1;
-            // The factor is relative to the first glyph, and a paragraph writes at its last, which
+            // The factor is relative to the first glyph, and the text is written at the last, which
             // can be a superscript in another size.
-            double size = (writer.ParagraphLines is null ? size0 : State!.Size) * factor;
-            bool fontChange = writer.Substitute is not null || writer.SizeFactor is not null;
+            double size = first.Size * factor;
+            bool otherFont = lineEdit && !ReferenceEquals(first.Font, state.Font);
+            bool fontChange = AfterPieces || writer.Substitute is not null || writer.SizeFactor is not null
+                || otherFont || lineEdit && size != size0;
             PdfName? original = state.FontResource
                 ?? (fontChange && state.FontObject is { } fontObject ? scope.Add(FontCategory, "KPEO", fontObject) : null);
             if (fontChange && original is null)
                 throw new NotSupportedException("The original font cannot be selected again after the new text.");
+            bool sameScope = ReferenceEquals(scope, _firstScope);
+            PdfName? chosen = !otherFont ? original
+                : sameScope && first.FontResource is { } own ? own : scope.Add(FontCategory, "KPEO", first.FontObject!);
             if (writer.Substitute is { } substitute)
-                output.Add(new PdfContentInstruction("Tf", 0, [scope.Add(FontCategory, "KPEF", substitute), new PdfReal(size)]));
-            else if (writer.SizeFactor is not null)
-                output.Add(new PdfContentInstruction("Tf", 0, [original!, new PdfReal(size)]));
-            if (writer.Fill is PdfRgbColor fill) output.Add(Op("rg", fill.Red, fill.Green, fill.Blue));
-            // A paragraph writes at its last glyph, which can be a closing link in another color.
-            bool dominantFill = writer.ParagraphFill is { } dominant && FillKey(dominant) != FillKey(state.Fill);
-            if (dominantFill) output.AddRange(writer.ParagraphFill!.Length > 0 ? writer.ParagraphFill : [Op("g", 0)]);
-            if (writer.CharacterSpacing is double spacing) output.Add(Op("Tc", spacing));
-            // Justified source lines carry their own spacing, which must not stretch the replacement.
-            bool clearSpacing = writer.ParagraphLines is not null;
-            if (clearSpacing) { output.Add(Op("Tc", 0)); output.Add(Op("Tw", 0)); output.Add(Op("Ts", 0)); }
-            output.Add(Op("Tm", Glyph.A, Glyph.B, Glyph.C, Glyph.D, Glyph.E, Glyph.F));
-            double leading = state.Leading > 0 ? state.Leading * factor : Math.Abs(size) * 1.2;
+                target.Add(new PdfContentInstruction("Tf", 0, [scope.Add(FontCategory, "KPEF", substitute), new PdfReal(size)]));
+            else if (fontChange)
+                target.Add(new PdfContentInstruction("Tf", 0, [chosen!, new PdfReal(size)]));
+            if (writer.Fill is PdfRgbColor fill) target.Add(Op("rg", fill.Red, fill.Green, fill.Blue));
+            // The look comes from the first glyph, or a paragraph's dominant fill, and the text is
+            // written at the last glyph, which can be a closing link in another color.
+            PdfContentInstruction[] look = writer.ParagraphFill ?? first.Fill;
+            bool fillChange = writer.Fill is null && (AfterPieces || FillKey(look) != FillKey(state.Fill));
+            if (fillChange && !sameScope && look.Any(item => item.Operands.Any(operand => operand is PdfName)))
+                throw new NotSupportedException("The line is drawn in separate parts of the page, and its color cannot be carried across them.");
+            if (fillChange) target.AddRange(look.Length > 0 ? look : [Op("g", 0)]);
+            var restore = new List<PdfContentInstruction>();
+            void Set(string name, double wanted, double current)
+            {
+                if (wanted == current && !AfterPieces) return;
+                target.Add(Op(name, wanted));
+                restore.Add(Op(name, current));
+            }
+            // Justified source lines carry their own spacing, which must not stretch a paragraph.
+            Set("Tc", lineEdit ? writer.CharacterSpacing ?? first.CharacterSpacing : 0, state.CharacterSpacing);
+            Set("Tw", lineEdit ? first.WordSpacing : 0, state.WordSpacing);
+            Set("Ts", lineEdit ? first.Rise : 0, state.Rise);
+            if (lineEdit)
+            {
+                Set("Tz", first.Scale * 100, state.Scale * 100);
+                Set("Tr", first.RenderMode, state.RenderMode);
+            }
+            // The place was found under the first glyph's transformation, which the last can differ from.
+            Matrix place = AfterPieces || first.Ctm == state.Ctm ? Glyph : Glyph.Then(first.Ctm).Then(Inverse(state.Ctm));
+            target.Add(Op("Tm", place.A, place.B, place.C, place.D, place.E, place.F));
             for (int index = 0; index < writer.Lines.Count; index++)
             {
                 // Font expansion is typesetting, so the plan measures and this writes at unit aspect.
                 if (writer.ParagraphLines is { } positions && index < positions.Count)
-                    output.Add(Op("Tm", Glyph.D * state.Ctm.D / state.Ctm.A, 0, 0, Glyph.D, (positions[index].X - state.Ctm.E) / state.Ctm.A,
+                    target.Add(Op("Tm", Glyph.D * state.Ctm.D / state.Ctm.A, 0, 0, Glyph.D, (positions[index].X - state.Ctm.E) / state.Ctm.A,
                         (positions[index].Baseline - state.Ctm.F) / state.Ctm.D));
-                else if (index > 0) output.Add(Op("Td", 0, -leading));
+                else if (index > 0) target.Add(Op("Td", 0, -writer.Leading));
                 if (writer.Lines[index].Items.Count > 0)
-                    output.Add(new PdfContentInstruction("TJ", 0, [new PdfArray(writer.Lines[index].Items)]));
+                    target.Add(new PdfContentInstruction("TJ", 0, [new PdfArray(writer.Lines[index].Items)]));
+            }
+            Written = true;
+            if (AfterPieces)
+            {
+                target.Add(Op("ET"));
+                if (writer.Underline || writer.Strike) target.AddRange(Rules(writer, first, place, size));
+                return;
             }
 
             if (fontChange) output.Add(new PdfContentInstruction("Tf", 0, [original!, new PdfReal(size0)]));
-            if (writer.Fill is not null || dominantFill) output.AddRange(state.Fill.Length > 0 ? state.Fill : [Op("g", 0)]);
-            if (writer.CharacterSpacing is not null || clearSpacing) output.Add(Op("Tc", state.CharacterSpacing));
-            if (clearSpacing) { output.Add(Op("Tw", state.WordSpacing)); output.Add(Op("Ts", state.Rise)); }
+            if (writer.Fill is not null || fillChange) output.AddRange(state.Fill.Length > 0 ? state.Fill : [Op("g", 0)]);
+            output.AddRange(restore);
             output.Add(Op("Tm", line.A, line.B, line.C, line.D, line.E, line.F));
             bool vertical = state.Font?.IsVertical == true;
             double axisX = vertical ? line.C : line.A, axisY = vertical ? line.D : line.B;
@@ -692,22 +1025,21 @@ public static partial class PdfContentRedaction
                 if (scale == 0) throw new NotSupportedException("The text position cannot be restored at a zero font size.");
                 output.Add(new PdfContentInstruction("TJ", 0, [new PdfArray([new PdfReal(-moved * 1000 / scale)])]));
             }
-            Written = true;
 
             if (writer.Underline || writer.Strike)
             {
-                AfterText = Rules(writer, state, size, leading);
+                AfterText = Rules(writer, first, place, size);
                 AfterTextDepth = depth;
             }
         }
 
         // Underline and strikethrough are drawn after the text object ends, since paths cannot be
-        // drawn inside one. Nothing changes the transformation inside a text object, so the text
-        // matrix of the first glyph still places them.
-        private List<PdfContentInstruction> Rules(LineWriter writer, TextState state, double size, double leading)
+        // drawn inside one. Nothing changes the transformation inside a text object, so the matrix
+        // the text was placed with still places them.
+        private static List<PdfContentInstruction> Rules(LineWriter writer, TextState state, Matrix place, double size)
         {
             double spacing = writer.CharacterSpacing ?? state.CharacterSpacing;
-            double scale = Math.Sqrt(Math.Abs(Glyph.A * Glyph.D - Glyph.B * Glyph.C));
+            double scale = Math.Sqrt(Math.Abs(place.A * place.D - place.B * place.C));
             var rules = new List<PdfContentInstruction> { Op("q") };
             if (writer.Fill is PdfRgbColor fill) rules.Add(Op("RG", fill.Red, fill.Green, fill.Blue));
             else if (state.Fill.Length == 0) rules.Add(Op("G", 0));
@@ -719,12 +1051,12 @@ public static partial class PdfContentRedaction
                 EncodedLine line = writer.Lines[index];
                 double width = (line.Units / 1000 * size + line.Glyphs * spacing) * state.Scale;
                 if (width <= 0) continue;
-                double baseline = -index * leading;
+                double baseline = -index * writer.Leading;
                 foreach (double offset in new[] { writer.Underline ? -0.12 : double.NaN, writer.Strike ? 0.3 : double.NaN })
                 {
                     if (double.IsNaN(offset)) continue;
-                    PdfPoint start = Glyph.Point(0, baseline + offset * size);
-                    PdfPoint end = Glyph.Point(width, baseline + offset * size);
+                    PdfPoint start = place.Point(0, baseline + offset * size);
+                    PdfPoint end = place.Point(width, baseline + offset * size);
                     rules.Add(Op("m", start.X, start.Y));
                     rules.Add(Op("l", end.X, end.Y));
                 }

@@ -1177,7 +1177,11 @@ namespace KillerPDF.Controls
             _selectedTextLook = null;
             if (_activeTextBox is not null || _defaultsBeforePageEdit is not { } saved) return;
             _defaultsBeforePageEdit = null;
-            if (_textColor == synced.Color && _textOpacity == synced.Opacity) (_textColor, _textOpacity) = (saved.Color, saved.Opacity);
+            // The opacity slider writes into _textColor too, so a new opacity is not a new ink.
+            bool sameInk = _textColor.R == synced.Color.R && _textColor.G == synced.Color.G && _textColor.B == synced.Color.B;
+            if (sameInk) _textColor = saved.Color;
+            if (_textOpacity == synced.Opacity) _textOpacity = saved.Opacity;
+            _textColor = Color.FromArgb(_textOpacity, _textColor.R, _textColor.G, _textColor.B);
             if (_textFontSize == synced.FontSize) _textFontSize = saved.FontSize;
             if (_textFontName == synced.FontName) _textFontName = saved.FontName;
             if (_textBold == synced.Bold) _textBold = saved.Bold;
