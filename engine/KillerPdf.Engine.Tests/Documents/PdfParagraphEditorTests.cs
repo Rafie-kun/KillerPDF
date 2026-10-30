@@ -1041,10 +1041,21 @@ public sealed class PdfParagraphEditorTests
     [Theory]
     [InlineData("(See example.com/)", "(path/to here)", "See example.com/path/to here")]
     [InlineData("(Use and/)", "(or both)", "Use and/or both")]
+    [InlineData("(See https://example.com/download/v)", "(1.2/file.zip)", "See https://example.com/download/v1.2/file.zip")]
+    [InlineData("(See https://example.com/path)", "(for more of it)", "See https://example.com/path for more of it")]
+    [InlineData("(See https://example.com/path.)", "(And/or more)", "See https://example.com/path. And/or more")]
     public void NoSpaceFollowsASlashAtTheEndOfARow(string first, string second, string expected)
     {
         PdfDocument source = Raw($"BT /F1 10 Tf 30 250 Td {first} Tj 0 -12 Td {second} Tj ET");
         Assert.Equal(expected, Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0)).Text);
+    }
+
+    // A shell line that continues on the next row is still its own row, however long that row is.
+    [Fact]
+    public void ABackslashAtTheEndOfARowKeepsTheRow()
+    {
+        PdfDocument source = Raw(@"BT /F1 10 Tf 30 250 Td ($ wget \\) Tj 0 -12 Td (https://example.com/download/file-1.2.zip) Tj ET");
+        Assert.Equal("$ wget \\\nhttps://example.com/download/file-1.2.zip", Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0)).Text);
     }
 
     // Nothing was typed, so nothing moves and no hyphen goes, whichever way the words were joined.

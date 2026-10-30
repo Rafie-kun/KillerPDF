@@ -496,12 +496,19 @@ public static class PdfParagraphEditor
                 if (keeps is null) guesses.Add(Bare(previous[(previous.LastIndexOf(' ') + 1)..^1]) + string.Concat(row.TakeWhile(char.IsLetter)));
             }
             else if (previous[^1] == '\u00AD') text.Length--;
-            else if (ended[index - 1] || allRows) text.Append('\n');
-            else if (previous.Length < 2 || previous[^1] != '/' || previous[^2] == ' ') text.Append(' ');
+            else if (ended[index - 1] || allRows || previous.EndsWith(" \\", StringComparison.Ordinal)) text.Append('\n');
+            else if (!ContinuesAddress(previous, row)) text.Append(' ');
             text.Append(row);
         }
         return text.ToString();
     }
+
+    // Any word with a slash can break after it, as and/or does. Past that, the row has to stop
+    // inside a web address and the next one has to go on as a path.
+    private static bool ContinuesAddress(string previous, string row) =>
+        previous.Length >= 2 && (previous[^1] == '/' && previous[^2] != ' '
+            || char.IsLetterOrDigit(previous[^1]) && row.Split(' ')[0].Contains('/')
+                && previous[(previous.LastIndexOf(' ') + 1)..].Contains("://", StringComparison.Ordinal));
 
     // Soft breaks fall between lowercase letters of a word, and an address holds no words. After
     // that the document's own spelling decides, the hyphenated form first because a real hyphen is
