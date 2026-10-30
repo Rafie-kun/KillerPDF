@@ -51,6 +51,9 @@ namespace KillerPDF.Services
         {
             try
             {
+                // A protected file whose trailer is gone reads as plain ciphertext, and rebuilding
+                // it would hand back pages that can never be read.
+                if (PdfEngineIntegration.HidesEncryption(File.ReadAllBytes(sourcePath))) return false;
                 PdfEngineIntegration.RebuildDocument(
                     sourcePath, destPath, stripRotations);
                 return true;
@@ -85,8 +88,10 @@ namespace KillerPDF.Services
         // True for recoverable PdfSharpCore read/parse failures that our repair path
         // (import-rebuild / PDFium round-trip) can usually fix. Named for the original xref case,
         // but now also covers other parser-level errors surfaced when reopening a saved temp.
+        // A refusal to rewrite a damaged protected file is final: the repairs this selects rewrite it.
         internal static bool IsXRefException(Exception ex) =>
-            ex.Message.Contains("XRef", StringComparison.OrdinalIgnoreCase) ||
+            ex is not DamagedSaveRefusedException &&
+            (ex.Message.Contains("XRef", StringComparison.OrdinalIgnoreCase) ||
             ex.Message.Contains("cross-reference", StringComparison.OrdinalIgnoreCase) ||
             ex.Message.Contains("trailer", StringComparison.OrdinalIgnoreCase) ||
             ex.Message.Contains("Invalid PDF file", StringComparison.OrdinalIgnoreCase) ||
@@ -94,7 +99,7 @@ namespace KillerPDF.Services
             ex.Message.Contains("Unexpected token", StringComparison.OrdinalIgnoreCase) ||
             // #106: "Cannot retrieve stream length." - a stream whose /Length is indirect or broken.
             ex.Message.Contains("stream length", StringComparison.OrdinalIgnoreCase) ||
-            ex.Message.Contains("File streams are not yet implemented", StringComparison.OrdinalIgnoreCase);
+            ex.Message.Contains("File streams are not yet implemented", StringComparison.OrdinalIgnoreCase));
 
         // True for UNC paths (\\server\share, \\wsl$\..., \\wsl.localhost\...) and mapped
         // network drives. Such files are copied locally before opening to avoid 9P short reads.

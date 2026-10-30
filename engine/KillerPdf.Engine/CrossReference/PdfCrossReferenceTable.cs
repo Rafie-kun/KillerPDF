@@ -225,6 +225,9 @@ public sealed class PdfCrossReferenceTable : IReadOnlyDictionary<int, PdfCrossRe
             var found = new Dictionary<PdfName, PdfObject>();
             foreach (var entry in trailer ?? new PdfDictionary([]))
                 found[entry.Key] = entry.Value;
+            if (trailer is null)
+                foreach (var entry in RecoverTrailerEntries(source))
+                    found[entry.Key] = entry.Value;
             foreach (PdfCrossReferenceEntry entry in entries.Values
                 .Where(entry => entry.Type == PdfCrossReferenceEntryType.InUse)
                 .OrderBy(entry => entry.Field1))
@@ -273,6 +276,31 @@ public sealed class PdfCrossReferenceTable : IReadOnlyDictionary<int, PdfCrossRe
         foreach (var pair in recoveredHeaders)
             table._recoveredHeaders.Add(pair.Key, pair.Value);
         return table;
+    }
+
+    // A damaged trailer keyword leaves its dictionary intact behind the last object. Reading that
+    // dictionary on its own keeps the catalog, information, identifier and encryption entries the
+    // pages depend on: without /Encrypt a protected file reads as ciphertext and looks unprotected.
+    private static IEnumerable<KeyValuePair<PdfName, PdfObject>> RecoverTrailerEntries(
+        ReadOnlyMemory<byte> source)
+    {
+        ReadOnlySpan<byte> bytes = source.Span;
+        int lastObject = Math.Max(bytes.LastIndexOf("endobj"u8), bytes.LastIndexOf("endstream"u8));
+        if (lastObject < 0) return [];
+        int dictionary = bytes[lastObject..].IndexOf("<<"u8);
+        if (dictionary < 0) return [];
+        try
+        {
+            if (new PdfObjectParser(source, lastObject + dictionary, allowDuplicateDictionaryKeys: true)
+                .ParseObject() is not PdfDictionary trailer)
+                return [];
+            return trailer.Where(entry => entry.Key.ValueAsLatin1() is "Root" or "Info" or "ID" or "Encrypt").ToList();
+        }
+        catch (Exception error) when (error is PdfSyntaxException or FormatException
+            or NotSupportedException or OverflowException)
+        {
+            return [];
+        }
     }
 
     private static Dictionary<int, HashSet<(int ObjectNumber, int Index)>> RecoverObjectStreamEntries(
