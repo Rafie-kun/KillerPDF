@@ -492,6 +492,7 @@ public partial class MainWindow
                 finalizeSavedFile: path =>
                     PdfEngineIntegration.ApplyAttachmentEdits(path, dialog.Edits),
                 documentUndo: documentUndo);
+            RefreshSidebarPanel();   // the panel lists the files, so it must not keep showing a removed one
             SetStatus(Loc("Str_Attachment_Updated"));
         }
         catch (Exception ex)
