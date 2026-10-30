@@ -752,6 +752,7 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Reduce_Working">Riduzione della dimensione del file...</sys:String>
     <sys:String x:Key="Str_Reduce_Done">{0} salvato: da {1} a {2}, immagini ricampionate: {3}</sys:String>
     <sys:String x:Key="Str_Reduce_Failed">Impossibile salvare la copia più piccola.</sys:String>
+    <sys:String x:Key="Str_Reduce_ClearsSignature">Questo documento è firmato o contiene diritti di utilizzo di Reader, e la riduzione riscrive il file, quindi non verranno mantenuti in &quot;{0}&quot;. Il file originale li mantiene.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Immagini</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Tutti i file</sys:String>
     <sys:String x:Key="Str_Filter_Zip">Archivio ZIP</sys:String>
@@ -762,12 +763,15 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Drop_Merge">Unisci i file in un unico file PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Apri i file separatamente</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Nessun PDF o immagine trovata da aprire.</sys:String>
-    <sys:String x:Key="Str_Drop_SkippedFiles">Ignorati {0} file che non è stato possibile riparare.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Esclusi {0} file che non è stato possibile leggere o riparare.</sys:String>
+    <sys:String x:Key="Str_Drop_RepairFailed">Non è stato possibile riparare il file, quindi nulla è stato unito.</sys:String>
+    <sys:String x:Key="Str_Import_NoPages">{0} non contiene pagine, quindi non c’è nulla da unire.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Verranno aperte {0} schede separate. Vuoi continuare?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Questa cartella o archivio contiene {0} file. KillerPDF aprirà solo i primi {1}. Vuoi continuare?</sys:String>
     <sys:String x:Key="Str_Status_Merged">Uniti {0} file: non ancora salvati</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Unione file...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Unione annullata</sys:String>
+    <sys:String x:Key="Str_Merge_TargetChanged">L’unione è stata annullata perché il documento è cambiato durante il controllo dei file. Non è stato aggiunto nulla.</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Sono presenti modifiche non salvate. Vuoi salvarle prima di chiudere tutti i documenti?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Prima apri un file PDF.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Vuoi salvare le modifiche prima di comprimerle in ZIP?</sys:String>
@@ -1589,6 +1593,7 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Macro_RedactPrompt">Inserisci le parole o frasi da oscurare, una per riga. Anche le aree contrassegnate con lo strumento Oscura in questo documento vengono oscurate.</sys:String>
     <sys:String x:Key="Str_Macro_RedactNothing">Inserisci almeno una parola o frase, oppure contrassegna prima delle aree con lo strumento Oscura.</sys:String>
     <sys:String x:Key="Str_Macro_Redacted">Oscurate {0} aree su {1} pagina/e.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactSkippedPages">L’oscuramento si è interrotto perché non è stato possibile leggere i campi modulo o i commenti in queste pagine, quindi un termine presente potrebbe sfuggire: {0}</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Scorri verso l'alto</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Scorri verso il basso</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Scorri a sinistra</sys:String>
@@ -1869,6 +1874,7 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Paragraph_Ready">Anteprima pronta. Applica sostituisce il testo del paragrafo originale.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Nessun paragrafo supportato trovato.</sys:String>
     <sys:String x:Key="Str_Paragraph_NoText">Questa pagina non contiene testo da modificare. Una pagina scansionata richiede prima l’OCR.</sys:String>
+    <sys:String x:Key="Str_Paragraph_HyphensToCheck">Controlla queste parole. Ognuna è stata unita a fine riga e nulla nel documento indica se il trattino ne faccia parte: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Questo paragrafo non può essere modificato: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Questo paragrafo combina caratteri, dimensioni o colori diversi. Il nuovo testo usa un solo stile, quindi questa formattazione non verrà mantenuta.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Carattere dell’anteprima: {0}. Questo carattere verrà incorporato nel PDF modificato.</sys:String>

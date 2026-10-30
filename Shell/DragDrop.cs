@@ -468,43 +468,84 @@ namespace KillerPDF.Shell
             // Repairs below are awaited; the import goes only into the document it was dropped on.
             var isTargetCurrent = CaptureDocumentOrigin();
             var imports = new List<PdfEngineIntegration.ImportedDocument>();
-            int notRepaired = 0;   // files whose repair was declined or failed, so the merge says they were left out
+            // Every file the merge does not take is counted, so the status never reports a clean merge
+            // over a file that quietly went missing.
+            int declined = 0;       // repairs the user turned down
+            int repairFailed = 0;   // repairs that were accepted and did not work
+            int unreadable = 0;     // files that could not be read, converted or merged
+            string? noPages = null;
+            string? failure = null;
             foreach (var f in files)
             {
-                string? importPath = null;
-                if (PdfImport.IsPdfPath(f))
+                try
                 {
-                    importPath = f;
-                    // Checking a damaged file copies its pages, so it runs off the UI thread.
-                    try { await Task.Run(() => PdfEngineIntegration.ValidateImportable(f)); }
-                    catch
+                    IReadOnlyList<KillerPdf.Engine.Documents.PdfPageInformation> pages;
+                    string importPath;
+                    if (PdfImport.IsPdfPath(f))
                     {
-                        importPath = await RepairPdfForImportAsync(f);
-                        if (importPath is null) notRepaired++;
+                        importPath = f;
+                        // Checking a damaged file copies its pages, so it runs off the UI thread.
+                        try
+                        {
+                            pages = await RunBusyAsync(() =>
+                            {
+                                PdfEngineIntegration.ValidateImportable(f);
+                                return PdfEngineIntegration.ReadPageInformation(f);
+                            });
+                        }
+                        // Only damage a repair can mend is offered one.
+                        catch (Exception ex) when (PdfEngineIntegration.IsParserDamage(ex))
+                        {
+                            (string? repaired, bool wasDeclined) = await RepairPdfForImportAsync(f);
+                            if (repaired is null)
+                            {
+                                if (wasDeclined) declined++; else repairFailed++;
+                                continue;
+                            }
+                            importPath = repaired;
+                            // A repair that did not help leaves this file out, not the files beside it.
+                            pages = await RunBusyAsync(() =>
+                            {
+                                PdfEngineIntegration.ValidateImportable(importPath);
+                                return PdfEngineIntegration.ReadPageInformation(importPath);
+                            });
+                        }
                     }
-                }
-                else
-                {
-                    try
+                    else
                     {
                         importPath = App.MakeTempFile("dropimage");
                         File.WriteAllBytes(importPath, PdfEngineIntegration.MergeFiles([f]));
+                        pages = PdfEngineIntegration.ReadPageInformation(importPath);
                     }
-                    catch { importPath = null; }
-                }
-                if (importPath is null) continue;
-                try
-                {
-                    var pages = PdfEngineIntegration.ReadPageInformation(importPath);
                     imports.Add(new PdfEngineIntegration.ImportedDocument(importPath,
                         [.. pages.Select(page => page.Rotation)], f));
                 }
-                catch { /* skip anything still unreadable after repair */ }
+                catch (PdfEngineIntegration.ImportNoPagesException ex)
+                {
+                    noPages = ex.Message;
+                    unreadable++;
+                }
+                catch (Exception ex) when (PdfEngineIntegration.IsImportFailure(ex))
+                {
+                    failure = ex.Message;
+                    unreadable++;
+                }
             }
-            if (_doc is null || !isTargetCurrent()) return;
+            if (_doc is null || !isTargetCurrent())
+            {
+                SetStatus(Loc("Str_Merge_TargetChanged"));
+                return;
+            }
+            int skipped = declined + repairFailed + unreadable;
             if (imports.Count == 0)
             {
-                SetStatus(Loc(notRepaired > 0 ? "Str_Drop_MergeCanceled" : "Str_Drop_NothingOpenable"));
+                if (repairFailed > 0) SetStatus(Loc("Str_Drop_RepairFailed"));
+                else if (declined > 0) SetStatus(Loc("Str_Drop_MergeCanceled"));
+                else if (noPages is not null) SetStatus(noPages);
+                else if (failure is not null)
+                    KillerDialog.Show(this, Loc("Str_Err_MergeFailed") + "\n" + failure,
+                        Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+                else SetStatus(Loc("Str_Drop_NothingOpenable"));
                 return;
             }
             try
@@ -523,8 +564,8 @@ namespace KillerPDF.Shell
                     selectedPageAfterReload: insertAt,
                     documentUndo: documentUndo);
                 string merged = string.Format(Loc("Str_Status_Merged"), imports.Count);
-                SetStatus(notRepaired > 0
-                    ? merged + " " + string.Format(Loc("Str_Drop_SkippedFiles"), notRepaired) : merged);
+                SetStatus(skipped > 0
+                    ? merged + " " + string.Format(Loc("Str_Drop_SkippedFiles"), skipped) : merged);
             }
             catch (Exception ex)
             {
@@ -533,17 +574,26 @@ namespace KillerPDF.Shell
             }
         }
 
+        // Runs the page check on a worker behind the same overlay the repair uses, so the window cannot
+        // be changed underneath a merge that has not copied anything yet.
+        private async System.Threading.Tasks.Task<T> RunBusyAsync<T>(Func<T> work)
+        {
+            var busy = ShowBusyOverlay(Loc("Str_Drop_Merging"));
+            try { return await System.Threading.Tasks.Task.Run(work); }
+            finally { HideBusyOverlay(busy); }
+        }
+
         /// <summary>
         /// Runs the open path's three repair strategies against a dropped file and returns the
-        /// repaired temp copy, or null if the user declined or nothing recovered it. The original
-        /// file is never written to.
+        /// repaired temp copy. The path is null when the user declined, which Declined says, or when
+        /// nothing recovered it. The original file is never written to.
         /// </summary>
-        private async System.Threading.Tasks.Task<string?> RepairPdfForImportAsync(string path)
+        private async System.Threading.Tasks.Task<(string? Path, bool Declined)> RepairPdfForImportAsync(string path)
         {
             var ask = KillerDialog.Show(this,
                 string.Format(Loc("Str_Dlg_RepairAsk"), System.IO.Path.GetFileName(path)),
                 "KillerPDF", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (ask != MessageBoxResult.Yes) return null;
+            if (ask != MessageBoxResult.Yes) return (null, true);
 
             var busy = ShowBusyOverlay(Loc("Str_Busy_Repairing"));
             try
@@ -566,7 +616,7 @@ namespace KillerPDF.Shell
                         string.Format(Loc("Str_Err_FileRepairFailed"),
                             System.IO.Path.GetFileName(path)),
                         "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
-                return repaired;
+                return (repaired, false);
             }
             finally { HideBusyOverlay(busy); }
         }

@@ -668,6 +668,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Reduce_Working">Dosya boyutu küçültülüyor...</sys:String>
     <sys:String x:Key="Str_Reduce_Done">{0} kaydedildi: {1} yerine {2}, yeniden örneklenen görüntüler: {3}</sys:String>
     <sys:String x:Key="Str_Reduce_Failed">Daha küçük kopya kaydedilemedi.</sys:String>
+    <sys:String x:Key="Str_Reduce_ClearsSignature">Bu belge imzalı veya Reader kullanım haklarını içeriyor, küçültme ise dosyayı yeniden yazdığından bunlar &quot;{0}&quot; dosyasına aktarılmaz. Özgün dosya bunları korur.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Görüntüler</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Tüm dosyalar</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP arşivi</sys:String>
@@ -678,12 +679,15 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Drop_Merge">Tek bir PDF'de birleştir</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Ayrı ayrı aç</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Açılacak PDF veya görüntü bulunamadı.</sys:String>
-    <sys:String x:Key="Str_Drop_SkippedFiles">Onarılamayan {0} dosya atlandı.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Okunamayan veya onarılamayan {0} dosya dışarıda bırakıldı.</sys:String>
+    <sys:String x:Key="Str_Drop_RepairFailed">Dosya onarılamadığı için hiçbir şey birleştirilmedi.</sys:String>
+    <sys:String x:Key="Str_Import_NoPages">{0} dosyasında sayfa yok, bu yüzden birleştirilecek bir şey yok.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Bu, {0} ayrı sekme açacak. Devam edilsin mi?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Bu klasör veya arşiv {0} dosya içeriyor. KillerPDF yalnızca ilk {1} tanesini açacak. Devam edilsin mi?</sys:String>
     <sys:String x:Key="Str_Status_Merged">{0} dosya birleştirildi - henüz kaydedilmedi</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Dosyalar birleştiriliyor...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Birleştirme iptal edildi</sys:String>
+    <sys:String x:Key="Str_Merge_TargetChanged">Dosyalar denetlenirken belge değiştiği için birleştirme iptal edildi. Hiçbir şey eklenmedi.</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Kaydedilmemiş değişiklikleriniz var. Tüm belgeler kapatılmadan önce kaydedilsin mi?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Önce bir PDF açın.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">ZIP olarak sıkıştırmadan önce değişiklikler kaydedilsin mi?</sys:String>
@@ -1569,6 +1573,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Macro_RedactPrompt">Karartılacak sözcükleri veya ifadeleri her satıra bir tane olacak şekilde girin. Bu belgede Karart aracıyla işaretlediğiniz alanlar da karartılır.</sys:String>
     <sys:String x:Key="Str_Macro_RedactNothing">En az bir sözcük veya ifade girin ya da önce Karart aracıyla alan işaretleyin.</sys:String>
     <sys:String x:Key="Str_Macro_Redacted">Karartılan alanlar: {0}, sayfa sayısı: {1}.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactSkippedPages">Bu sayfalardaki form alanları veya yorumlar okunamadığı için karartma durduruldu, bu nedenle oradaki bir terim gözden kaçabilir: {0}</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Yukarı kaydır</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Aşağı kaydır</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Sola kaydır</sys:String>
@@ -1849,6 +1854,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Paragraph_Ready">Önizleme hazır. Uygulama işlemi özgün paragraf metnini değiştirir.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Desteklenen bir paragraf bulunamadı.</sys:String>
     <sys:String x:Key="Str_Paragraph_NoText">Bu sayfada düzenlenecek metin yok. Taranmış bir sayfa için önce OCR gerekir.</sys:String>
+    <sys:String x:Key="Str_Paragraph_HyphensToCheck">Lütfen bu sözcükleri kontrol edin. Her biri satır sonunda birleştirildi ve belgede kısa çizginin yerinde olup olmadığını gösteren hiçbir şey yok: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Bu paragraf düzenlenemez: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Bu paragraf farklı yazı tiplerini, boyutlarını veya renklerini bir arada kullanıyor. Yeni metin tek bir stil kullanır, bu nedenle bu biçimlendirme korunmaz.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Önizleme yazı tipi: {0}. Bu yazı tipi düzenlenen PDF'ye gömülecektir.</sys:String>

@@ -752,6 +752,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Reduce_Working">Đang giảm kích thước tệp...</sys:String>
     <sys:String x:Key="Str_Reduce_Done">Đã lưu {0}: từ {1} xuống {2}, số ảnh đã lấy mẫu lại: {3}</sys:String>
     <sys:String x:Key="Str_Reduce_Failed">Không thể lưu bản sao nhỏ hơn.</sys:String>
+    <sys:String x:Key="Str_Reduce_ClearsSignature">Tài liệu này đã được ký hoặc có quyền sử dụng của Reader, và việc thu nhỏ sẽ ghi lại tệp, nên chúng sẽ không được giữ lại trong &quot;{0}&quot;. Tệp gốc vẫn giữ chúng.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Hình ảnh</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Tất cả các tệp</sys:String>
     <sys:String x:Key="Str_Filter_Zip">Tệp lưu trữ ZIP</sys:String>
@@ -762,12 +763,15 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Drop_Merge">Gộp thành một tệp PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Mở riêng biệt</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Không tìm thấy tệp PDF hoặc hình ảnh nào có thể mở.</sys:String>
-    <sys:String x:Key="Str_Drop_SkippedFiles">Đã bỏ qua {0} tệp không thể sửa.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Đã loại ra {0} tệp không thể đọc hoặc sửa.</sys:String>
+    <sys:String x:Key="Str_Drop_RepairFailed">Không thể sửa tệp, nên chưa gộp gì cả.</sys:String>
+    <sys:String x:Key="Str_Import_NoPages">{0} không có trang nào, nên không có gì để gộp.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Thao tác này sẽ mở {0} tab riêng biệt. Tiếp tục?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Thư mục hoặc tệp lưu trữ này có {0} tệp. KillerPDF sẽ chỉ mở {1} tệp đầu tiên. Tiếp tục?</sys:String>
     <sys:String x:Key="Str_Status_Merged">Đã gộp {0} tệp - chưa được lưu</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Đang gộp các tệp...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Đã hủy gộp</sys:String>
+    <sys:String x:Key="Str_Merge_TargetChanged">Đã hủy việc gộp vì tài liệu thay đổi trong lúc kiểm tra các tệp. Chưa có gì được thêm vào.</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Bạn có các thay đổi chưa được lưu. Lưu chúng trước khi đóng tất cả tài liệu?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Hãy mở tệp PDF trước.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Lưu các thay đổi trước khi nén thành tệp ZIP?</sys:String>
@@ -1589,6 +1593,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Macro_RedactPrompt">Nhập các từ hoặc cụm từ cần che, mỗi dòng một mục. Các vùng bạn đã đánh dấu bằng công cụ Che trong tài liệu này cũng được che.</sys:String>
     <sys:String x:Key="Str_Macro_RedactNothing">Nhập ít nhất một từ hoặc cụm từ, hoặc đánh dấu vùng bằng công cụ Che trước.</sys:String>
     <sys:String x:Key="Str_Macro_Redacted">Đã che {0} vùng trên {1} trang.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactSkippedPages">Việc che đã dừng vì không đọc được các trường biểu mẫu hoặc nhận xét trên các trang này, nên một thuật ngữ ở đó có thể bị bỏ sót: {0}</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Cuộn lên</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Cuộn xuống</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Cuộn sang trái</sys:String>
@@ -1869,6 +1874,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Paragraph_Ready">Bản xem trước đã sẵn sàng. Thao tác áp dụng sẽ thay thế văn bản của đoạn gốc.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Không tìm thấy đoạn văn được hỗ trợ.</sys:String>
     <sys:String x:Key="Str_Paragraph_NoText">Trang này không có văn bản để chỉnh sửa. Trang quét cần được OCR trước.</sys:String>
+    <sys:String x:Key="Str_Paragraph_HyphensToCheck">Hãy kiểm tra các từ này. Mỗi từ đã được nối qua cuối dòng và không có gì trong tài liệu cho biết dấu gạch nối có thuộc về từ đó hay không: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Không thể chỉnh sửa đoạn văn này: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Đoạn văn này dùng nhiều phông chữ, cỡ chữ hoặc màu sắc khác nhau. Văn bản mới chỉ dùng một kiểu, nên định dạng này sẽ không được giữ lại.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Phông chữ xem trước: {0}. Phông chữ này sẽ được nhúng vào PDF đã chỉnh sửa.</sys:String>

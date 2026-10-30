@@ -670,6 +670,7 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Reduce_Working">正在縮減檔案大小...</sys:String>
     <sys:String x:Key="Str_Reduce_Done">已儲存 {0}: 從 {1} 減為 {2}，重新取樣的影像: {3}</sys:String>
     <sys:String x:Key="Str_Reduce_Failed">無法儲存較小的副本。</sys:String>
+    <sys:String x:Key="Str_Reduce_ClearsSignature">此文件已簽署或帶有 Reader 使用權限，而縮小檔案會重寫該檔案，因此它們不會保留到「{0}」中。原始檔案仍保留它們。</sys:String>
     <sys:String x:Key="Str_Filter_Images">圖片</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">所有檔案</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP 壓縮檔</sys:String>
@@ -680,12 +681,15 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Drop_Merge">合併為單一 PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">分別開啟</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">找不到可開啟的 PDF 或圖片。</sys:String>
-    <sys:String x:Key="Str_Drop_SkippedFiles">已略過 {0} 個無法修復的檔案。</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">已排除 {0} 個無法讀取或修復的檔案。</sys:String>
+    <sys:String x:Key="Str_Drop_RepairFailed">無法修復該檔案，因此未合併任何內容。</sys:String>
+    <sys:String x:Key="Str_Import_NoPages">{0} 沒有頁面，因此沒有可合併的內容。</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">這將開啟 {0} 個獨立分頁。要繼續嗎？</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">此資料夾或壓縮檔包含 {0} 個檔案。KillerPDF 只會開啟前 {1} 個。要繼續嗎？</sys:String>
     <sys:String x:Key="Str_Status_Merged">已合併 {0} 個檔案 - 尚未儲存</sys:String>
     <sys:String x:Key="Str_Drop_Merging">正在合併檔案...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">已取消合併</sys:String>
+    <sys:String x:Key="Str_Merge_TargetChanged">由於在檢查檔案期間文件發生了變化，合併已被放棄。未新增任何內容。</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedCloseAll">您有未儲存的變更。要在關閉所有文件之前儲存嗎？</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">請先開啟一個 PDF。</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">壓縮為 ZIP 前儲存變更？</sys:String>
@@ -1571,6 +1575,7 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Macro_RedactPrompt">輸入要塗黑的文字或片語，每行一個。在此文件中以塗黑工具標記的區域也會被塗黑。</sys:String>
     <sys:String x:Key="Str_Macro_RedactNothing">請至少輸入一個文字或片語，或先以塗黑工具標記區域。</sys:String>
     <sys:String x:Key="Str_Macro_Redacted">已塗黑 {1} 頁上的 {0} 個區域。</sys:String>
+    <sys:String x:Key="Str_Macro_RedactSkippedPages">由於無法讀取這些頁面上的表單欄位或註解，塗黑已停止，因此其中的某個詞語可能被遺漏：{0}</sys:String>
     <sys:String x:Key="Str_Scroll_Up">向上捲動</sys:String>
     <sys:String x:Key="Str_Scroll_Down">向下捲動</sys:String>
     <sys:String x:Key="Str_Scroll_Left">向左捲動</sys:String>
@@ -1851,6 +1856,7 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">預覽已就緒。套用後將取代原段落文字。</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">找不到支援的段落。</sys:String>
     <sys:String x:Key="Str_Paragraph_NoText">此頁面沒有可編輯的文字。掃描的頁面需要先進行 OCR。</sys:String>
+    <sys:String x:Key="Str_Paragraph_HyphensToCheck">請檢查這些單字。每個單字都在行尾被連接，文件中沒有任何資訊表明其連字號是否應保留：{0}</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">無法編輯此段落：{0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">此段落混用了多種字型、大小或顏色。新文字僅使用單一樣式，因此不會保留該樣式設定。</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">預覽字型：{0}。此字型將嵌入編輯後的 PDF。</sys:String>

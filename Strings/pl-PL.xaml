@@ -734,6 +734,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Reduce_Working">Zmniejszanie rozmiaru pliku...</sys:String>
     <sys:String x:Key="Str_Reduce_Done">Zapisano {0}: z {1} do {2}, przeskalowane obrazy: {3}</sys:String>
     <sys:String x:Key="Str_Reduce_Failed">Nie można zapisać mniejszej kopii.</sys:String>
+    <sys:String x:Key="Str_Reduce_ClearsSignature">Ten dokument jest podpisany lub zawiera prawa użytkowania programu Reader, a zmniejszenie go przepisuje plik, więc nie zostaną one przeniesione do &quot;{0}&quot;. Oryginalny plik je zachowuje.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Obrazy</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Wszystkie pliki</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP archiwum</sys:String>
@@ -744,12 +745,15 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Drop_Merge">Połącz w jeden PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Otwórz osobno</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Nie znaleziono plików PDF ani obrazów do otwarcia.</sys:String>
-    <sys:String x:Key="Str_Drop_SkippedFiles">Pominięto pliki, których nie udało się naprawić (liczba: {0}).</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Pominięto pliki, których nie udało się odczytać ani naprawić (liczba: {0}).</sys:String>
+    <sys:String x:Key="Str_Drop_RepairFailed">Nie udało się naprawić pliku, więc nic nie zostało scalone.</sys:String>
+    <sys:String x:Key="Str_Import_NoPages">Plik {0} nie zawiera stron, więc nie ma czego scalać.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Spowoduje to otwarcie {0} oddzielnych kart. Kontynuować?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Ten folder lub archiwum zawiera {0} plików. KillerPDF otworzy tylko pierwsze {1}. Kontynuować?</sys:String>
     <sys:String x:Key="Str_Status_Merged">Połączono {0} plików - jeszcze nie zapisano</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Łączenie plików...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Łączenie anulowane</sys:String>
+    <sys:String x:Key="Str_Merge_TargetChanged">Scalanie zostało odrzucone, ponieważ dokument zmienił się podczas sprawdzania plików. Nic nie zostało dodane.</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Masz niezapisane zmiany. Zapisać je przed zamknięciem wszystkich dokumentów?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Najpierw otwórz PDF.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Zapisać zmiany przed skompresowaniem do ZIP?</sys:String>
@@ -1577,6 +1581,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Macro_RedactPrompt">Wpisz słowa lub frazy do zaczernienia, po jednym w wierszu. Obszary zaznaczone narzędziem Zaczernij w tym dokumencie również zostaną zaczernione.</sys:String>
     <sys:String x:Key="Str_Macro_RedactNothing">Wpisz co najmniej jedno słowo lub frazę albo najpierw zaznacz obszary narzędziem Zaczernij.</sys:String>
     <sys:String x:Key="Str_Macro_Redacted">Zaczernione obszary: {0}, na {1} str.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactSkippedPages">Zaczernianie zostało zatrzymane, ponieważ nie udało się odczytać pól formularza ani komentarzy na tych stronach, więc znajdujące się tam wyrażenie mogło zostać pominięte: {0}</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Przewiń w górę</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Przewiń w dół</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Przewiń w lewo</sys:String>
@@ -1857,6 +1862,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Paragraph_Ready">Podgląd gotowy. Zastosowanie zmian zastąpi oryginalny tekst akapitu.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Nie znaleziono obsługiwanego akapitu.</sys:String>
     <sys:String x:Key="Str_Paragraph_NoText">Ta strona nie zawiera tekstu do edycji. Zeskanowana strona wymaga najpierw OCR.</sys:String>
+    <sys:String x:Key="Str_Paragraph_HyphensToCheck">Sprawdź te słowa. Każde zostało połączone na końcu wiersza i nic w dokumencie nie wskazuje, czy jego łącznik należy zachować: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Tego akapitu nie można edytować: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Ten akapit łączy różne czcionki, rozmiary lub kolory. Nowy tekst używa jednego stylu, więc to formatowanie nie zostanie zachowane.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Czcionka podglądu: {0}. Ta czcionka zostanie osadzona w edytowanym pliku PDF.</sys:String>

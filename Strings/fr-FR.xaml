@@ -752,6 +752,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Reduce_Working">Réduction de la taille du fichier...</sys:String>
     <sys:String x:Key="Str_Reduce_Done">{0} enregistré : {1} à {2}, images rééchantillonnées : {3}</sys:String>
     <sys:String x:Key="Str_Reduce_Failed">Impossible d’enregistrer la copie plus petite.</sys:String>
+    <sys:String x:Key="Str_Reduce_ClearsSignature">Ce document est signé ou comporte des droits d’utilisation Reader, et sa réduction réécrit le fichier, donc ils ne seront pas conservés dans « {0} ». Le fichier d’origine les conserve.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Images</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Tous les fichiers</sys:String>
     <sys:String x:Key="Str_Filter_Zip">Archive ZIP</sys:String>
@@ -762,12 +763,15 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Drop_Merge">Fusionner en un seul PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Ouvrir séparément</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Aucun PDF ou image à ouvrir n'a été trouvé.</sys:String>
-    <sys:String x:Key="Str_Drop_SkippedFiles">{0} fichier(s) n’ont pas pu être réparés et ont été ignorés.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">{0} fichier(s) qui n’ont pas pu être lus ou réparés ont été laissés de côté.</sys:String>
+    <sys:String x:Key="Str_Drop_RepairFailed">Le fichier n’a pas pu être réparé, donc rien n’a été fusionné.</sys:String>
+    <sys:String x:Key="Str_Import_NoPages">{0} ne contient aucune page, il n’y a donc rien à fusionner.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Cela ouvrira {0} onglets séparés. Continuer ?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Ce dossier ou cette archive contient {0} fichiers. KillerPDF n'ouvrira que les {1} premiers. Continuer ?</sys:String>
     <sys:String x:Key="Str_Status_Merged">{0} fichiers fusionnés - pas encore enregistré</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Fusion des fichiers...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Fusion annulée</sys:String>
+    <sys:String x:Key="Str_Merge_TargetChanged">La fusion a été abandonnée, car le document a changé pendant la vérification des fichiers. Rien n’a été ajouté.</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Des modifications non enregistrées sont présentes. Les enregistrer avant de fermer tous les documents ?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Ouvrez d'abord un PDF.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Enregistrer les modifications avant de compresser en ZIP ?</sys:String>
@@ -1589,6 +1593,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Macro_RedactPrompt">Saisissez les mots ou expressions à caviarder, un par ligne. Les zones marquées avec l'outil Caviarder dans ce document sont aussi caviardées.</sys:String>
     <sys:String x:Key="Str_Macro_RedactNothing">Saisissez au moins un mot ou une expression, ou marquez d'abord des zones avec l'outil Caviarder.</sys:String>
     <sys:String x:Key="Str_Macro_Redacted">{0} zone(s) caviardée(s) sur {1} page(s).</sys:String>
+    <sys:String x:Key="Str_Macro_RedactSkippedPages">Le caviardage s’est arrêté, car les champs de formulaire ou les commentaires de ces pages n’ont pas pu être lus, donc un terme qui s’y trouve pourrait être manqué : {0}</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Défiler vers le haut</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Défiler vers le bas</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Défiler vers la gauche</sys:String>
@@ -1869,6 +1874,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Paragraph_Ready">Aperçu prêt. Appliquer remplace le texte du paragraphe d’origine.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Aucun paragraphe compatible trouvé.</sys:String>
     <sys:String x:Key="Str_Paragraph_NoText">Cette page ne contient aucun texte à modifier. Une page numérisée nécessite d’abord l’OCR.</sys:String>
+    <sys:String x:Key="Str_Paragraph_HyphensToCheck">Veuillez vérifier ces mots. Chacun a été joint à une fin de ligne, et rien dans le document n’indique si son trait d’union doit rester : {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Ce paragraphe ne peut pas être modifié : {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Ce paragraphe mélange plusieurs polices, tailles ou couleurs. Le nouveau texte utilise un seul style, cette mise en forme ne sera donc pas conservée.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Police de l’aperçu : {0}. Cette police sera incorporée au PDF modifié.</sys:String>

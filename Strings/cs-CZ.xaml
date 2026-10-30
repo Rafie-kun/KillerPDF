@@ -743,6 +743,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Reduce_Working">Zmenšování velikosti souboru...</sys:String>
     <sys:String x:Key="Str_Reduce_Done">Uloženo {0}: z {1} na {2}, převzorkované obrázky: {3}</sys:String>
     <sys:String x:Key="Str_Reduce_Failed">Menší kopii nelze uložit.</sys:String>
+    <sys:String x:Key="Str_Reduce_ClearsSignature">Tento dokument je podepsaný nebo obsahuje práva k použití v aplikaci Reader a zmenšení přepíše soubor, takže se do souboru &quot;{0}&quot; nepřenesou. Původní soubor je zachová.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Obrázky</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Všechny soubory</sys:String>
     <sys:String x:Key="Str_Filter_Zip">Archiv ZIP</sys:String>
@@ -753,12 +754,15 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Drop_Merge">Sloučit do jednoho PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Otevřít samostatně</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Nebyly nalezeny žádné PDF ani obrázky k otevření.</sys:String>
-    <sys:String x:Key="Str_Drop_SkippedFiles">Přeskočeno souborů, které se nepodařilo opravit: {0}.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Vynecháno souborů, které se nepodařilo přečíst nebo opravit: {0}.</sys:String>
+    <sys:String x:Key="Str_Drop_RepairFailed">Soubor se nepodařilo opravit, proto nebylo nic sloučeno.</sys:String>
+    <sys:String x:Key="Str_Import_NoPages">Soubor {0} neobsahuje žádné stránky, takže není co sloučit.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Otevřou se samostatné karty (počet: {0}). Pokračovat?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Tato složka nebo archiv obsahuje soubory (počet: {0}). KillerPDF otevře jen prvních {1}. Pokračovat?</sys:String>
     <sys:String x:Key="Str_Status_Merged">Sloučeno souborů: {0} - zatím neuloženo</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Slučuji soubory...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Slučování zrušeno</sys:String>
+    <sys:String x:Key="Str_Merge_TargetChanged">Sloučení bylo zahozeno, protože se dokument během kontroly souborů změnil. Nic nebylo přidáno.</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Máte neuložené změny. Uložit je před zavřením všech dokumentů?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Nejprve otevřete PDF.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Uložit změny před komprimací do ZIP?</sys:String>
@@ -1574,6 +1578,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Macro_RedactPrompt">Zadejte slova nebo fráze k začernění, na každý řádek jedno. Oblasti označené nástrojem Začernit v tomto dokumentu se začerní také.</sys:String>
     <sys:String x:Key="Str_Macro_RedactNothing">Zadejte alespoň jedno slovo nebo frázi, nebo nejprve označte oblasti nástrojem Začernit.</sys:String>
     <sys:String x:Key="Str_Macro_Redacted">Začerněno oblastí: {0}, na {1} str.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactSkippedPages">Začernění se zastavilo, protože se nepodařilo přečíst formulářová pole nebo komentáře na těchto stránkách, takže tam mohl být nějaký výraz přehlédnut: {0}</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Posunout nahoru</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Posunout dolů</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Posunout doleva</sys:String>
@@ -1854,6 +1859,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Paragraph_Ready">Náhled je připraven. Použitím změn nahradíte původní text odstavce.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Nebyl nalezen žádný podporovaný odstavec.</sys:String>
     <sys:String x:Key="Str_Paragraph_NoText">Tato stránka neobsahuje žádný text k úpravě. Naskenovaná stránka nejprve vyžaduje OCR.</sys:String>
+    <sys:String x:Key="Str_Paragraph_HyphensToCheck">Zkontrolujte prosím tato slova. Každé bylo spojeno přes konec řádku a nic v dokumentu nenaznačuje, zda k němu spojovník patří: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Tento odstavec nelze upravit: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Tento odstavec kombinuje různá písma, velikosti nebo barvy. Nový text používá jeden styl, takže se toto formátování nepřenese.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Písmo náhledu: {0}. Toto písmo bude vloženo do upraveného PDF.</sys:String>

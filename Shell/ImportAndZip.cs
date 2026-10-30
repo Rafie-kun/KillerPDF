@@ -174,7 +174,7 @@ namespace KillerPDF.Shell
             try
             {
                 // Build off the UI thread so the window stays responsive (and movable) while it works.
-                string? tempPath = await Task.Run(() => BuildCombinedPdf(found, ct));
+                (string? tempPath, int leftOut) = await Task.Run(() => BuildCombinedPdf(found, ct));
                 target.LoadPending = false;
                 if (!ReclaimAsyncOwner(owner))
                 {
@@ -199,7 +199,9 @@ namespace KillerPDF.Shell
                 FinishOpenFile("Combined.pdf", tempPath);
                 _originalFile = null;   // unsaved -> Save routes to Save As
                 MarkDirty(true);
-                SetStatus(string.Format(Loc("Str_Status_Merged"), found.Count));
+                string merged = string.Format(Loc("Str_Status_Merged"), found.Count - leftOut);
+                SetStatus(leftOut > 0
+                    ? merged + " " + string.Format(Loc("Str_Drop_SkippedFiles"), leftOut) : merged);
                 CaptureSessionState(_active!);
                 SetTool(_currentTool);
                 RebuildTabStrip();
@@ -247,14 +249,15 @@ namespace KillerPDF.Shell
         }
 
         // Builds one PDF from a mix of PDFs (pages imported in order) and images (one page each).
-        // Unreadable / encrypted entries are skipped rather than aborting the whole merge.
-        private static string? BuildCombinedPdf(List<string> files, CancellationToken ct)
+        // Unreadable / encrypted entries are skipped rather than aborting the whole merge, and how many
+        // were left out comes back with the file so the status can say so.
+        private static (string? Path, int LeftOut) BuildCombinedPdf(List<string> files, CancellationToken ct)
         {
-            if (ct.IsCancellationRequested) return null;
+            if (ct.IsCancellationRequested) return (null, 0);
             string outPath = Path.Combine(Path.GetTempPath(),
                 $"Combined-{DateTime.Now:yyyyMMdd-HHmmss-fff}.pdf");
-            File.WriteAllBytes(outPath, PdfEngineIntegration.MergeReadableFiles(files));
-            return outPath;
+            File.WriteAllBytes(outPath, PdfEngineIntegration.MergeReadableFiles(files, out IReadOnlyList<string> leftOut));
+            return (outPath, leftOut.Count);
         }
 
         // Recursively gathers the PDFs and images under a folder, in a stable name order.

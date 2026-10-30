@@ -752,6 +752,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Reduce_Working">Reduserer filstørrelsen...</sys:String>
     <sys:String x:Key="Str_Reduce_Done">Lagret {0}: fra {1} til {2}, nedskalerte bilder: {3}</sys:String>
     <sys:String x:Key="Str_Reduce_Failed">Den mindre kopien kunne ikke lagres.</sys:String>
+    <sys:String x:Key="Str_Reduce_ClearsSignature">Dette dokumentet er signert eller har Reader-bruksrettigheter, og reduksjon skriver filen på nytt, så de blir ikke med over til «{0}». Den opprinnelige filen beholder dem.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Bilder</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Alle filer</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP-arkiv</sys:String>
@@ -762,12 +763,15 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Drop_Merge">Slå sammen til én PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Åpne hver for seg</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Fant ingen PDF-er eller bilder å åpne.</sys:String>
-    <sys:String x:Key="Str_Drop_SkippedFiles">Hoppet over {0} fil(er) som ikke kunne repareres.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Utelot {0} fil(er) som ikke kunne leses eller repareres.</sys:String>
+    <sys:String x:Key="Str_Drop_RepairFailed">Filen kunne ikke repareres, så ingenting ble slått sammen.</sys:String>
+    <sys:String x:Key="Str_Import_NoPages">{0} har ingen sider, så det er ingenting å slå sammen.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Dette åpner {0} separate faner. Vil du fortsette?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Denne mappen eller dette arkivet har {0} filer. KillerPDF åpner bare de første {1}. Vil du fortsette?</sys:String>
     <sys:String x:Key="Str_Status_Merged">Slo sammen {0} filer - ikke lagret ennå</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Slår sammen filer...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Sammenslåingen er avbrutt</sys:String>
+    <sys:String x:Key="Str_Merge_TargetChanged">Sammenslåingen ble forkastet fordi dokumentet endret seg mens filene ble kontrollert. Ingenting ble lagt til.</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Du har ulagrede endringer. Vil du lagre dem før du lukker alle dokumenter?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Åpne en PDF først.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Lagre endringer før komprimering til ZIP?</sys:String>
@@ -1589,6 +1593,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Macro_RedactPrompt">Skriv inn ordene eller uttrykkene som skal sladdes, ett per linje. Områder du har markert med Sladd-verktøyet i dette dokumentet, sladdes også.</sys:String>
     <sys:String x:Key="Str_Macro_RedactNothing">Skriv inn minst ett ord eller uttrykk, eller marker først områder med Sladd-verktøyet.</sys:String>
     <sys:String x:Key="Str_Macro_Redacted">Sladdet {0} område(r) på {1} side(r).</sys:String>
+    <sys:String x:Key="Str_Macro_RedactSkippedPages">Sladdingen stoppet fordi skjemafeltene eller kommentarene på disse sidene ikke kunne leses, så et uttrykk der kan bli oversett: {0}</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Rull opp</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Rull ned</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Rull til venstre</sys:String>
@@ -1869,6 +1874,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Paragraph_Ready">Forhåndsvisningen er klar. Bruk erstatter den opprinnelige avsnittsteksten.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Fant ingen støttede avsnitt.</sys:String>
     <sys:String x:Key="Str_Paragraph_NoText">Denne siden har ingen tekst å redigere. En skannet side må først behandles med OCR.</sys:String>
+    <sys:String x:Key="Str_Paragraph_HyphensToCheck">Kontroller disse ordene. Hvert av dem ble slått sammen over en linjeslutt, og ingenting i dokumentet viser om bindestreken hører til: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Dette avsnittet kan ikke redigeres: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Dette avsnittet blander skrifttyper, størrelser eller farger. Den nye teksten bruker én stil, så denne formateringen blir ikke med videre.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Skrift i forhåndsvisningen: {0}. Denne skriften bygges inn i den redigerte PDF-filen.</sys:String>

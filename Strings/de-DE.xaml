@@ -668,6 +668,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Reduce_Working">Dateigröße wird reduziert...</sys:String>
     <sys:String x:Key="Str_Reduce_Done">{0} gespeichert: {1} auf {2}, neu berechnete Bilder: {3}</sys:String>
     <sys:String x:Key="Str_Reduce_Failed">Die kleinere Kopie konnte nicht gespeichert werden.</sys:String>
+    <sys:String x:Key="Str_Reduce_ClearsSignature">Dieses Dokument ist signiert oder enthält Reader-Nutzungsrechte. Beim Verkleinern wird die Datei neu geschrieben, daher werden sie nicht nach &quot;{0}&quot; übernommen. Die Originaldatei behält sie.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Bilder</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Alle Dateien</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP-Archiv</sys:String>
@@ -678,12 +679,15 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Drop_Merge">In einer PDF zusammenführen</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Einzeln öffnen</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Keine PDFs oder Bilder zum Öffnen gefunden.</sys:String>
-    <sys:String x:Key="Str_Drop_SkippedFiles">{0} Datei(en), die nicht repariert werden konnten, wurden übersprungen.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">{0} Datei(en), die nicht gelesen oder repariert werden konnten, wurden ausgelassen.</sys:String>
+    <sys:String x:Key="Str_Drop_RepairFailed">Die Datei konnte nicht repariert werden, daher wurde nichts zusammengeführt.</sys:String>
+    <sys:String x:Key="Str_Import_NoPages">{0} enthält keine Seiten, daher gibt es nichts zusammenzuführen.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Dies öffnet {0} separate Tabs. Fortfahren?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Dieser Ordner bzw. dieses Archiv enthält {0} Dateien. KillerPDF öffnet nur die ersten {1}. Fortfahren?</sys:String>
     <sys:String x:Key="Str_Status_Merged">{0} Dateien zusammengeführt - noch nicht gespeichert</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Dateien werden zusammengeführt...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Zusammenführen abgebrochen</sys:String>
+    <sys:String x:Key="Str_Merge_TargetChanged">Das Zusammenführen wurde verworfen, weil sich das Dokument während der Prüfung der Dateien geändert hat. Es wurde nichts hinzugefügt.</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Es gibt ungespeicherte Änderungen. Vor dem Schließen aller Dokumente speichern?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Öffnen Sie zuerst eine PDF.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Änderungen vor dem Komprimieren in ZIP speichern?</sys:String>
@@ -1578,6 +1582,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Macro_RedactPrompt">Geben Sie die zu schwärzenden Wörter oder Ausdrücke ein, einen pro Zeile. Mit dem Schwärzen-Werkzeug markierte Bereiche in diesem Dokument werden ebenfalls geschwärzt.</sys:String>
     <sys:String x:Key="Str_Macro_RedactNothing">Geben Sie mindestens ein Wort oder einen Ausdruck ein oder markieren Sie zuerst Bereiche mit dem Schwärzen-Werkzeug.</sys:String>
     <sys:String x:Key="Str_Macro_Redacted">{0} Bereich(e) auf {1} Seite(n) geschwärzt.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactSkippedPages">Das Schwärzen wurde angehalten, weil die Formularfelder oder Kommentare auf diesen Seiten nicht gelesen werden konnten und ein Begriff dort übersehen werden könnte: {0}</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Nach oben scrollen</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Nach unten scrollen</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Nach links scrollen</sys:String>
@@ -1858,6 +1863,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Paragraph_Ready">Vorschau bereit. Anwenden ersetzt den ursprünglichen Absatztext.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Kein unterstützter Absatz gefunden.</sys:String>
     <sys:String x:Key="Str_Paragraph_NoText">Diese Seite enthält keinen bearbeitbaren Text. Eine gescannte Seite benötigt zuerst OCR.</sys:String>
+    <sys:String x:Key="Str_Paragraph_HyphensToCheck">Bitte prüfen Sie diese Wörter. Jedes wurde über einen Zeilenumbruch hinweg zusammengefügt, und nichts im Dokument zeigt, ob der Bindestrich dazugehört: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Dieser Absatz kann nicht bearbeitet werden: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Dieser Absatz enthält verschiedene Schriftarten, Schriftgrößen oder Farben. Der neue Text verwendet einen einheitlichen Stil, daher wird diese Formatierung nicht übernommen.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Vorschauschrift: {0}. Diese Schrift wird in die bearbeitete PDF eingebettet.</sys:String>

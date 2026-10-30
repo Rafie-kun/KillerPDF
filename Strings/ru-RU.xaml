@@ -752,6 +752,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Reduce_Working">Уменьшение размера файла...</sys:String>
     <sys:String x:Key="Str_Reduce_Done">Сохранено {0}: с {1} до {2}, пересчитано изображений: {3}</sys:String>
     <sys:String x:Key="Str_Reduce_Failed">Не удалось сохранить уменьшенную копию.</sys:String>
+    <sys:String x:Key="Str_Reduce_ClearsSignature">Этот документ подписан или содержит права на использование Reader, а уменьшение размера перезаписывает файл, поэтому они не сохранятся в «{0}». Исходный файл их сохраняет.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Изображения</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Все файлы</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP архив</sys:String>
@@ -762,12 +763,15 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Drop_Merge">Объединить в один PDF-файл</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Открыть отдельно</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Не найдено PDF или изображений чтобы открыть.</sys:String>
-    <sys:String x:Key="Str_Drop_SkippedFiles">Пропущено файлов, которые не удалось восстановить: {0}.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Исключено файлов, которые не удалось прочитать или восстановить: {0}.</sys:String>
+    <sys:String x:Key="Str_Drop_RepairFailed">Не удалось восстановить файл, поэтому ничего не объединено.</sys:String>
+    <sys:String x:Key="Str_Import_NoPages">В файле {0} нет страниц, поэтому объединять нечего.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Будет открыто {0} отдельных вкладок. Продолжить?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Эта папка или архив содержит файлов: {0}. KillerPDF откроет только первые {1}. Продолжить?</sys:String>
     <sys:String x:Key="Str_Status_Merged">Объединено {0} файлов - пока не сохранены</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Объединяем файлы...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Объединение отменено</sys:String>
+    <sys:String x:Key="Str_Merge_TargetChanged">Объединение отменено, так как документ изменился во время проверки файлов. Ничего не добавлено.</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedCloseAll">У вас есть несохраненные изменения. Сохранить их перед закрытием всех документов?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Сначала откройте PDF-файл.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Сохранить изменения перед сжатием в ZIP-файл?</sys:String>
@@ -1592,6 +1596,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Macro_RedactPrompt">Введите слова или фразы, которые нужно скрыть, по одной в строке. Области, отмеченные в этом документе инструментом «Скрыть», тоже будут скрыты.</sys:String>
     <sys:String x:Key="Str_Macro_RedactNothing">Введите хотя бы одно слово или фразу либо сначала отметьте области инструментом «Скрыть».</sys:String>
     <sys:String x:Key="Str_Macro_Redacted">Скрыто: {0} обл. на {1} стр.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactSkippedPages">Скрытие остановлено, так как не удалось прочитать поля формы или комментарии на этих страницах, поэтому термин там мог быть пропущен: {0}</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Прокрутить вверх</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Прокрутить вниз</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Прокрутить влево</sys:String>
@@ -1872,6 +1877,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Paragraph_Ready">Предпросмотр готов. Применение заменит исходный текст абзаца.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Поддерживаемый абзац не найден.</sys:String>
     <sys:String x:Key="Str_Paragraph_NoText">На этой странице нет текста для редактирования. Для отсканированной страницы сначала нужно выполнить OCR.</sys:String>
+    <sys:String x:Key="Str_Paragraph_HyphensToCheck">Проверьте эти слова. Каждое было соединено на конце строки, и ничто в документе не показывает, нужен ли в нем дефис: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Этот абзац нельзя редактировать: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">В этом абзаце смешаны разные шрифты, размеры или цвета. Новый текст использует один стиль, поэтому это форматирование не сохранится.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Шрифт предпросмотра: {0}. Этот шрифт будет встроен в отредактированный PDF.</sys:String>

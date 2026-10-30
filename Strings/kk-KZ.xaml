@@ -672,6 +672,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Reduce_Working">Файл өлшемі азайтылуда...</sys:String>
     <sys:String x:Key="Str_Reduce_Done">{0} сақталды: {1} орнына {2}, қайта есептелген суреттер: {3}</sys:String>
     <sys:String x:Key="Str_Reduce_Failed">Кішірек көшірмені сақтау мүмкін болмады.</sys:String>
+    <sys:String x:Key="Str_Reduce_ClearsSignature">Бұл құжатқа қол қойылған немесе онда Reader пайдалану құқықтары бар, ал кішірейту файлды қайта жазады, сондықтан олар «{0}» файлына көшпейді. Түпнұсқа файл оларды сақтайды.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Суреттер</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Барлық файлдар</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP мұрағаты</sys:String>
@@ -682,12 +683,15 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Drop_Merge">Бір PDF-ке біріктіру</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Бөлек ашу</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Ашуға PDF немесе сурет табылмады.</sys:String>
-    <sys:String x:Key="Str_Drop_SkippedFiles">Жөндеу мүмкін болмаған {0} файл өткізіп жіберілді.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Оқу немесе жөндеу мүмкін болмаған {0} файл шығарып тасталды.</sys:String>
+    <sys:String x:Key="Str_Drop_RepairFailed">Файлды жөндеу мүмкін болмады, сондықтан ештеңе біріктірілген жоқ.</sys:String>
+    <sys:String x:Key="Str_Import_NoPages">{0} файлында беттер жоқ, сондықтан біріктіретін ештеңе жоқ.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Бұл {0} бөлек қойынды ашады. Жалғастыру керек пе?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Бұл қалтада немесе мұрағатта {0} файл бар. KillerPDF тек алғашқы {1} файлды ашады. Жалғастыру керек пе?</sys:String>
     <sys:String x:Key="Str_Status_Merged">{0} файл біріктірілді - әлі сақталмаған</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Файлдар біріктірілуде...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Біріктіру болдырылмады</sys:String>
+    <sys:String x:Key="Str_Merge_TargetChanged">Файлдарды тексеру кезінде құжат өзгергендіктен, біріктіру тоқтатылды. Ештеңе қосылған жоқ.</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Сақталмаған өзгерістер бар. Барлық құжаттарды жаппас бұрын оларды сақтау керек пе?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Алдымен PDF ашыңыз.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">ZIP-ке сығар алдында өзгерістерді сақтау керек пе?</sys:String>
@@ -1592,6 +1596,7 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Macro_RedactPrompt">Жасырылатын сөздерді немесе тіркестерді әр жолға біреуден енгізіңіз. Осы құжатта Жасыру құралымен белгіленген аймақтар да жасырылады.</sys:String>
     <sys:String x:Key="Str_Macro_RedactNothing">Кемінде бір сөз не тіркес енгізіңіз немесе алдымен Жасыру құралымен аймақтарды белгілеңіз.</sys:String>
     <sys:String x:Key="Str_Macro_Redacted">{1} беттегі {0} аймақ жасырылды.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactSkippedPages">Осы беттердегі пішін өрістерін немесе түсініктемелерді оқу мүмкін болмағандықтан, жасыру тоқтатылды, сондықтан сол жердегі термин қалып қоюы мүмкін: {0}</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Жоғары айналдыру</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Төмен айналдыру</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Солға айналдыру</sys:String>
@@ -1872,6 +1877,7 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Paragraph_Ready">Алдын ала қарау дайын. Өзгерістерді қолдану бастапқы абзац мәтінін ауыстырады.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Қолдау көрсетілетін абзац табылмады.</sys:String>
     <sys:String x:Key="Str_Paragraph_NoText">Бұл бетте өңделетін мәтін жоқ. Сканерленген бетке алдымен OCR қажет.</sys:String>
+    <sys:String x:Key="Str_Paragraph_HyphensToCheck">Осы сөздерді тексеріңіз. Әрқайсысы жол соңында біріктірілген, ал сызықшаның қажет екенін құжаттан анықтау мүмкін емес: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Бұл абзацты өңдеу мүмкін емес: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Бұл абзацта әртүрлі қаріптер, өлшемдер немесе түстер араласқан. Жаңа мәтін бір стильді пайдаланады, сондықтан бұл пішімдеу сақталмайды.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Алдын ала қарау қарпі: {0}. Бұл қаріп өңделген PDF файлына ендіріледі.</sys:String>

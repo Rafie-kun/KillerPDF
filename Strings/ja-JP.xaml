@@ -752,6 +752,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Reduce_Working">ファイルサイズを縮小中...</sys:String>
     <sys:String x:Key="Str_Reduce_Done">{0} を保存しました: {1} から {2}、再サンプリングした画像: {3}</sys:String>
     <sys:String x:Key="Str_Reduce_Failed">小さいコピーを保存できませんでした。</sys:String>
+    <sys:String x:Key="Str_Reduce_ClearsSignature">この文書には署名または Reader の使用権限が含まれており、縮小するとファイルが書き直されるため、「{0}」 には引き継がれません。元のファイルには保持されます。</sys:String>
     <sys:String x:Key="Str_Filter_Images">画像</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">すべてのファイル</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP アーカイブ</sys:String>
@@ -762,12 +763,15 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Drop_Merge">1つの PDF に結合</sys:String>
     <sys:String x:Key="Str_Drop_Separate">個別に開く</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">開ける PDF または画像が見つかりませんでした。</sys:String>
-    <sys:String x:Key="Str_Drop_SkippedFiles">修復できなかったファイルを {0} 件スキップしました。</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">読み取りまたは修復できなかったファイルを {0} 件除外しました。</sys:String>
+    <sys:String x:Key="Str_Drop_RepairFailed">ファイルを修復できなかったため、何も結合されていません。</sys:String>
+    <sys:String x:Key="Str_Import_NoPages">{0} にはページがないため、結合するものがありません。</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">{0} 個のタブを個別に開きます。続行しますか？</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">このフォルダーまたはアーカイブには {0} 個のファイルがあります。KillerPDF は最初の {1} 個のみを開きます。続行しますか？</sys:String>
     <sys:String x:Key="Str_Status_Merged">{0} 個のファイルを結合しました - 未保存です</sys:String>
     <sys:String x:Key="Str_Drop_Merging">ファイルを結合中...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">結合をキャンセルしました</sys:String>
+    <sys:String x:Key="Str_Merge_TargetChanged">ファイルの確認中に文書が変更されたため、結合を取り消しました。何も追加されていません。</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedCloseAll">保存されていない変更があります。すべてのドキュメントを閉じる前に保存しますか？</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">先に PDF を開いてください。</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">ZIP に圧縮する前に変更を保存しますか？</sys:String>
@@ -1589,6 +1593,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Macro_RedactPrompt">墨消しする語句を 1 行に 1 つずつ入力してください。この文書で墨消しツールでマークした範囲も墨消しされます。</sys:String>
     <sys:String x:Key="Str_Macro_RedactNothing">語句を 1 つ以上入力するか、先に墨消しツールで範囲をマークしてください。</sys:String>
     <sys:String x:Key="Str_Macro_Redacted">{1} ページ上の {0} 範囲を墨消ししました。</sys:String>
+    <sys:String x:Key="Str_Macro_RedactSkippedPages">これらのページのフォームフィールドまたはコメントを読み取れなかったため、墨消しを中止しました。そこにある語句が見落とされる可能性があります：{0}</sys:String>
     <sys:String x:Key="Str_Scroll_Up">上へスクロール</sys:String>
     <sys:String x:Key="Str_Scroll_Down">下へスクロール</sys:String>
     <sys:String x:Key="Str_Scroll_Left">左へスクロール</sys:String>
@@ -1869,6 +1874,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">プレビューの準備ができました。適用すると元の段落テキストが置き換えられます。</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">対応する段落が見つかりませんでした。</sys:String>
     <sys:String x:Key="Str_Paragraph_NoText">このページには編集できるテキストがありません。スキャンしたページは、先に OCR が必要です。</sys:String>
+    <sys:String x:Key="Str_Paragraph_HyphensToCheck">次の単語を確認してください。いずれも行末をまたいで結合されており、ハイフンが必要かどうかは文書からは判断できません：{0}</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">この段落は編集できません: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">この段落には複数のフォント、サイズ、または色が混在しています。新しいテキストは単一のスタイルを使用するため、この書式は引き継がれません。</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">プレビューのフォント: {0}。このフォントは編集後のPDFに埋め込まれます。</sys:String>

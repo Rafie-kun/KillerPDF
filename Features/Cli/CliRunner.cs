@@ -859,6 +859,15 @@ namespace KillerPDF.Features
             string inPath = Path.GetFullPath(pos[0]), outPath = Path.GetFullPath(pos[1]);
             if (!File.Exists(inPath)) { con.WriteLine($"Input not found: {inPath}"); return 2; }
 
+            // The output is a rewrite, so a damaged signed, certified, usage-rights or encrypted file is
+            // refused as the save paths refuse it, instead of written with its protection quietly gone.
+            try { PdfEngineIntegration.ThrowIfDamagedProtected(inPath); }
+            catch (DamagedSaveRefusedException ex)
+            {
+                con.WriteLine(ex.Message);
+                return 1;
+            }
+
             PdfDocument document;
             try
             {

@@ -86,7 +86,7 @@ namespace KillerPDF.Shell
             {
                 CommitActiveTextBox();
                 var rotations = SnapshotPageRotations();
-                snapshot = WriteSavedCopyToTemp();
+                snapshot = WriteSavedCopyToTemp(throwaway: true);
                 PdfEngineIntegration.ExtractPages(
                     snapshot, dlg.FileName, ordered, rotations);
                 SetStatus(string.Format(Loc("Str_Extracted"), ordered.Length, System.IO.Path.GetFileName(dlg.FileName)));

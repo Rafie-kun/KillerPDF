@@ -414,6 +414,7 @@ namespace KillerPDF.Shell
                 if (ReclaimAsyncOwner(owner))
                 {
                     _asyncOpenPending = false;
+                    AbandonFailedOpen();   // the finish step can throw after the repaired copy is assigned
                     KillerDialog.Show(this, Loc("Str_Err_RepairFailed") + "\n" + ex.Message, "KillerPDF",
                         MessageBoxButton.OK, MessageBoxImage.Error);
                 }
@@ -428,6 +429,7 @@ namespace KillerPDF.Shell
         // unlocks it. The decrypted working copy lives in temp, like a password-protected open.
         private void OpenCertificateProtected(string srcPath, string displayPath)
         {
+            var before = _doc;
             try
             {
                 IReadOnlyList<System.Security.Cryptography.X509Certificates.X509Certificate2> certificates;
@@ -456,6 +458,9 @@ namespace KillerPDF.Shell
             }
             catch (Exception ex)
             {
+                // The finish step can throw after the document is assigned (a PDF with no pages, for one), but a
+                // failure before the open replaced anything leaves the document that was already showing.
+                if (!ReferenceEquals(_doc, before)) AbandonFailedOpen();
                 KillerDialog.Show(this, string.Format(Loc("Str_Dlg_FailedOpen"), ex.Message), Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -537,6 +542,7 @@ namespace KillerPDF.Shell
                 if (ReclaimAsyncOwner(owner))
                 {
                     _asyncOpenPending = false;
+                    AbandonFailedOpen();
                     KillerDialog.Show(this, Loc("Str_Err_OpenProtected") + "\n" + ex.Message,
                         "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
@@ -575,6 +581,7 @@ namespace KillerPDF.Shell
             string? ownerPassword = KillerDialog.PromptPassword(this, displayPath,
                 Loc("Str_Restricted_OwnerRequired"), Loc("Str_Btn_Open"));
             if (ownerPassword is null) return;
+            var before = _doc;
             try
             {
                 string tempDec = App.MakeTempFile("dec");
@@ -592,6 +599,7 @@ namespace KillerPDF.Shell
             }
             catch (Exception error) when (error is not OutOfMemoryException)
             {
+                if (!ReferenceEquals(_doc, before)) AbandonFailedOpen();
                 KillerDialog.Show(this, Loc("Str_Restricted_WrongPassword"), "KillerPDF",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
             }
@@ -1161,8 +1169,8 @@ namespace KillerPDF.Shell
             var dlg = new Controls.FileDialog(Controls.FileDialogMode.Open)
                           { Filter = Loc("Str_Filter_Pdf") + "|*.pdf", Title = Loc("Str_Dlg_SelectMerge"), Multiselect = true };
             if (dlg.ShowDialog(this) != true) return;
-            // Checking a damaged file copies its pages, so it runs off the UI thread, and the import
-            // goes only into the document the merge was started on.
+            // Checking a damaged file copies its pages, so it runs off the UI thread behind the busy
+            // overlay, and the import goes only into the document the merge was started on.
             var isTargetCurrent = CaptureDocumentOrigin();
             try
             {
@@ -1172,33 +1180,47 @@ namespace KillerPDF.Shell
                     try
                     {
                         string importPath = file;
+                        IReadOnlyList<KillerPdf.Engine.Documents.PdfPageInformation> pages;
                         try
                         {
-                            await Task.Run(() => PdfEngineIntegration.ValidateImportable(file));
+                            pages = await RunBusyAsync(() =>
+                            {
+                                PdfEngineIntegration.ValidateImportable(file);
+                                return PdfEngineIntegration.ReadPageInformation(file);
+                            });
                         }
-                        catch
+                        catch (Exception ex) when (PdfEngineIntegration.IsParserDamage(ex))
                         {
-                            string? repaired = await RepairPdfForImportAsync(file);
+                            // Only damage a repair can mend is offered one; a file the merge refuses for
+                            // another reason keeps its own message.
+                            (string? repaired, bool declined) = await RepairPdfForImportAsync(file);
                             if (repaired is null)
                             {
-                                SetStatus(Loc("Str_Drop_MergeCanceled"));
+                                SetStatus(Loc(declined ? "Str_Drop_MergeCanceled" : "Str_Drop_RepairFailed"));
                                 return;
                             }
                             importPath = repaired;
-                            PdfEngineIntegration.ValidateDocument(importPath);
+                            pages = await RunBusyAsync(() =>
+                            {
+                                PdfEngineIntegration.ValidateDocument(importPath);
+                                return PdfEngineIntegration.ReadPageInformation(importPath);
+                            });
                         }
-
-                        IReadOnlyList<KillerPdf.Engine.Documents.PdfPageInformation> pages =
-                            PdfEngineIntegration.ReadPageInformation(importPath);
                         imports.Add(new PdfEngineIntegration.ImportedDocument(importPath,
                             [.. pages.Select(page => page.Rotation)], file));
                     }
-                    catch (Exception ex) when (PdfEngineIntegration.IsImportFailure(ex))
+                    // A file with no pages already says so in plain words and names itself.
+                    catch (Exception ex) when (PdfEngineIntegration.IsImportFailure(ex)
+                        && ex is not PdfEngineIntegration.ImportNoPagesException)
                     {
                         throw PdfEngineIntegration.WithImportSource(file, ex);
                     }
                 }
-                if (_doc is null || !isTargetCurrent()) return;
+                if (_doc is null || !isTargetCurrent())
+                {
+                    SetStatus(Loc("Str_Merge_TargetChanged"));
+                    return;
+                }
                 int insertAt = insertionIndex ?? _doc.PageCount;
                 int importedPages = imports.Sum(import => import.PageRotations.Count);
                 ReloadWithRemappedAnnotations(
@@ -1848,7 +1870,8 @@ namespace KillerPDF.Shell
             string? snapshot = null;
             try
             {
-                snapshot = WriteSavedCopyToTemp(forRasterization: options.OfficeMode == PdfOfficeExportMode.PageImages);
+                snapshot = WriteSavedCopyToTemp(
+                    forRasterization: options.OfficeMode == PdfOfficeExportMode.PageImages, throwaway: true);
                 var document = PdfEngineIntegration.OpenForReading(System.IO.File.ReadAllBytes(snapshot));
                 PdfStructuredExportReport losses = PdfStructuredExport.InspectLosses(document, options.Format, pages, officeMode: options.OfficeMode);
                 if (!losses.IsLossless)
@@ -2101,7 +2124,9 @@ namespace KillerPDF.Shell
                 await Task.Run(() =>
                 {
                     System.IO.File.Copy(tempClean, printPath, true);
-                    PdfEngineIntegration.RepairHarmlessSaveArtifacts(printPath);
+                    // The print copy is deleted afterward, so a damaged signed or usage-rights file is readied
+                    // for it instead of refused. The copy still holds its rights until they are cleared next.
+                    PdfEngineIntegration.PrepareThrowawayCopy(printPath);
                     PdfEngineIntegration.ClearInvalidatedSignatures(printPath);
                     PdfEngineIntegration.StripLinkAppearances(printPath);
                     if (annotsSnap.Values.Any(list => list.Count > 0) || stampSnap is not null)

@@ -7,10 +7,12 @@ using KillerPdf.Engine.Authoring;
 using KillerPdf.Engine.Diagnostics;
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Editing;
+using KillerPdf.Engine.Filters;
 using KillerPdf.Engine.Fonts;
 using KillerPdf.Engine.Objects;
 using KillerPdf.Engine.Parsing;
 using KillerPdf.Engine.Signing;
+using KillerPdf.Engine.Syntax;
 using KillerPdf.Engine.Writing;
 using DrawingBitmap = System.Drawing.Bitmap;
 using DrawingGraphics = System.Drawing.Graphics;
@@ -129,19 +131,23 @@ internal static partial class PdfEngineIntegration
     /// Opens a PDF whose pages are copied into another document. The viewer reads files through
     /// compatibility recovery, so a page source that only the strict parser refuses is retried the
     /// same way. No password is supplied, so an encrypted source keeps its strict-open permissions.
-    /// The source bytes are never written back.
+    /// The source bytes are never written back. A protected file whose trailer is gone is refused,
+    /// because its pages read as ciphertext and would be copied as pages nobody can read.
     /// </summary>
     internal static PdfDocument OpenPageSource(ReadOnlyMemory<byte> source)
     {
         try { return PdfDocument.Open(source); }
         catch (Exception strict) when (IsImportFailure(strict))
         {
-            try { return PdfDocument.OpenWithCompatibilityRecovery(source); }
+            PdfDocument recovered;
+            try { recovered = PdfDocument.OpenWithCompatibilityRecovery(source); }
             catch (Exception recovery) when (IsImportFailure(recovery))
             {
                 System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(strict).Throw();
                 throw;
             }
+            if (HidesEncryption(source)) throw new DamagedSaveRefusedException(DamagedSaveRefusal.Encrypted);
+            return recovered;
         }
     }
 
@@ -417,21 +423,27 @@ internal static partial class PdfEngineIntegration
             result = removal.Build();
         }
 
-        // A rename makes the new name the key. Every renamed file moves to a temporary name first, so
-        // two files can swap names, and each row's key is followed through both moves.
+        // A rename makes the new name the key, and each rewrite of a file copies its whole payload into
+        // the file again, so a rename goes straight to its new name. Only when a file takes the name
+        // another still has, as two files swapping names do, does every renamed file move to a
+        // temporary name first, and each row's key is followed through both moves.
         var finalKeys = new Dictionary<string, string>(StringComparer.Ordinal);
         var temporaryKeys = new Dictionary<string, string>(StringComparer.Ordinal);
+        bool needsTemporaryNames = remaining.Any(row => Renamed(row.Edit) && remaining.Any(other =>
+            other.Key != row.Key
+            && string.Equals(other.Edit.OriginalFileName, row.Edit.FileName, StringComparison.OrdinalIgnoreCase)));
+        if (needsTemporaryNames)
+            foreach (var row in remaining.Where(row => Renamed(row.Edit)))
+            {
+                string temporary = $"killerpdf-{Guid.NewGuid():N}{Path.GetExtension(row.Edit.FileName)}";
+                result = new PdfIncrementalPageEditor(PdfDocument.Open(result))
+                    .RenameAttachmentByKey(row.Key, temporary).Build();
+                temporaryKeys[row.Key] = temporary;
+            }
         foreach (var row in remaining.Where(row => Renamed(row.Edit)))
         {
-            string temporary = $"killerpdf-{Guid.NewGuid():N}{Path.GetExtension(row.Edit.FileName)}";
             result = new PdfIncrementalPageEditor(PdfDocument.Open(result))
-                .RenameAttachmentByKey(row.Key, temporary).Build();
-            temporaryKeys[row.Key] = temporary;
-        }
-        foreach (var row in remaining.Where(row => Renamed(row.Edit)))
-        {
-            result = new PdfIncrementalPageEditor(PdfDocument.Open(result))
-                .RenameAttachmentByKey(temporaryKeys[row.Key], row.Edit.FileName).Build();
+                .RenameAttachmentByKey(needsTemporaryNames ? temporaryKeys[row.Key] : row.Key, row.Edit.FileName).Build();
             finalKeys[row.Key] = row.Edit.FileName;
         }
 
@@ -1117,6 +1129,7 @@ internal static partial class PdfEngineIntegration
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sourcePath);
         ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
+        ThrowIfDamagedProtected(sourcePath);
         PdfDocument document = PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(sourcePath));
         PdfDocumentWriteResult result = PdfDocumentEncryptionWriter.EncryptWithPasswordsWithReport(
             document, options, allowSignatureInvalidation, replaceDanglingReferences: true);
@@ -1130,6 +1143,7 @@ internal static partial class PdfEngineIntegration
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sourcePath);
         ArgumentException.ThrowIfNullOrWhiteSpace(destinationPath);
+        ThrowIfDamagedProtected(sourcePath);
         PdfDocument document = PdfDocument.OpenWithCompatibilityRecovery(File.ReadAllBytes(sourcePath));
         PdfDocumentWriteResult result = PdfDocumentEncryptionWriter.EncryptForRecipientsWithReport(
             document, options, allowSignatureInvalidation, replaceDanglingReferences: true);
@@ -1736,8 +1750,41 @@ internal static partial class PdfEngineIntegration
     internal static bool IsImportFailure(Exception exception) =>
         exception is not OperationCanceledException and not OutOfMemoryException;
 
-    internal static InvalidOperationException WithImportSource(string path, Exception exception) =>
-        new($"\"{path}\": {exception.Message}", exception);
+    internal static InvalidOperationException WithImportSource(string path, Exception exception)
+    {
+        var named = new InvalidOperationException($"\"{path}\": {exception.Message}", exception);
+        named.Data[ImportSourceMarker] = path;
+        return named;
+    }
+
+    // Marks the exception that names the file that failed. Its message holds a path, which says nothing
+    // about why the import failed, and its inner exception is the failure itself.
+    private const string ImportSourceMarker = "KillerPDF.ImportSource";
+
+    /// <summary>A PDF with no pages, which there is nothing to merge from.</summary>
+    internal sealed class ImportNoPagesException : InvalidOperationException
+    {
+        internal ImportNoPagesException(string path) : base(TextFor(path)) { }
+
+        private static string TextFor(string path)
+        {
+            string format = System.Windows.Application.Current?.TryFindResource("Str_Import_NoPages") as string
+                ?? "{0} has no pages, so there is nothing to merge.";
+            return string.Format(format, Path.GetFileName(path));
+        }
+    }
+
+    /// <summary>
+    /// True when a file failed because its bytes are damaged, which a repair can mend. A validator
+    /// refusing content the file holds is not damage, and rebuilding the file does not change it.
+    /// </summary>
+    internal static bool IsParserDamage(Exception exception)
+    {
+        for (Exception? current = exception; current is not null; current = current.InnerException)
+            if (current is FormatException or InvalidDataException or PdfFilterException)
+                return true;
+        return false;
+    }
 
     private static byte[] BuildImportedDocuments(
         PdfIncrementalPageEditor editor, IReadOnlyDictionary<PdfDocument, string> sourcePaths)
@@ -1754,7 +1801,13 @@ internal static partial class PdfEngineIntegration
     }
 
     /// <summary>Merges every readable PDF or image input and skips invalid entries.</summary>
-    internal static byte[] MergeReadableFiles(IReadOnlyList<string> paths)
+    internal static byte[] MergeReadableFiles(IReadOnlyList<string> paths) => MergeReadableFiles(paths, out _);
+
+    /// <summary>
+    /// Merges every readable PDF or image input and skips invalid entries. The files it left out, in
+    /// the order given, come back so the caller can say how many were not taken.
+    /// </summary>
+    internal static byte[] MergeReadableFiles(IReadOnlyList<string> paths, out IReadOnlyList<string> leftOut)
     {
         ArgumentNullException.ThrowIfNull(paths);
         var rejected = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -1777,8 +1830,11 @@ internal static partial class PdfEngineIntegration
                     {
                         if (!opened.TryGetValue(path, out PdfDocument? document))
                             opened[path] = document = OpenPageSource(File.ReadAllBytes(path));
+                        int pagesBefore = editor.PageCount;
                         editor.AddImportedDocument(document, !withoutBookmarks.Contains(path));
                         sourcePaths[document] = path;
+                        // A PDF with no pages gives the combine nothing, so it counts as left out.
+                        if (editor.PageCount == pagesBefore) unreadable.Add(path);
                     }
                     else
                         AppendImageFrames(editor, path);
@@ -1793,7 +1849,9 @@ internal static partial class PdfEngineIntegration
                 throw new InvalidOperationException("No readable PDF or image pages were found.");
             try
             {
-                return editor.Build();
+                byte[] merged = editor.Build();
+                leftOut = [.. paths.Where(path => rejected.Contains(path) || unreadable.Contains(path))];
+                return merged;
             }
             // A damaged outline leaves the pages readable, so that file loses only its bookmarks.
             catch (Exception ex) when (IsBookmarkGraphFailure(ex) && editor.FailedImportSource is PdfDocument damaged
@@ -2107,29 +2165,25 @@ internal static partial class PdfEngineIntegration
         string Path, IReadOnlyList<int> PageRotations, string? OriginalPath = null);
 
     /// <summary>
-    /// Validates that a document can be merged, not only opened. A file the strict parser opens passes
-    /// as it always has. A file only compatibility recovery opens must also survive a trial page copy,
-    /// because the page copy applies its strict checks to what recovery rebuilt, and a file that fails
-    /// that should be offered a repair instead of failing the merge.
+    /// Validates that a document can be merged, not only opened. Strict open is lazy, so damage in an
+    /// object only a page copy reads passes it, and the page copy applies its own strict checks to what
+    /// recovery rebuilt. Every file therefore goes through a trial copy of all its pages, made the way
+    /// <see cref="InsertDocuments"/> makes it, so the check and the merge fail on the same things. A file
+    /// with no pages fails with <see cref="ImportNoPagesException"/>. <see cref="IsParserDamage"/> tells
+    /// a failure a repair can mend from one it cannot.
     /// </summary>
     internal static void ValidateImportable(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        byte[] bytes = File.ReadAllBytes(path);
-        try
-        {
-            _ = new PdfIncrementalPageEditor(PdfDocument.Open(bytes)).PageCount;
-            return;
-        }
-        catch (Exception strict) when (IsImportFailure(strict))
-        {
-            // Recovery is the only way in, so the trial below decides.
-        }
-        PdfDocument source = OpenPageSource(bytes);
+        PdfDocument source = OpenPageSource(File.ReadAllBytes(path));
         int count = new PdfIncrementalPageEditor(source).PageCount;
-        if (count == 0) return;
-        new PdfIncrementalPageEditor(PdfDocument.Open(new PdfDocumentBuilder().Build()))
-            .InsertImportedPages(0, source, [.. Enumerable.Range(0, count)])
+        if (count == 0) throw new ImportNoPagesException(path);
+        // Page by page, as the merge copies them into an open document. A whole-document import reads the
+        // trailer /Info first, and a validator failing there would hide the parser damage the merge meets
+        // in the pages. An empty destination also adopts the source catalog, which an open document does
+        // not, so the trial copy goes behind a page.
+        new PdfIncrementalPageEditor(PdfDocument.Open(new PdfDocumentBuilder().AddBlankPage().Build()))
+            .InsertImportedPages(1, source, [.. Enumerable.Range(0, count)])
             .Build();
     }
 
@@ -2389,10 +2443,11 @@ internal static partial class PdfEngineIntegration
             var editor = new PdfIncrementalAnnotationEditor(document);
             bool removed = false;
             int pageCount = PdfPageInformation.Read(document).Count;
+            // Every link goes, so the list checks only the subtype and a link the reader cannot read is removed too.
             for (int pageIndex = 0; pageIndex < pageCount; pageIndex++)
-                foreach (PdfLinkInfo link in reader.ReadPage(pageIndex).OrderByDescending(link => link.AnnotationIndex))
+                foreach (int annotationIndex in reader.ReadLinkAnnotationIndexes(pageIndex).OrderByDescending(index => index))
                 {
-                    editor.RemoveAnnotationAt(pageIndex, link.AnnotationIndex);
+                    editor.RemoveAnnotationAt(pageIndex, annotationIndex);
                     removed = true;
                 }
             if (removed) document = PdfDocument.Open(editor.Build());
@@ -2792,11 +2847,20 @@ internal static partial class PdfEngineIntegration
         return result;
     }
 
-    private static bool IsBookmarkGraphFailure(Exception exception)
+    // The editor names the outline in its failures but has no exception type of its own for them, so
+    // the wording decides. The wrapper that names the failed file and the file errors that quote a path
+    // are skipped, because a folder called "bookmarks" is not a damaged outline.
+    internal static bool IsBookmarkGraphFailure(Exception exception)
     {
         for (Exception? current = exception; current is not null; current = current.InnerException)
-            if (current.Message.Contains("bookmark", StringComparison.OrdinalIgnoreCase))
+        {
+            if (current.Data.Contains(ImportSourceMarker)
+                || current is IOException or UnauthorizedAccessException or ImportNoPagesException)
+                continue;
+            if (current.Message.Contains("bookmark", StringComparison.OrdinalIgnoreCase)
+                || current.Message.Contains("/Outlines", StringComparison.Ordinal))
                 return true;
+        }
         return false;
     }
 

@@ -668,6 +668,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Reduce_Working">ফাইলের আকার কমানো হচ্ছে...</sys:String>
     <sys:String x:Key="Str_Reduce_Done">{0} সংরক্ষিত: {1} থেকে {2}, পুনঃনমুনাকৃত ছবি: {3}</sys:String>
     <sys:String x:Key="Str_Reduce_Failed">ছোট কপিটি সংরক্ষণ করা যায়নি।</sys:String>
+    <sys:String x:Key="Str_Reduce_ClearsSignature">এই নথি স্বাক্ষরিত অথবা এতে Reader-এর ব্যবহারের অধিকার আছে, আর আকার কমালে ফাইলটি নতুন করে লেখা হয়, তাই সেগুলো &quot;{0}&quot;-এ থাকবে না। মূল ফাইলে সেগুলো থাকে।</sys:String>
     <sys:String x:Key="Str_Filter_Images">ছবি</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">সমস্ত ফাইল</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP আর্কাইভ</sys:String>
@@ -678,12 +679,15 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Drop_Merge">একটি PDF-এ একত্র করুন</sys:String>
     <sys:String x:Key="Str_Drop_Separate">আলাদাভাবে খুলুন</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">খোলার জন্য কোনো PDF বা ছবি পাওয়া যায়নি।</sys:String>
-    <sys:String x:Key="Str_Drop_SkippedFiles">মেরামত করা যায়নি এমন {0}টি ফাইল বাদ দেওয়া হয়েছে।</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">পড়া বা মেরামত করা যায়নি এমন {0}টি ফাইল বাদ রাখা হয়েছে।</sys:String>
+    <sys:String x:Key="Str_Drop_RepairFailed">ফাইলটি মেরামত করা যায়নি, তাই কিছু একত্র করা হয়নি।</sys:String>
+    <sys:String x:Key="Str_Import_NoPages">{0}-এ কোনো পৃষ্ঠা নেই, তাই একত্র করার মতো কিছু নেই।</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">এটি {0}টি আলাদা ট্যাব খুলবে। চালিয়ে যাবেন?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">এই ফোল্ডার বা আর্কাইভে {0}টি ফাইল আছে। KillerPDF শুধু প্রথম {1}টি খুলবে। চালিয়ে যাবেন?</sys:String>
     <sys:String x:Key="Str_Status_Merged">{0}টি ফাইল একত্র করা হয়েছে - এখনও সংরক্ষণ করা হয়নি</sys:String>
     <sys:String x:Key="Str_Drop_Merging">ফাইল একত্র করা হচ্ছে...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">একত্রীকরণ বাতিল করা হয়েছে</sys:String>
+    <sys:String x:Key="Str_Merge_TargetChanged">ফাইল যাচাইয়ের সময় নথিটি বদলে যাওয়ায় একত্র করা বাতিল হয়েছে। কিছু যোগ করা হয়নি।</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedCloseAll">আপনার অসংরক্ষিত পরিবর্তন রয়েছে। সব নথি বন্ধ করার আগে সেগুলো সংরক্ষণ করবেন?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">প্রথমে একটি PDF খুলুন।</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">ZIP-এ সংকুচিত করার আগে পরিবর্তনগুলি সংরক্ষণ করবেন?</sys:String>
@@ -1569,6 +1573,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Macro_RedactPrompt">যে শব্দ বা বাক্যাংশ রিড্যাক্ট করতে চান তা লিখুন, প্রতি লাইনে একটি। এই ডকুমেন্টে রিড্যাক্ট টুল দিয়ে চিহ্নিত এলাকাগুলোও রিড্যাক্ট হবে।</sys:String>
     <sys:String x:Key="Str_Macro_RedactNothing">অন্তত একটি শব্দ বা বাক্যাংশ লিখুন, অথবা আগে রিড্যাক্ট টুল দিয়ে এলাকা চিহ্নিত করুন।</sys:String>
     <sys:String x:Key="Str_Macro_Redacted">{1}টি পৃষ্ঠায় {0}টি এলাকা রিড্যাক্ট করা হয়েছে।</sys:String>
+    <sys:String x:Key="Str_Macro_RedactSkippedPages">এই পৃষ্ঠাগুলোর ফর্ম ফিল্ড বা মন্তব্য পড়া যায়নি বলে রিড্যাক্ট থামানো হয়েছে, তাই সেখানকার কোনো শব্দ বাদ পড়তে পারে: {0}</sys:String>
     <sys:String x:Key="Str_Scroll_Up">উপরে স্ক্রল করুন</sys:String>
     <sys:String x:Key="Str_Scroll_Down">নিচে স্ক্রল করুন</sys:String>
     <sys:String x:Key="Str_Scroll_Left">বাঁয়ে স্ক্রল করুন</sys:String>
@@ -1849,6 +1854,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Paragraph_Ready">পূর্বরূপ প্রস্তুত। প্রয়োগ করলে মূল অনুচ্ছেদের পাঠ্য প্রতিস্থাপিত হবে।</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">সমর্থিত কোনো অনুচ্ছেদ পাওয়া যায়নি।</sys:String>
     <sys:String x:Key="Str_Paragraph_NoText">এই পৃষ্ঠায় সম্পাদনার মতো কোনো পাঠ্য নেই। স্ক্যান করা পৃষ্ঠায় আগে OCR করতে হবে।</sys:String>
+    <sys:String x:Key="Str_Paragraph_HyphensToCheck">অনুগ্রহ করে এই শব্দগুলো দেখে নিন। প্রতিটি লাইনের শেষ জুড়ে একত্র করা হয়েছে, আর হাইফেনটি থাকা উচিত কি না তা নথি থেকে বোঝা যায় না: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">এই অনুচ্ছেদটি সম্পাদনা করা যাবে না: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">এই অনুচ্ছেদে একাধিক ফন্ট, আকার বা রঙ মিশ্রিত আছে। নতুন পাঠ্যে একটিমাত্র শৈলী ব্যবহৃত হয়, তাই এই বিন্যাস বহাল থাকবে না।</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">পূর্বরূপের ফন্ট: {0}। এই ফন্টটি সম্পাদিত PDF-এ সংযুক্ত করা হবে।</sys:String>

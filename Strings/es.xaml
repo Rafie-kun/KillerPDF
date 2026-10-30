@@ -668,6 +668,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Reduce_Working">Reduciendo el tamaño del archivo...</sys:String>
     <sys:String x:Key="Str_Reduce_Done">{0} guardado: de {1} a {2}, imágenes remuestreadas: {3}</sys:String>
     <sys:String x:Key="Str_Reduce_Failed">No se pudo guardar la copia más pequeña.</sys:String>
+    <sys:String x:Key="Str_Reduce_ClearsSignature">Este documento está firmado o tiene derechos de uso de Reader, y al reducirlo se reescribe el archivo, por lo que no se conservarán en &quot;{0}&quot;. El archivo original los conserva.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Imágenes</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Todos los archivos</sys:String>
     <sys:String x:Key="Str_Filter_Zip">Archivo ZIP</sys:String>
@@ -678,12 +679,15 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Drop_Merge">Combinar en un solo PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Abrir por separado</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">No se encontraron PDF ni imágenes para abrir.</sys:String>
-    <sys:String x:Key="Str_Drop_SkippedFiles">Se omitieron {0} archivo(s) que no se pudieron reparar.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Se omitieron {0} archivo(s) que no se pudieron leer ni reparar.</sys:String>
+    <sys:String x:Key="Str_Drop_RepairFailed">No se pudo reparar el archivo, por lo que no se combinó nada.</sys:String>
+    <sys:String x:Key="Str_Import_NoPages">{0} no tiene páginas, por lo que no hay nada que combinar.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Esto abrirá {0} pestañas separadas. ¿Continuar?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Esta carpeta o archivo tiene {0} archivos. KillerPDF abrirá solo los primeros {1}. ¿Continuar?</sys:String>
     <sys:String x:Key="Str_Status_Merged">{0} archivos combinados - sin guardar todavía</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Combinando archivos...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Combinación cancelada</sys:String>
+    <sys:String x:Key="Str_Merge_TargetChanged">Se descartó la combinación porque el documento cambió mientras se comprobaban los archivos. No se agregó nada.</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Tiene cambios sin guardar. ¿Guardarlos antes de cerrar todos los documentos?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Primero abre un PDF.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">¿Guardar los cambios antes de comprimir a ZIP?</sys:String>
@@ -1569,6 +1573,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Macro_RedactPrompt">Escriba las palabras o frases que desea censurar, una por línea. Las áreas marcadas con la herramienta Censurar en este documento también se censuran.</sys:String>
     <sys:String x:Key="Str_Macro_RedactNothing">Escriba al menos una palabra o frase, o marque primero áreas con la herramienta Censurar.</sys:String>
     <sys:String x:Key="Str_Macro_Redacted">Se censuraron {0} área(s) en {1} página(s).</sys:String>
+    <sys:String x:Key="Str_Macro_RedactSkippedPages">La censura se detuvo porque no se pudieron leer los campos de formulario o los comentarios de estas páginas, por lo que podría pasarse por alto un término allí: {0}</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Desplazar hacia arriba</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Desplazar hacia abajo</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Desplazar hacia la izquierda</sys:String>
@@ -1849,6 +1854,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Vista previa lista. Aplicar reemplaza el texto del párrafo original.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">No se encontró ningún párrafo compatible.</sys:String>
     <sys:String x:Key="Str_Paragraph_NoText">Esta página no tiene texto que editar. Una página escaneada necesita OCR primero.</sys:String>
+    <sys:String x:Key="Str_Paragraph_HyphensToCheck">Revise estas palabras. Cada una se unió al final de una línea y nada en el documento indica si su guion corresponde: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Este párrafo no se puede editar: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Este párrafo combina fuentes, tamaños o colores distintos. El texto nuevo usa un solo estilo, por lo que ese formato no se conservará.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Fuente de la vista previa: {0}. Esta fuente se incrustará en el PDF editado.</sys:String>

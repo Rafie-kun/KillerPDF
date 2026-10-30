@@ -752,6 +752,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Reduce_Working">Reduzindo o tamanho do arquivo...</sys:String>
     <sys:String x:Key="Str_Reduce_Done">{0} salvo: de {1} para {2}, imagens reamostradas: {3}</sys:String>
     <sys:String x:Key="Str_Reduce_Failed">Não foi possível salvar a cópia menor.</sys:String>
+    <sys:String x:Key="Str_Reduce_ClearsSignature">Este documento está assinado ou tem direitos de uso do Reader, e reduzi-lo reescreve o arquivo, então eles não serão mantidos em &quot;{0}&quot;. O arquivo original os mantém.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Imagens</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Todos os arquivos</sys:String>
     <sys:String x:Key="Str_Filter_Zip">Arquivo ZIP</sys:String>
@@ -762,12 +763,15 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Drop_Merge">Mesclar em um único PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Abrir separadamente</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Nenhum PDF ou imagem encontrado para abrir.</sys:String>
-    <sys:String x:Key="Str_Drop_SkippedFiles">{0} arquivo(s) que não puderam ser reparados foram ignorados.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">{0} arquivo(s) que não puderam ser lidos ou reparados foram deixados de fora.</sys:String>
+    <sys:String x:Key="Str_Drop_RepairFailed">Não foi possível reparar o arquivo, então nada foi mesclado.</sys:String>
+    <sys:String x:Key="Str_Import_NoPages">{0} não tem páginas, então não há nada para mesclar.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Isso abrirá {0} guias separadas. Continuar?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Esta pasta ou arquivo compactado tem {0} arquivos. O KillerPDF abrirá apenas os primeiros {1}. Continuar?</sys:String>
     <sys:String x:Key="Str_Status_Merged">{0} arquivos mesclados - ainda não salvo</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Mesclando arquivos...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Mesclagem cancelada</sys:String>
+    <sys:String x:Key="Str_Merge_TargetChanged">A mesclagem foi descartada porque o documento mudou enquanto os arquivos eram verificados. Nada foi adicionado.</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Você tem alterações não salvas. Salvar antes de fechar todos os documentos?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Abra um PDF primeiro.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Salvar as alterações antes de compactar em ZIP?</sys:String>
@@ -1589,6 +1593,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Macro_RedactPrompt">Digite as palavras ou frases a tarjar, uma por linha. As áreas marcadas com a ferramenta Tarjar neste documento também são tarjadas.</sys:String>
     <sys:String x:Key="Str_Macro_RedactNothing">Digite pelo menos uma palavra ou frase, ou marque áreas com a ferramenta Tarjar primeiro.</sys:String>
     <sys:String x:Key="Str_Macro_Redacted">{0} área(s) tarjada(s) em {1} página(s).</sys:String>
+    <sys:String x:Key="Str_Macro_RedactSkippedPages">A tarja foi interrompida porque os campos de formulário ou os comentários destas páginas não puderam ser lidos, então um termo ali pode passar despercebido: {0}</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Rolar para cima</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Rolar para baixo</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Rolar para a esquerda</sys:String>
@@ -1869,6 +1874,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Paragraph_Ready">Prévia pronta. Aplicar substitui o texto do parágrafo original.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Nenhum parágrafo compatível foi encontrado.</sys:String>
     <sys:String x:Key="Str_Paragraph_NoText">Esta página não tem texto para editar. Uma página digitalizada precisa primeiro de OCR.</sys:String>
+    <sys:String x:Key="Str_Paragraph_HyphensToCheck">Confira estas palavras. Cada uma foi unida no fim de uma linha e nada no documento mostra se o hífen faz parte dela: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Este parágrafo não pode ser editado: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Este parágrafo mistura fontes, tamanhos ou cores diferentes. O novo texto usa um único estilo, então essa formatação não será mantida.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Fonte da prévia: {0}. Esta fonte será incorporada ao PDF editado.</sys:String>

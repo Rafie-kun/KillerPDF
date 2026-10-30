@@ -28,7 +28,20 @@ namespace KillerPDF.Shell
                 FileName = System.IO.Path.GetFileNameWithoutExtension(seed) + "-reduced.pdf"
             };
             if (dlg.ShowDialog(this) != true) return;
-            if (!ConfirmSignatureRemoval(dlg.FileName)) return;
+            // The reduced copy is a new file, so a signed source or one with Reader usage rights loses them in it,
+            // and WriteSavedCopyToTemp clears them before the optimizer runs. Say so before the file is touched.
+            bool sourceSigned;
+            try { sourceSigned = PdfEngineIntegration.HasSignedSignatures(_currentFile); }
+            catch (Exception ex) when (ex is not OutOfMemoryException) { sourceSigned = false; }   // an unreadable source is reported by the reduce itself
+            if (sourceSigned)
+            {
+                if (KillerDialog.Show(this,
+                        string.Format(Loc("Str_Reduce_ClearsSignature"), System.IO.Path.GetFileName(dlg.FileName)),
+                        Loc("Str_Dlg_AppTitle"), MessageBoxButton.OKCancel, MessageBoxImage.Warning,
+                        defaultResult: MessageBoxResult.Cancel) != MessageBoxResult.OK)
+                    return;
+            }
+            else if (!ConfirmSignatureRemoval(dlg.FileName)) return;
             CloseEngineDocumentSession();
             OfferRescaleOutOfRangePages();
 
@@ -78,8 +91,11 @@ namespace KillerPDF.Shell
                 System.Globalization.CultureInfo.CurrentCulture) + " MB";
 
         // The bytes Save As would write, in a temp file, without touching the open document's
-        // state: annotations and stamps burned in, form values and page rotations applied.
-        private string WriteSavedCopyToTemp(bool forRasterization = false)
+        // state: annotations and stamps burned in, form values and page rotations applied. A damaged
+        // signed, certified or usage-rights document is refused, because the output stands in for it.
+        // Extract Pages and Export pass throwaway: their output is a new file the protection never
+        // carries into, so the copy is readied instead.
+        private string WriteSavedCopyToTemp(bool forRasterization = false, bool throwaway = false)
         {
             Dictionary<int, int> rotations = SnapshotPageRotations();
             string clean = App.MakeTempFile("reduceclean");
@@ -87,7 +103,8 @@ namespace KillerPDF.Shell
             try
             {
                 _doc!.Save(clean);
-                PdfEngineIntegration.RepairHarmlessSaveArtifacts(clean);
+                if (throwaway) PdfEngineIntegration.PrepareThrowawayCopy(clean);
+                else PdfEngineIntegration.RepairHarmlessSaveArtifacts(clean);
                 PdfEngineIntegration.StripLinkAppearances(clean);
                 System.IO.File.Copy(clean, copy, true);
                 PdfEngineIntegration.ClearInvalidatedSignatures(copy);

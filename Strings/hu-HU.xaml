@@ -752,6 +752,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Reduce_Working">Fájlméret csökkentése...</sys:String>
     <sys:String x:Key="Str_Reduce_Done">{0} mentve: {1} helyett {2}, újramintavételezett képek: {3}</sys:String>
     <sys:String x:Key="Str_Reduce_Failed">A kisebb másolatot nem sikerült menteni.</sys:String>
+    <sys:String x:Key="Str_Reduce_ClearsSignature">Ez a dokumentum alá van írva, vagy Reader-használati jogokat tartalmaz, és a méretcsökkentés újraírja a fájlt, ezért ezek nem kerülnek át a(z) &quot;{0}&quot; fájlba. Az eredeti fájl megtartja őket.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Képek</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Minden fájl</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP archívum</sys:String>
@@ -762,12 +763,15 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Drop_Merge">Egyesítés egyetlen PDF-be</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Megnyitás külön</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Nem található megnyitható PDF vagy kép.</sys:String>
-    <sys:String x:Key="Str_Drop_SkippedFiles">{0} fájl kimaradt, mert nem sikerült megjavítani.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">{0} fájl kimaradt, mert nem sikerült beolvasni vagy megjavítani.</sys:String>
+    <sys:String x:Key="Str_Drop_RepairFailed">A fájlt nem sikerült megjavítani, ezért semmi sem lett egyesítve.</sys:String>
+    <sys:String x:Key="Str_Import_NoPages">A(z) {0} fájlban nincsenek oldalak, ezért nincs mit egyesíteni.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Ez {0} külön lapot nyit meg. Folytatja?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Ez a mappa vagy archívum {0} fájlt tartalmaz. A KillerPDF csak az első {1} fájlt nyitja meg. Folytatja?</sys:String>
     <sys:String x:Key="Str_Status_Merged">{0} fájl egyesítve - még nincs mentve</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Fájlok egyesítése...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Egyesítés megszakítva</sys:String>
+    <sys:String x:Key="Str_Merge_TargetChanged">Az egyesítés elmaradt, mert a dokumentum megváltozott a fájlok ellenőrzése közben. Semmi sem lett hozzáadva.</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Nem mentett módosításai vannak. Menti őket az összes dokumentum bezárása előtt?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Először nyisson meg egy PDF-et.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Menti a módosításokat a ZIP-be tömörítés előtt?</sys:String>
@@ -1576,6 +1580,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Macro_RedactPrompt">Írja be a kitakarandó szavakat vagy kifejezéseket, soronként egyet. A dokumentumban a Kitakarás eszközzel megjelölt területek is kitakarásra kerülnek.</sys:String>
     <sys:String x:Key="Str_Macro_RedactNothing">Írjon be legalább egy szót vagy kifejezést, vagy előbb jelöljön meg területeket a Kitakarás eszközzel.</sys:String>
     <sys:String x:Key="Str_Macro_Redacted">Kitakarva: {0} terület, {1} oldalon.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactSkippedPages">A kitakarás leállt, mert az ezeken az oldalakon lévő űrlapmezőket vagy megjegyzéseket nem sikerült beolvasni, ezért egy ottani kifejezés kimaradhat: {0}</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Görgetés felfelé</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Görgetés lefelé</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Görgetés balra</sys:String>
@@ -1856,6 +1861,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Paragraph_Ready">Az előnézet kész. Az alkalmazás lecseréli az eredeti bekezdés szövegét.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Nem található támogatott bekezdés.</sys:String>
     <sys:String x:Key="Str_Paragraph_NoText">Ezen az oldalon nincs szerkeszthető szöveg. A beolvasott oldalhoz először OCR szükséges.</sys:String>
+    <sys:String x:Key="Str_Paragraph_HyphensToCheck">Kérjük, ellenőrizze ezeket a szavakat. Mindegyiket sorvégen egyesítettük, és a dokumentumból nem derül ki, hogy a kötőjel odatartozik-e: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Ez a bekezdés nem szerkeszthető: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Ez a bekezdés többféle betűtípust, betűméretet vagy színt tartalmaz. Az új szöveg egyetlen stílust használ, ezért ez a formázás nem marad meg.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Előnézeti betűtípus: {0}. Ez a betűtípus be lesz ágyazva a szerkesztett PDF-be.</sys:String>

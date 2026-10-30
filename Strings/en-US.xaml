@@ -753,6 +753,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Reduce_Working">Reducing file size...</sys:String>
     <sys:String x:Key="Str_Reduce_Done">Saved {0}: {1} to {2}, images resampled: {3}</sys:String>
     <sys:String x:Key="Str_Reduce_Failed">The smaller copy could not be saved.</sys:String>
+    <sys:String x:Key="Str_Reduce_ClearsSignature">This document is signed or carries Reader usage rights, and reducing it rewrites the file, so they will not carry over to &quot;{0}&quot;. The original file keeps them.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Images</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">All files</sys:String>
     <sys:String x:Key="Str_Filter_Zip">ZIP archive</sys:String>
@@ -763,12 +764,15 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Drop_Merge">Merge into one PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Open separately</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">No PDFs or images were found to open.</sys:String>
-    <sys:String x:Key="Str_Drop_SkippedFiles">Skipped {0} file(s) that could not be repaired.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Left out {0} file(s) that could not be read or repaired.</sys:String>
+    <sys:String x:Key="Str_Drop_RepairFailed">The file could not be repaired, so nothing was merged.</sys:String>
+    <sys:String x:Key="Str_Import_NoPages">{0} has no pages, so there is nothing to merge.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">This will open {0} separate tabs. Continue?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">This folder or archive has {0} files. KillerPDF will open only the first {1}. Continue?</sys:String>
     <sys:String x:Key="Str_Status_Merged">Merged {0} files, not yet saved</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Merging files...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Merge canceled</sys:String>
+    <sys:String x:Key="Str_Merge_TargetChanged">The merge was dropped because the document changed while the files were being checked. Nothing was added.</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedCloseAll">You have unsaved changes. Save them before closing all documents?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Open a PDF first.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Save changes before compressing to ZIP?</sys:String>
@@ -1600,6 +1604,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Macro_RedactPrompt">Enter the words or phrases to redact, one per line. Areas you marked with the Redact tool on this document are redacted too.</sys:String>
     <sys:String x:Key="Str_Macro_RedactNothing">Enter at least one word or phrase, or mark areas with the Redact tool first.</sys:String>
     <sys:String x:Key="Str_Macro_Redacted">Redacted {0} area(s) on {1} page(s).</sys:String>
+    <sys:String x:Key="Str_Macro_RedactSkippedPages">Redaction stopped because the form fields or comments on these pages could not be read, so a term there might be missed: {0}</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Scroll up</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Scroll down</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Scroll left</sys:String>
@@ -1880,6 +1885,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Paragraph_Ready">Preview ready. Apply replaces the original paragraph text.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">No supported paragraph was found.</sys:String>
     <sys:String x:Key="Str_Paragraph_NoText">This page has no text to edit. A scanned page needs OCR first.</sys:String>
+    <sys:String x:Key="Str_Paragraph_HyphensToCheck">Please check these words. Each was joined across a line end, and nothing in the document shows whether its hyphen belongs: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">This paragraph cannot be edited: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">This paragraph mixes fonts, sizes or colors. The new text uses one style, so that styling will not carry over.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Preview font: {0}. This font will be embedded in the edited PDF.</sys:String>

@@ -752,6 +752,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Reduce_Working">Зменшення розміру файлу...</sys:String>
     <sys:String x:Key="Str_Reduce_Done">Збережено {0}: з {1} до {2}, перераховано зображень: {3}</sys:String>
     <sys:String x:Key="Str_Reduce_Failed">Не вдалося зберегти меншу копію.</sys:String>
+    <sys:String x:Key="Str_Reduce_ClearsSignature">Цей документ підписано або він містить права на використання Reader, а зменшення перезаписує файл, тому вони не збережуться в &quot;{0}&quot;. Початковий файл їх зберігає.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Зображення</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Усі файли</sys:String>
     <sys:String x:Key="Str_Filter_Zip">Архів ZIP</sys:String>
@@ -762,12 +763,15 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Drop_Merge">Об'єднати в один PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Відкрити окремо</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Не знайдено PDF чи зображень для відкриття.</sys:String>
-    <sys:String x:Key="Str_Drop_SkippedFiles">Пропущено файлів, які не вдалося відновити: {0}.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Виключено файлів, які не вдалося прочитати або відновити: {0}.</sys:String>
+    <sys:String x:Key="Str_Drop_RepairFailed">Файл не вдалося відновити, тому нічого не об’єднано.</sys:String>
+    <sys:String x:Key="Str_Import_NoPages">У файлі {0} немає сторінок, тому об’єднувати нічого.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Буде відкрито окремих вкладок: {0}. Продовжити?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">У цій папці або архіві файлів: {0}. KillerPDF відкриє лише перші {1}. Продовжити?</sys:String>
     <sys:String x:Key="Str_Status_Merged">Об'єднано файлів: {0} - ще не збережено</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Об'єднання файлів...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Об'єднання скасовано</sys:String>
+    <sys:String x:Key="Str_Merge_TargetChanged">Об’єднання скасовано, бо документ змінився під час перевірки файлів. Нічого не додано.</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Є незбережені зміни. Зберегти їх перед закриттям усіх документів?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Спершу відкрийте PDF.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Зберегти зміни перед стисканням у ZIP?</sys:String>
@@ -1589,6 +1593,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Macro_RedactPrompt">Введіть слова або фрази, які потрібно приховати, по одній у рядку. Області, позначені в цьому документі інструментом «Приховати», теж буде приховано.</sys:String>
     <sys:String x:Key="Str_Macro_RedactNothing">Введіть принаймні одне слово чи фразу або спершу позначте області інструментом «Приховати».</sys:String>
     <sys:String x:Key="Str_Macro_Redacted">Приховано: {0} обл. на {1} стор.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactSkippedPages">Приховування зупинено, бо не вдалося прочитати поля форм або коментарі на цих сторінках, тому термін там міг бути пропущений: {0}</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Прокрутити вгору</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Прокрутити вниз</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Прокрутити ліворуч</sys:String>
@@ -1869,6 +1874,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Paragraph_Ready">Попередній перегляд готовий. Застосування замінить початковий текст абзацу.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Підтримуваний абзац не знайдено.</sys:String>
     <sys:String x:Key="Str_Paragraph_NoText">На цій сторінці немає тексту для редагування. Для відсканованої сторінки спочатку потрібне OCR.</sys:String>
+    <sys:String x:Key="Str_Paragraph_HyphensToCheck">Перевірте ці слова. Кожне було з’єднано на кінці рядка, і ніщо в документі не показує, чи потрібен у ньому дефіс: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Цей абзац не можна редагувати: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Цей абзац поєднує різні шрифти, розміри або кольори. Новий текст використовує один стиль, тому це форматування не збережеться.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Шрифт попереднього перегляду: {0}. Цей шрифт буде вбудовано у відредагований PDF.</sys:String>

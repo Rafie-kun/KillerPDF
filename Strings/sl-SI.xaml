@@ -691,6 +691,7 @@
     <sys:String x:Key="Str_Reduce_Working">Zmanjševanje velikosti datoteke...</sys:String>
     <sys:String x:Key="Str_Reduce_Done">Shranjeno {0}: z {1} na {2}, ponovno vzorčene slike: {3}</sys:String>
     <sys:String x:Key="Str_Reduce_Failed">Manjše kopije ni bilo mogoče shraniti.</sys:String>
+    <sys:String x:Key="Str_Reduce_ClearsSignature">Ta dokument je podpisan ali vsebuje pravice za uporabo v programu Reader, pri zmanjšanju pa se datoteka na novo zapiše, zato se ne bodo prenesli v »{0}«. Izvirna datoteka jih ohrani.</sys:String>
     <sys:String x:Key="Str_Filter_Images">Slike</sys:String>
     <sys:String x:Key="Str_Filter_AllFiles">Vse datoteke</sys:String>
     <sys:String x:Key="Str_Filter_Zip">Arhiv ZIP</sys:String>
@@ -701,12 +702,15 @@
     <sys:String x:Key="Str_Drop_Merge">Združi v en PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Odpri ločeno</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Ni datotek PDF ali slik za odpiranje.</sys:String>
-    <sys:String x:Key="Str_Drop_SkippedFiles">Število preskočenih datotek, ki jih ni bilo mogoče popraviti: {0}.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Število izpuščenih datotek, ki jih ni bilo mogoče prebrati ali popraviti: {0}.</sys:String>
+    <sys:String x:Key="Str_Drop_RepairFailed">Datoteke ni bilo mogoče popraviti, zato ni bilo nič združeno.</sys:String>
+    <sys:String x:Key="Str_Import_NoPages">Datoteka {0} nima strani, zato ni ničesar za združiti.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Odprlo se bo {0} ločenih zavihkov. Želite nadaljevati?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Ta mapa ali arhiv vsebuje {0} datotek. KillerPDF bo odprl samo prvih {1}. Želite nadaljevati?</sys:String>
     <sys:String x:Key="Str_Status_Merged">Združene datoteke: {0}, še niso shranjene</sys:String>
     <sys:String x:Key="Str_Drop_Merging">Združevanje datotek...</sys:String>
     <sys:String x:Key="Str_Drop_MergeCanceled">Združevanje je preklicano</sys:String>
+    <sys:String x:Key="Str_Merge_TargetChanged">Združevanje je bilo zavrnjeno, ker se je dokument med preverjanjem datotek spremenil. Nič ni bilo dodano.</sys:String>
     <sys:String x:Key="Str_Dlg_UnsavedCloseAll">Imate neshranjene spremembe. Jih želite shraniti pred zapiranjem vseh dokumentov?</sys:String>
     <sys:String x:Key="Str_Msg_OpenFirst">Najprej odprite PDF.</sys:String>
     <sys:String x:Key="Str_Dlg_SaveBeforeZip">Želite shraniti spremembe pred stiskanjem v ZIP?</sys:String>
@@ -1482,6 +1486,7 @@
     <sys:String x:Key="Str_Macro_RedactPrompt">Vnesite besede ali besedne zveze za prekrivanje, po eno na vrstico. Prekrijejo se tudi območja, ki ste jih v tem dokumentu označili z orodjem Prekrij.</sys:String>
     <sys:String x:Key="Str_Macro_RedactNothing">Vnesite vsaj eno besedo ali besedno zvezo oziroma najprej označite območja z orodjem Prekrij.</sys:String>
     <sys:String x:Key="Str_Macro_Redacted">Prekrita območja: {0}, na straneh: {1}.</sys:String>
+    <sys:String x:Key="Str_Macro_RedactSkippedPages">Prekrivanje se je ustavilo, ker polj obrazca ali komentarjev na teh straneh ni bilo mogoče prebrati, zato bi lahko bil tam kakšen izraz spregledan: {0}</sys:String>
     <sys:String x:Key="Str_Scroll_Up">Pomakni navzgor</sys:String>
     <sys:String x:Key="Str_Scroll_Down">Pomakni navzdol</sys:String>
     <sys:String x:Key="Str_Scroll_Left">Pomakni levo</sys:String>
@@ -1759,6 +1764,7 @@
     <sys:String x:Key="Str_Paragraph_Ready">Predogled je pripravljen. Uporabi nadomesti izvirno besedilo odstavka.</sys:String>
     <sys:String x:Key="Str_Paragraph_Unsupported">Ni podprtega odstavka.</sys:String>
     <sys:String x:Key="Str_Paragraph_NoText">Ta stran nima besedila za urejanje. Skenirana stran najprej potrebuje OCR.</sys:String>
+    <sys:String x:Key="Str_Paragraph_HyphensToCheck">Preverite te besede. Vsaka je bila združena čez konec vrstice in nič v dokumentu ne kaže, ali vezaj sodi zraven: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Tega odstavka ni mogoče urejati: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Ta odstavek vsebuje različne pisave, velikosti ali barve. Novo besedilo uporablja en slog, zato se to oblikovanje ne bo ohranilo.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Pisava predogleda: {0}. Ta pisava bo vdelana v urejeni PDF.</sys:String>
