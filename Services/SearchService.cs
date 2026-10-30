@@ -7,6 +7,15 @@ namespace KillerPDF.Services
         public Dictionary<int, List<(double Left, double Bottom, double Right, double Top)>> PageRects { get; } = [];
         public List<int> ResultPages { get; } = [];
         public int TotalHits { get; set; }
+
+        /// <summary>
+        /// Zero-based pages whose text could not be read and were left out of the result. A search that
+        /// found nothing on the other pages has not shown the term is absent from these.
+        /// </summary>
+        public List<int> UnreadablePages { get; } = [];
+
+        /// <summary>Why each page in <see cref="UnreadablePages"/> was skipped, by page.</summary>
+        public Dictionary<int, string> UnreadableMessages { get; } = [];
     }
 
     internal sealed class SearchService
@@ -14,8 +23,10 @@ namespace KillerPDF.Services
         /// <summary>
         /// Scans every page of <paramref name="filePath"/> for <paramref name="query"/>, ignoring case
         /// unless <paramref name="matchCase"/> is set; <paramref name="wholeWord"/> skips matches inside
-        /// longer words. Returns an empty result when query is blank. A file whose text cannot be read throws,
-        /// because an empty result would tell the user the term is absent.
+        /// longer words. Returns an empty result when query is blank. A file that cannot be opened, or whose
+        /// pages all fail to read, throws, because an empty result would tell the user the term is absent. A
+        /// page the text reader refuses is skipped and listed in <see cref="SearchResult.UnreadablePages"/>, so
+        /// one bad page does not cost the matches on every other page.
         /// </summary>
         public static SearchResult Search(string filePath, string query, bool matchCase = false, bool wholeWord = false)
         {
@@ -24,10 +35,18 @@ namespace KillerPDF.Services
                 return result;
 
             using var doc = PdfDocument.Open(filePath);
+            Exception? firstFailure = null;
             for (int pi = 0; pi < doc.NumberOfPages; pi++)
             {
-                var page = doc.GetPage(pi + 1);
-                var hits = FindMatchesOnPage(page, query, matchCase, wholeWord);
+                List<(double Left, double Bottom, double Right, double Top)> hits;
+                try { hits = FindMatchesOnPage(doc.GetPage(pi + 1), query, matchCase, wholeWord); }
+                catch (Exception ex) when (CanSkipPage(ex))
+                {
+                    result.UnreadablePages.Add(pi);
+                    result.UnreadableMessages[pi] = ex.Message;
+                    firstFailure ??= ex;
+                    continue;
+                }
                 if (hits.Count > 0)
                 {
                     result.PageRects[pi] = hits;
@@ -36,7 +55,30 @@ namespace KillerPDF.Services
                 }
             }
 
+            RequireAReadablePage(doc.NumberOfPages, result.UnreadablePages.Count, firstFailure);
             return result;
+        }
+
+        // A page the reader refuses is skipped; running out of memory or being cancelled is not that.
+        private static bool CanSkipPage(Exception ex) => ex is not (OutOfMemoryException or OperationCanceledException);
+
+        // Every page failing is a file that cannot be searched, not a file without the term.
+        private static void RequireAReadablePage(int pageCount, int unreadableCount, Exception? firstFailure)
+        {
+            if (firstFailure is not null && unreadableCount == pageCount)
+                throw new System.IO.InvalidDataException("No page of the document could be read: " + firstFailure.Message, firstFailure);
+        }
+
+        /// <summary>
+        /// The one-based page numbers of <paramref name="zeroBasedPages"/> as a comma-separated list for a
+        /// message, cut after ten so a document that fails everywhere does not fill the status bar.
+        /// </summary>
+        internal static string SkippedPagesText(IEnumerable<int> zeroBasedPages)
+        {
+            const int Shown = 10;
+            List<int> pages = [.. zeroBasedPages.Select(page => page + 1)];
+            string text = string.Join(", ", pages.Take(Shown).Select(page => page.ToString(System.Globalization.CultureInfo.InvariantCulture)));
+            return pages.Count > Shown ? text + ", ..." : text;
         }
 
         internal static List<(double Left, double Bottom, double Right, double Top)> FindMatchesOnPage(
@@ -92,19 +134,44 @@ namespace KillerPDF.Services
 
         /// <summary>
         /// Finds every case-insensitive occurrence of <paramref name="query"/> on every page and
-        /// returns the bounds of only the matched characters, one rectangle per word a match touches.
+        /// returns the bounds of only the matched characters, one rectangle per word a match touches. A page
+        /// that cannot be read throws, so the caller never proceeds as if that page had been searched.
         /// </summary>
         internal static Dictionary<int, List<(double Left, double Bottom, double Right, double Top)>> FindExactMatches(
-            string filePath, string query)
+            string filePath, string query) => FindExactMatches(filePath, query, null);
+
+        /// <summary>
+        /// The same search, except a page the reader refuses is left out and its zero-based number added to
+        /// <paramref name="unreadablePages"/>, which the caller must show the user. Still throws when the
+        /// file cannot be opened or no page can be read.
+        /// </summary>
+        internal static Dictionary<int, List<(double Left, double Bottom, double Right, double Top)>> FindExactMatches(
+            string filePath, string query, out List<int> unreadablePages)
+        {
+            unreadablePages = [];
+            return FindExactMatches(filePath, query, unreadablePages);
+        }
+
+        private static Dictionary<int, List<(double Left, double Bottom, double Right, double Top)>> FindExactMatches(
+            string filePath, string query, List<int>? unreadablePages)
         {
             var result = new Dictionary<int, List<(double, double, double, double)>>();
             if (string.IsNullOrWhiteSpace(query) || string.IsNullOrWhiteSpace(filePath)) return result;
             using var doc = PdfDocument.Open(filePath);
+            Exception? firstFailure = null;
             for (int pi = 0; pi < doc.NumberOfPages; pi++)
             {
-                var hits = FindExactMatchesOnPage(doc.GetPage(pi + 1), query);
+                List<(double Left, double Bottom, double Right, double Top)> hits;
+                try { hits = FindExactMatchesOnPage(doc.GetPage(pi + 1), query); }
+                catch (Exception ex) when (unreadablePages is not null && CanSkipPage(ex))
+                {
+                    unreadablePages.Add(pi);
+                    firstFailure ??= ex;
+                    continue;
+                }
                 if (hits.Count > 0) result[pi] = hits;
             }
+            RequireAReadablePage(doc.NumberOfPages, unreadablePages?.Count ?? 0, firstFailure);
             return result;
         }
 

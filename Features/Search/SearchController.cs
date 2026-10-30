@@ -24,6 +24,10 @@ namespace KillerPDF.Features
         internal List<int> ResultPages { get; set; } = [];
         internal int PageCursor { get; set; } = -1;
 
+        /// <summary>Zero-based pages the last search could not read. A search that found nothing on the
+        /// others has not shown the term is absent from these, so every result view names them.</summary>
+        internal IReadOnlyList<int> UnreadablePages { get; private set; } = [];
+
         // Flat, reading-ordered list of every match (page + rect) so Enter steps word-by-word rather
         // than page-by-page; _matchCursor indexes it and that match is drawn with extra emphasis.
         private readonly List<(int page, double left, double bottom, double right, double top)> _matches = [];
@@ -59,6 +63,7 @@ namespace KillerPDF.Features
             _matches.Clear();
             _matchCursor = -1;
             PageCursor = -1;
+            UnreadablePages = [];
         }
 
         /// <summary>The new/closed-document reset - exactly the three things FileOperations
@@ -68,6 +73,7 @@ namespace KillerPDF.Features
             AllSearchRects.Clear();
             ResultPages.Clear();
             PageCursor = -1;
+            UnreadablePages = [];
         }
 
         internal void Run(string query)
@@ -79,6 +85,7 @@ namespace KillerPDF.Features
             _matches.Clear();
             _matchCursor = -1;
             PageCursor = -1;
+            UnreadablePages = [];
 
             if (string.IsNullOrWhiteSpace(query) || _host.CurrentFile is null)
             {
@@ -89,6 +96,7 @@ namespace KillerPDF.Features
             try
             {
                 var sr = SearchService.Search(_host.CurrentFile, query, MatchCase, WholeWord);
+                UnreadablePages = [.. sr.UnreadablePages];
 
                 // Text hidden under an edit, such as a replaced line, no longer counts as a match.
                 foreach (var kvp in sr.PageRects)
@@ -108,7 +116,15 @@ namespace KillerPDF.Features
 
                 if (_matches.Count == 0)
                 {
-                    _host.SetResultText(_host.Loc("Str_Search_NoMatches"));
+                    // Pages that could not be read were not searched, so this is not a plain "No matches".
+                    if (UnreadablePages.Count == 0)
+                    {
+                        _host.SetResultText(_host.Loc("Str_Search_NoMatches"));
+                        return;
+                    }
+                    _host.SetResultText(FormatOrFallback("Str_Search_NoMatchesPartial",
+                        "No matches on the readable pages. {0} pages could not be read.", UnreadablePages.Count));
+                    _host.SetStatus(SkippedPagesText());
                     return;
                 }
 
@@ -120,6 +136,7 @@ namespace KillerPDF.Features
                 if (_matchCursor < 0) _matchCursor = 0;
 
                 GoToCurrentMatch();
+                if (UnreadablePages.Count > 0) _host.SetStatus(SkippedPagesText());
             }
             catch
             {
@@ -163,8 +180,26 @@ namespace KillerPDF.Features
                 return;
             }
             int pages = ResultPages.Count;
-            _host.SetResultCount($"{_matchCursor + 1} / {_matches.Count}",
-                string.Format(_host.Loc("Str_Search_Summary"), _matches.Count, pages));
+            string summary = string.Format(_host.Loc("Str_Search_Summary"), _matches.Count, pages);
+            if (UnreadablePages.Count > 0) summary += "\n" + SkippedPagesText();
+            _host.SetResultCount($"{_matchCursor + 1} / {_matches.Count}", summary);
+        }
+
+        private string SkippedPagesText() => SkippedPagesMessage(UnreadablePages);
+
+        /// <summary>Names the (zero-based) pages that were not searched because they could not be read,
+        /// for the search bar, the status line and the Find-and-Redact warning.</summary>
+        internal string SkippedPagesMessage(IEnumerable<int> pages) => FormatOrFallback("Str_Search_PagesSkipped",
+            "These pages could not be read, so they were not searched: {0}", SearchService.SkippedPagesText(pages));
+
+        // The string table may not carry a key yet (Loc then returns the key itself), and a translation
+        // may not match the placeholders: either way the English text still reaches the user.
+        private string FormatOrFallback(string key, string english, object argument)
+        {
+            string text = _host.Loc(key);
+            if (text == key) text = english;
+            try { return string.Format(text, argument); }
+            catch (FormatException) { return string.Format(english, argument); }
         }
     }
 }

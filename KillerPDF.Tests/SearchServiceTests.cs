@@ -79,7 +79,181 @@ namespace KillerPDF.Tests
             var result = new SearchResult();
             Assert.Empty(result.PageRects);
             Assert.Empty(result.ResultPages);
+            Assert.Empty(result.UnreadablePages);
             Assert.Equal(0, result.TotalHits);
+        }
+
+        // One page the text reader refuses must not cost the matches on every other page (F3-001).
+        [Fact]
+        public void Search_OnePageTheReaderRefuses_KeepsTheOtherPagesAndNamesTheSkippedOne()
+        {
+            WithPdf([GoodPage, BadPage, GoodPage], path =>
+            {
+                var result = SearchService.Search(path, "Conventional");
+                Assert.Equal(2, result.TotalHits);
+                Assert.Equal([0, 2], result.ResultPages);
+                Assert.Equal([1], result.UnreadablePages);
+                Assert.Contains("Nested", result.UnreadableMessages[1]);
+            });
+        }
+
+        [Fact]
+        public void Search_EveryPageReadable_ReportsNoSkippedPages()
+        {
+            WithPdf([GoodPage, GoodPage], path =>
+            {
+                var result = SearchService.Search(path, "Conventional");
+                Assert.Equal(2, result.TotalHits);
+                Assert.Empty(result.UnreadablePages);
+            });
+        }
+
+        // "No matches" for a file nothing could be read from would tell the user the term is absent.
+        [Fact]
+        public void Search_EveryPageUnreadable_ThrowsInsteadOfReportingNoHits()
+        {
+            WithPdf([BadPage, BadPage], path =>
+                Assert.ThrowsAny<Exception>(() => SearchService.Search(path, "Conventional")));
+        }
+
+        [Fact]
+        public void FindExactMatches_OnePageTheReaderRefuses_KeepsTheOtherPagesAndNamesTheSkippedOne()
+        {
+            WithPdf([GoodPage, BadPage, GoodPage], path =>
+            {
+                var matches = SearchService.FindExactMatches(path, "Conventional", out List<int> unreadable);
+                Assert.Equal([0, 2], matches.Keys.OrderBy(page => page));
+                Assert.Equal([1], unreadable);
+            });
+        }
+
+        [Fact]
+        public void FindExactMatches_EveryPageUnreadable_Throws()
+        {
+            WithPdf([BadPage, BadPage], path =>
+                Assert.ThrowsAny<Exception>(() => SearchService.FindExactMatches(path, "Conventional", out _)));
+        }
+
+        // The strict form is for callers that must not proceed past a page they could not search.
+        [Fact]
+        public void FindExactMatches_WithoutAReport_StillThrowsOnAPageTheReaderRefuses()
+        {
+            WithPdf([GoodPage, BadPage], path =>
+                Assert.ThrowsAny<Exception>(() => SearchService.FindExactMatches(path, "Conventional")));
+        }
+
+        [Fact]
+        public void SkippedPagesText_ListsPagesFromOneAndCapsALongList()
+        {
+            Assert.Equal("4", SearchService.SkippedPagesText([3]));
+            Assert.Equal("2, 5, 9", SearchService.SkippedPagesText([1, 4, 8]));
+            Assert.Equal("1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ...", SearchService.SkippedPagesText(Enumerable.Range(0, 12)));
+        }
+
+        [Fact]
+        public void Search_ArxivPaperWithABadTransformationMatrix_KeepsItsReadablePages()
+        {
+            string path = CorpusFile("arxiv-cc-2025-01-batch2", "2411.07303v2.pdf");
+            if (!System.IO.File.Exists(path)) return;
+            var result = SearchService.Search(path, "the");
+            Assert.Equal(854, result.TotalHits);
+            Assert.Equal([2], result.UnreadablePages);
+        }
+
+        [Fact]
+        public void Search_ArxivPaperWithABadShading_KeepsItsReadablePages()
+        {
+            string path = CorpusFile("arxiv-cc-2025-01-08-to-14-batch3", "2501.04289v1.pdf");
+            if (!System.IO.File.Exists(path)) return;
+            var result = SearchService.Search(path, "the");
+            Assert.Equal(342, result.TotalHits);
+            Assert.NotEmpty(result.UnreadablePages);
+        }
+
+        // SearchController, the CLI and the viewer are not linked into this project, so what they do with
+        // the skipped pages is pinned in their source.
+        [Fact]
+        public void TheSearchBarReportsSkippedPagesAndNeverShowsPlainNoMatchesForThem()
+        {
+            string source = ReadSource("Features/Search/SearchController.cs");
+            Assert.Contains("sr.UnreadablePages", source);
+            Assert.Contains("Str_Search_PagesSkipped", source);
+            Assert.Contains("Str_Search_NoMatchesPartial", source);
+        }
+
+        [Fact]
+        public void TheCommandLineSearchReportsSkippedPagesAndExitsWithThree()
+        {
+            string source = ReadSource("Features/Cli/CliRunner.cs");
+            int start = source.IndexOf("private static int CliSearchText", StringComparison.Ordinal);
+            Assert.True(start >= 0);
+            string body = source[start..Math.Min(source.Length, start + 2500)];
+            Assert.Contains("unreadablePages", body);
+            Assert.Contains("found.UnreadablePages.Count > 0 ? 3 : 0", body);
+        }
+
+        [Fact]
+        public void MarkAllSearchResultsForRedactionWarnsAboutPagesItCouldNotSearch()
+        {
+            string source = ReadSource("Controls/Viewer/PdfViewer.Redaction.cs");
+            int start = source.IndexOf("private void MarkSearchResultsForRedaction", StringComparison.Ordinal);
+            Assert.True(start >= 0);
+            string body = source[start..Math.Min(source.Length, start + 3500)];
+            Assert.DoesNotContain("catch (Exception) { matches = []; }", body);
+            Assert.Contains("out unreadable", body);
+            Assert.Contains("Search.SkippedPagesMessage(unreadable)", body);
+            Assert.Contains("KillerDialog.Show(", body);
+        }
+
+        private const string GoodPage = "BT /F1 12 Tf 72 700 Td (Conventional) Tj ET";
+
+        // A content stream the strict text reader refuses while a renderer would draw around it.
+        private const string BadPage = "BT BT ET ET";
+
+        private static string CorpusFile(string batch, string name) =>
+            System.IO.Path.Combine(@"C:\Users\steve\code\KillerPDF-Corpus\corpus\regression", batch, name);
+
+        private static string ReadSource(string relativePath, [System.Runtime.CompilerServices.CallerFilePath] string testFile = "") =>
+            System.IO.File.ReadAllText(System.IO.Path.Combine(
+                System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(testFile))!, relativePath));
+
+        private static void WithPdf(string[] pageContents, Action<string> check)
+        {
+            string path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid() + ".pdf");
+            try
+            {
+                System.IO.File.WriteAllBytes(path, BuildPdf(pageContents));
+                check(path);
+            }
+            finally { System.IO.File.Delete(path); }
+        }
+
+        private static byte[] BuildPdf(string[] pageContents)
+        {
+            var objects = new List<string>
+            {
+                "<< /Type /Catalog /Pages 2 0 R >>",
+                "<< /Type /Pages /Kids [" + string.Join(" ", pageContents.Select((_, i) => $"{4 + 2 * i} 0 R")) + $"] /Count {pageContents.Length} >>",
+                "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>"
+            };
+            for (int i = 0; i < pageContents.Length; i++)
+            {
+                objects.Add($"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents {5 + 2 * i} 0 R >>");
+                objects.Add($"<< /Length {pageContents[i].Length} >>\nstream\n{pageContents[i]}\nendstream");
+            }
+
+            var pdf = new System.Text.StringBuilder("%PDF-1.4\n");
+            var offsets = new List<int>();
+            for (int i = 0; i < objects.Count; i++)
+            {
+                offsets.Add(pdf.Length);
+                pdf.Append($"{i + 1} 0 obj\n{objects[i]}\nendobj\n");
+            }
+            int xref = pdf.Length;
+            pdf.Append($"xref\n0 {objects.Count + 1}\n0000000000 65535 f \n");
+            foreach (int offset in offsets) pdf.Append($"{offset:D10} 00000 n \n");
+            pdf.Append($"trailer\n<< /Size {objects.Count + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
+            return System.Text.Encoding.ASCII.GetBytes(pdf.ToString());
         }
     }
 }

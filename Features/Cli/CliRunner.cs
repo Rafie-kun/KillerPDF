@@ -497,7 +497,8 @@ namespace KillerPDF.Features
             "                                           [--text <phrase>] [--terms <file>] [--rasterize] [--json]",
             "                                           run a macro; --macro --list shows the saved ones",
             "  killerpdf document-info <in.pdf>                 print document details as JSON",
-            "  killerpdf search-text <in.pdf> <query>            print page hits as JSON",
+            "  killerpdf search-text <in.pdf> <query>            print page hits as JSON; exit 3 when pages",
+            "                                           could not be read (listed as unreadablePages)",
             "  killerpdf batch-resave <in> <out> [--log <f.csv>] [--quiet]",
             "                                           resave a file or tree through the standard",
             "                                           open/save pipeline (validation harness)",
@@ -2248,13 +2249,21 @@ namespace KillerPDF.Features
                 con.WriteLine("Could not read the document: " + FlattenBatchDetail(ex.Message));
                 return 1;
             }
-            SearchResult found = SearchService.Search(path, pos[1]);
+            SearchResult found;
+            try { found = SearchService.Search(path, pos[1]); }
+            catch (Exception ex) when (ex is not OutOfMemoryException)
+            {
+                con.WriteLine("Could not read the document: " + FlattenBatchDetail(ex.Message));
+                return 1;
+            }
             con.WriteLine(JsonSerializer.Serialize(new
             {
                 path, query = pos[1], totalHits = found.TotalHits,
-                pages = found.ResultPages.Select(page => page + 1).ToArray()
+                pages = found.ResultPages.Select(page => page + 1).ToArray(),
+                unreadablePages = found.UnreadablePages.Select(page => page + 1).ToArray()
             }));
-            return 0;
+            // A hit count that left pages out is not a "not found": a script reads 3 as partial, never as absent.
+            return found.UnreadablePages.Count > 0 ? 3 : 0;
         }
 
         private static bool CliInspectEditInput(

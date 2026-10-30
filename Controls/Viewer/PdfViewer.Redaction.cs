@@ -383,9 +383,11 @@ namespace KillerPDF.Controls
                 return;
             }
             // Mark only the matched characters, not the whole words the search highlights.
+            // A page that cannot be read is not searched, and a redaction that skips it must say so.
             Dictionary<int, List<(double Left, double Bottom, double Right, double Top)>> matches;
-            try { matches = SearchService.FindExactMatches(_currentFile!, Search.LastQuery); }
-            catch (Exception) { matches = []; }
+            List<int> unreadable;
+            try { matches = SearchService.FindExactMatches(_currentFile!, Search.LastQuery, out unreadable); }
+            catch (Exception) { matches = []; unreadable = [.. Search.UnreadablePages]; }
             if (matches.Count == 0)
                 matches = Search.PagesWithResults.ToDictionary(page => page,
                     page => Search.TryGetPageRects(page, out var found)
@@ -404,7 +406,15 @@ namespace KillerPDF.Controls
             if (added > 0) MarkDirty();
             UpdateRedactionCount();
             RepaintRedactionMarks();
-            SetStatus(string.Format(Loc("Str_Redact_MarkedSearch"), added));
+            string marked = string.Format(Loc("Str_Redact_MarkedSearch"), added);
+            if (unreadable.Count == 0)
+            {
+                SetStatus(marked);
+                return;
+            }
+            string skipped = Search.SkippedPagesMessage(unreadable);
+            SetStatus(marked + " " + skipped);
+            KillerDialog.Show(Window.GetWindow(this), skipped, "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
         // The Redact bar's Find: words, phrases or patterns across the whole document, reviewed in a
