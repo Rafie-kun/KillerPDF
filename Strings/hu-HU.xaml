@@ -212,6 +212,7 @@ Az oldal lecserélhető a saját képére, amelyen a megjelölt területek feket
     <sys:String x:Key="Str_DocInfo_Producer">Gyártó</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Mentés</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Mégse</sys:String>
+    <sys:String x:Key="Str_DocInfo_UnreadableKept">A fájl néhány adatát nem sikerült beolvasni, ezért üresen jelennek meg. Változatlanok maradnak, hacsak nem ír be helyettük újat.</sys:String>
     <sys:String x:Key="Str_KS_Find">Szöveg keresése</sys:String>
     <sys:String x:Key="Str_KS_Replace">Keresés és csere</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Következő / előző találat</sys:String>
@@ -248,6 +249,10 @@ Az oldal lecserélhető a saját képére, amelyen a megjelölt területek feket
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Megnyitva: {0} (csak olvasható - nem szabványos XRef tábla) - {1} oldal</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Megnyitva: {0} (javított másolat - mentse a változások megtartásához) - {1} oldal</sys:String>
     <sys:String x:Key="Str_Save_ReferenceRepairs">Mentve a hibás hivatkozások javításával. A hiányzó tartalom nem lett helyreállítva.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedEncrypted">Ez a PDF sérült és jelszóval védett, ezért a KillerPDF nem tudja megjavítani vagy menteni. Az eredeti fájl nem változott.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedSigned">Ez a PDF sérült, és digitális aláírást tartalmaz. A mentés érvénytelenítené az aláírást, ezért a fájl nem változott.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedCertified">Ez a PDF sérült, és a szerzője tanúsította. A mentés megszüntetné a tanúsítást, ezért a fájl nem változott.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedUsageRights">Ez a PDF sérült, és Reader-használati jogokat tartalmaz. A mentés érvénytelenítené ezeket, ezért a fájl nem változott.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Megnyitva: {0} (raszterizált javítás - mentse a változások megtartásához) - {1} oldal</sys:String>
     <sys:String x:Key="Str_PageOf">{0}. oldal / {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">{0}. oldal / {1}  ({2} hivatkozás)</sys:String>
@@ -757,6 +762,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Drop_Merge">Egyesítés egyetlen PDF-be</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Megnyitás külön</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Nem található megnyitható PDF vagy kép.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">{0} fájl kimaradt, mert nem sikerült megjavítani.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Ez {0} külön lapot nyit meg. Folytatja?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Ez a mappa vagy archívum {0} fájlt tartalmaz. A KillerPDF csak az első {1} fájlt nyitja meg. Folytatja?</sys:String>
     <sys:String x:Key="Str_Status_Merged">{0} fájl egyesítve - még nincs mentve</sys:String>
@@ -1357,6 +1363,8 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Search_NoMatches">Nincs találat</sys:String>
     <sys:String x:Key="Str_Search_Error">Keresési hiba</sys:String>
     <sys:String x:Key="Str_Search_Summary">{0} találat {1} oldalon</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">Ezeket az oldalakat nem sikerült beolvasni, ezért nem lettek átkeresve: {0}</sys:String>
+    <sys:String x:Key="Str_Search_NoMatchesPartial">Nincs találat az olvasható oldalakon. {0} oldalt nem sikerült beolvasni.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Előző találat (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Következő találat (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Bezárás (Esc)</sys:String>
@@ -1846,9 +1854,9 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Paragraph_Right">Jobbra</sys:String>
     <sys:String x:Key="Str_Paragraph_Overflow">A szöveg nem fér el. Növelje a keret méretét, vagy csökkentse a betűméretet vagy a sortávolságot.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Az előnézet kész. Az alkalmazás lecseréli az eredeti bekezdés szövegét.</sys:String>
-    <sys:String x:Key="Str_Paragraph_Unsupported">Nem található támogatott bekezdés. Ez az első verzió egyetlen stílusú, vízszintes szöveget támogat.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Nem található támogatott bekezdés.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Ez a bekezdés nem szerkeszthető: {0}</sys:String>
-    <sys:String x:Key="Str_Paragraph_MixedStyles">Ez a bekezdés többféle betűtípust vagy betűméretet tartalmaz. Az új szöveg egyetlen stílust használ, ezért ez a formázás nem marad meg.</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">Ez a bekezdés többféle betűtípust, betűméretet vagy színt tartalmaz. Az új szöveg egyetlen stílust használ, ezért ez a formázás nem marad meg.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Előnézeti betűtípus: {0}. Ez a betűtípus be lesz ágyazva a szerkesztett PDF-be.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Előnézet előkészítése...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">A dokumentum megváltozott. A folytatáshoz nyissa meg újra a bekezdésszerkesztést.</sys:String>

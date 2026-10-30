@@ -231,6 +231,10 @@
     <sys:String x:Key="Str_OpenedReadOnlyXRef">已打开 {0}（只读 - 非标准 XRef 表）- {1} 页</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">已打开 {0}（已修复副本 - 请保存以保留变更）- {1} 页</sys:String>
     <sys:String x:Key="Str_Save_ReferenceRepairs">已修复损坏的引用并保存。缺失的内容未恢复。</sys:String>
+    <sys:String x:Key="Str_Save_DamagedEncrypted">此 PDF 已损坏且受密码保护，因此 KillerPDF 无法修复或保存。原始文件未被更改。</sys:String>
+    <sys:String x:Key="Str_Save_DamagedSigned">此 PDF 已损坏且带有数字签名。保存会破坏签名，因此文件未被更改。</sys:String>
+    <sys:String x:Key="Str_Save_DamagedCertified">此 PDF 已损坏且经作者认证。保存会破坏认证，因此文件未被更改。</sys:String>
+    <sys:String x:Key="Str_Save_DamagedUsageRights">此 PDF 已损坏且带有 Reader 使用权限。保存会破坏这些权限，因此文件未被更改。</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">已打开 {0}（栅格化修复 - 请保存以保留变更）- {1} 页</sys:String>
     <sys:String x:Key="Str_PageOf">第 {0} 页，共 {1} 页</sys:String>
     <sys:String x:Key="Str_PageOfLinks">第 {0} 页，共 {1} 页（{2} 个链接）</sys:String>
@@ -674,6 +678,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Drop_Merge">合并为单个 PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">分别打开</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">未找到可打开的 PDF 或图片。</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">已跳过 {0} 个无法修复的文件。</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">这将打开 {0} 个单独的标签页。是否继续？</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">此文件夹或压缩包包含 {0} 个文件。KillerPDF 只会打开前 {1} 个。是否继续？</sys:String>
     <sys:String x:Key="Str_Status_Merged">已合并 {0} 个文件 - 尚未保存</sys:String>
@@ -1005,6 +1010,7 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_DocInfo_Producer">生成程序</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">保存</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">取消</sys:String>
+    <sys:String x:Key="Str_DocInfo_UnreadableKept">此文件中的某些详细信息无法读取，因此显示为空白。除非您输入替换内容，否则它们将保持原样。</sys:String>
     <sys:String x:Key="Str_LinkRemoveFailed">移除链接失败:</sys:String>
     <sys:String x:Key="Str_LinkBlocked">已拦截链接(不支持的类型):</sys:String>
     <sys:String x:Key="Str_LinkOpenFailed">无法打开链接</sys:String>
@@ -1354,6 +1360,8 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Search_NoMatches">无匹配项</sys:String>
     <sys:String x:Key="Str_Search_Error">搜索错误</sys:String>
     <sys:String x:Key="Str_Search_Summary">在 {1} 页中找到 {0} 个匹配项</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">这些页面无法读取，因此未被搜索：{0}</sys:String>
+    <sys:String x:Key="Str_Search_NoMatchesPartial">可读取的页面中没有匹配项。有 {0} 页无法读取。</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">上一个匹配项 (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">下一个匹配项 (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">关闭 (Esc)</sys:String>
@@ -1843,9 +1851,9 @@ KillerPDF 不会创建两个已安装的副本。</sys:String>
     <sys:String x:Key="Str_Paragraph_Right">右对齐</sys:String>
     <sys:String x:Key="Str_Paragraph_Overflow">文本无法容纳。请增大文本框，或减小字号或行距。</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">预览已就绪。应用后将替换原段落文本。</sys:String>
-    <sys:String x:Key="Str_Paragraph_Unsupported">未找到支持的段落。此初始版本支持单一样式的横排文本。</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">未找到支持的段落。</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">无法编辑此段落：{0}</sys:String>
-    <sys:String x:Key="Str_Paragraph_MixedStyles">此段落混用了多种字体或字号。新文本仅使用单一样式，因此不会保留该样式设置。</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">此段落混用了多种字体、字号或颜色。新文本仅使用单一样式，因此不会保留该样式设置。</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">预览字体：{0}。此字体将嵌入编辑后的 PDF。</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">正在准备预览...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">文档已更改。请重新打开段落编辑以继续。</sys:String>

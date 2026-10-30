@@ -213,6 +213,7 @@ The page can be replaced with an image of itself with the marked areas blacked o
     <sys:String x:Key="Str_DocInfo_Producer">Producer</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Save</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Cancel</sys:String>
+    <sys:String x:Key="Str_DocInfo_UnreadableKept">Some details in this file could not be read, so they appear blank. They stay as they are unless you type a replacement.</sys:String>
     <sys:String x:Key="Str_KS_Find">Find Text</sys:String>
     <sys:String x:Key="Str_KS_Replace">Find and replace</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Next / previous result</sys:String>
@@ -249,6 +250,10 @@ The page can be replaced with an image of itself with the marked areas blacked o
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Opened {0} read-only because of a non-standard XRef table ({1} page(s))</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Opened a repaired copy of {0}; save to keep changes ({1} page(s))</sys:String>
     <sys:String x:Key="Str_Save_ReferenceRepairs">Saved with repairs to broken references. Missing content was not recovered.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedEncrypted">This PDF is damaged and password protected, so KillerPDF cannot repair or save it. The original file has not been changed.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedSigned">This PDF is damaged and carries a digital signature. Saving would break the signature, so the file was not changed.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedCertified">This PDF is damaged and certified by its author. Saving would break the certification, so the file was not changed.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedUsageRights">This PDF is damaged and carries Reader usage rights. Saving would break them, so the file was not changed.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Opened a rasterized repair of {0}; save to keep changes ({1} page(s))</sys:String>
     <sys:String x:Key="Str_PageOf">Page {0} of {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">Page {0} of {1}  ({2} link(s))</sys:String>
@@ -758,6 +763,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Drop_Merge">Merge into one PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Open separately</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">No PDFs or images were found to open.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Skipped {0} file(s) that could not be repaired.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">This will open {0} separate tabs. Continue?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">This folder or archive has {0} files. KillerPDF will open only the first {1}. Continue?</sys:String>
     <sys:String x:Key="Str_Status_Merged">Merged {0} files, not yet saved</sys:String>
@@ -1380,6 +1386,8 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Search_NoMatches">No matches</sys:String>
     <sys:String x:Key="Str_Search_Error">Search error</sys:String>
     <sys:String x:Key="Str_Search_Summary">{0} matches on {1} pages</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">These pages could not be read, so they were not searched: {0}</sys:String>
+    <sys:String x:Key="Str_Search_NoMatchesPartial">No matches on the readable pages. {0} pages could not be read.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Previous Match (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Next Match (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Close (Esc)</sys:String>
@@ -1870,9 +1878,9 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Paragraph_Right">Right</sys:String>
     <sys:String x:Key="Str_Paragraph_Overflow">The text does not fit. Enlarge the box or reduce the font size or line spacing.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Preview ready. Apply replaces the original paragraph text.</sys:String>
-    <sys:String x:Key="Str_Paragraph_Unsupported">No supported paragraph was found. This first version supports horizontal text in one style.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">No supported paragraph was found.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">This paragraph cannot be edited: {0}</sys:String>
-    <sys:String x:Key="Str_Paragraph_MixedStyles">This paragraph mixes fonts or sizes. The new text uses one style, so that styling will not carry over.</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">This paragraph mixes fonts, sizes or colors. The new text uses one style, so that styling will not carry over.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Preview font: {0}. This font will be embedded in the edited PDF.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Preparing preview...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">The document changed. Reopen paragraph editing to continue.</sys:String>

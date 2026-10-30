@@ -231,6 +231,10 @@
     <sys:String x:Key="Str_OpenedReadOnlyXRef">{0} খোলা হয়েছে (শুধুমাত্র পঠনযোগ্য - অ-মানক XRef টেবিল) - {1} পৃষ্ঠা</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">{0} খোলা হয়েছে (মেরামত করা কপি - পরিবর্তন রাখতে সংরক্ষণ করুন) - {1} পৃষ্ঠা</sys:String>
     <sys:String x:Key="Str_Save_ReferenceRepairs">অকার্যকর রেফারেন্স মেরামত করে সংরক্ষণ করা হয়েছে। অনুপস্থিত বিষয়বস্তু পুনরুদ্ধার করা হয়নি।</sys:String>
+    <sys:String x:Key="Str_Save_DamagedEncrypted">এই PDF ক্ষতিগ্রস্ত এবং পাসওয়ার্ড দিয়ে সুরক্ষিত, তাই KillerPDF এটি মেরামত বা সংরক্ষণ করতে পারবে না। মূল ফাইলটি পরিবর্তন করা হয়নি।</sys:String>
+    <sys:String x:Key="Str_Save_DamagedSigned">এই PDF ক্ষতিগ্রস্ত এবং এতে ডিজিটাল স্বাক্ষর আছে। সংরক্ষণ করলে স্বাক্ষরটি নষ্ট হয়ে যাবে, তাই ফাইলটি পরিবর্তন করা হয়নি।</sys:String>
+    <sys:String x:Key="Str_Save_DamagedCertified">এই PDF ক্ষতিগ্রস্ত এবং লেখক কর্তৃক প্রত্যয়িত। সংরক্ষণ করলে প্রত্যয়ন নষ্ট হয়ে যাবে, তাই ফাইলটি পরিবর্তন করা হয়নি।</sys:String>
+    <sys:String x:Key="Str_Save_DamagedUsageRights">এই PDF ক্ষতিগ্রস্ত এবং এতে Reader-এর ব্যবহারের অধিকার আছে। সংরক্ষণ করলে সেগুলো নষ্ট হয়ে যাবে, তাই ফাইলটি পরিবর্তন করা হয়নি।</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">{0} খোলা হয়েছে (রাস্টারাইজড মেরামত - পরিবর্তন রাখতে সংরক্ষণ করুন) - {1} পৃষ্ঠা</sys:String>
     <sys:String x:Key="Str_PageOf">{1}-এর মধ্যে {0} পৃষ্ঠা</sys:String>
     <sys:String x:Key="Str_PageOfLinks">{1}-এর মধ্যে {0} পৃষ্ঠা  ({2}টি লিংক)</sys:String>
@@ -674,6 +678,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Drop_Merge">একটি PDF-এ একত্র করুন</sys:String>
     <sys:String x:Key="Str_Drop_Separate">আলাদাভাবে খুলুন</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">খোলার জন্য কোনো PDF বা ছবি পাওয়া যায়নি।</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">মেরামত করা যায়নি এমন {0}টি ফাইল বাদ দেওয়া হয়েছে।</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">এটি {0}টি আলাদা ট্যাব খুলবে। চালিয়ে যাবেন?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">এই ফোল্ডার বা আর্কাইভে {0}টি ফাইল আছে। KillerPDF শুধু প্রথম {1}টি খুলবে। চালিয়ে যাবেন?</sys:String>
     <sys:String x:Key="Str_Status_Merged">{0}টি ফাইল একত্র করা হয়েছে - এখনও সংরক্ষণ করা হয়নি</sys:String>
@@ -1001,6 +1006,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_DocInfo_Producer">প্রযোজক</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">সংরক্ষণ</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">বাতিল</sys:String>
+    <sys:String x:Key="Str_DocInfo_UnreadableKept">এই ফাইলের কিছু তথ্য পড়া যায়নি, তাই সেগুলো ফাঁকা দেখাচ্ছে। আপনি বদলি কিছু না লিখলে সেগুলো যেমন আছে তেমনই থাকবে।</sys:String>
     <sys:String x:Key="Str_LinkRemoveFailed">লিঙ্ক সরানো যায়নি:</sys:String>
     <sys:String x:Key="Str_LinkBlocked">অবরুদ্ধ লিঙ্ক (অসমর্থিত ধরন):</sys:String>
     <sys:String x:Key="Str_LinkOpenFailed">লিঙ্ক খোলা যায়নি</sys:String>
@@ -1350,6 +1356,8 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Search_NoMatches">কোনো মিল নেই</sys:String>
     <sys:String x:Key="Str_Search_Error">অনুসন্ধান ত্রুটি</sys:String>
     <sys:String x:Key="Str_Search_Summary">{1}টি পাতায় {0}টি মিল</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">এই পৃষ্ঠাগুলো পড়া যায়নি, তাই এগুলোতে অনুসন্ধান করা হয়নি: {0}</sys:String>
+    <sys:String x:Key="Str_Search_NoMatchesPartial">পড়া যায় এমন পৃষ্ঠাগুলোতে কোনো মিল নেই। {0}টি পৃষ্ঠা পড়া যায়নি।</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">পূর্ববর্তী মিল (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">পরবর্তী মিল (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">বন্ধ করুন (Esc)</sys:String>
@@ -1839,9 +1847,9 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Paragraph_Right">ডানে</sys:String>
     <sys:String x:Key="Str_Paragraph_Overflow">পাঠ্য বাক্সে ধরছে না। বাক্স বড় করুন অথবা ফন্টের আকার বা লাইন ব্যবধান কমান।</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">পূর্বরূপ প্রস্তুত। প্রয়োগ করলে মূল অনুচ্ছেদের পাঠ্য প্রতিস্থাপিত হবে।</sys:String>
-    <sys:String x:Key="Str_Paragraph_Unsupported">সমর্থিত কোনো অনুচ্ছেদ পাওয়া যায়নি। এই প্রথম সংস্করণে একটিমাত্র শৈলীর অনুভূমিক পাঠ্য সমর্থিত।</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">সমর্থিত কোনো অনুচ্ছেদ পাওয়া যায়নি।</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">এই অনুচ্ছেদটি সম্পাদনা করা যাবে না: {0}</sys:String>
-    <sys:String x:Key="Str_Paragraph_MixedStyles">এই অনুচ্ছেদে একাধিক ফন্ট বা আকার মিশ্রিত আছে। নতুন পাঠ্যে একটিমাত্র শৈলী ব্যবহৃত হয়, তাই এই বিন্যাস বহাল থাকবে না।</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">এই অনুচ্ছেদে একাধিক ফন্ট, আকার বা রঙ মিশ্রিত আছে। নতুন পাঠ্যে একটিমাত্র শৈলী ব্যবহৃত হয়, তাই এই বিন্যাস বহাল থাকবে না।</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">পূর্বরূপের ফন্ট: {0}। এই ফন্টটি সম্পাদিত PDF-এ সংযুক্ত করা হবে।</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">পূর্বরূপ প্রস্তুত হচ্ছে...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">নথিটি পরিবর্তিত হয়েছে। চালিয়ে যেতে অনুচ্ছেদ সম্পাদনা আবার খুলুন।</sys:String>

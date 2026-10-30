@@ -212,6 +212,7 @@ Có thể thay trang bằng hình ảnh của chính nó với các vùng đã �
     <sys:String x:Key="Str_DocInfo_Producer">Nhà sản xuất</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Lưu</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Hủy</sys:String>
+    <sys:String x:Key="Str_DocInfo_UnreadableKept">Một số chi tiết trong tệp này không đọc được nên hiển thị trống. Chúng được giữ nguyên trừ khi bạn nhập giá trị thay thế.</sys:String>
     <sys:String x:Key="Str_KS_Find">Tìm văn bản</sys:String>
     <sys:String x:Key="Str_KS_Replace">Tìm và thay thế</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Kết quả tiếp theo / trước đó</sys:String>
@@ -248,6 +249,10 @@ Có thể thay trang bằng hình ảnh của chính nó với các vùng đã �
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Đã mở {0} (chỉ đọc - bảng XRef không chuẩn) - {1} trang</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Đã mở {0} (bản sao đã sửa chữa - hãy lưu lại để giữ các thay đổi) - {1} trang</sys:String>
     <sys:String x:Key="Str_Save_ReferenceRepairs">Đã lưu sau khi sửa các tham chiếu bị hỏng. Nội dung bị thiếu không được khôi phục.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedEncrypted">PDF này bị hỏng và được bảo vệ bằng mật khẩu, nên KillerPDF không thể sửa hoặc lưu. Tệp gốc chưa bị thay đổi.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedSigned">PDF này bị hỏng và có chữ ký số. Lưu sẽ làm hỏng chữ ký, nên tệp chưa bị thay đổi.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedCertified">PDF này bị hỏng và đã được tác giả chứng nhận. Lưu sẽ làm mất chứng nhận, nên tệp chưa bị thay đổi.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedUsageRights">PDF này bị hỏng và có quyền sử dụng của Reader. Lưu sẽ làm mất các quyền này, nên tệp chưa bị thay đổi.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Đã mở {0} (đã sửa bằng cách rasterize - hãy lưu lại để giữ các thay đổi) - {1} trang</sys:String>
     <sys:String x:Key="Str_PageOf">Trang {0} / {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">Trang {0} / {1}  ({2} liên kết)</sys:String>
@@ -757,6 +762,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Drop_Merge">Gộp thành một tệp PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Mở riêng biệt</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Không tìm thấy tệp PDF hoặc hình ảnh nào có thể mở.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Đã bỏ qua {0} tệp không thể sửa.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Thao tác này sẽ mở {0} tab riêng biệt. Tiếp tục?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Thư mục hoặc tệp lưu trữ này có {0} tệp. KillerPDF sẽ chỉ mở {1} tệp đầu tiên. Tiếp tục?</sys:String>
     <sys:String x:Key="Str_Status_Merged">Đã gộp {0} tệp - chưa được lưu</sys:String>
@@ -1370,6 +1376,8 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Search_NoMatches">Không tìm thấy kết quả phù hợp</sys:String>
     <sys:String x:Key="Str_Search_Error">Lỗi tìm kiếm</sys:String>
     <sys:String x:Key="Str_Search_Summary">{0} kết quả phù hợp trên {1} trang</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">Không đọc được các trang này nên chúng không được tìm kiếm: {0}</sys:String>
+    <sys:String x:Key="Str_Search_NoMatchesPartial">Không có kết quả phù hợp trên các trang đọc được. Có {0} trang không đọc được.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Kết quả trước (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Kết quả tiếp theo (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Đóng (Esc)</sys:String>
@@ -1859,9 +1867,9 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Paragraph_Right">Phải</sys:String>
     <sys:String x:Key="Str_Paragraph_Overflow">Văn bản không vừa khung. Hãy mở rộng khung hoặc giảm cỡ chữ hay khoảng cách dòng.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Bản xem trước đã sẵn sàng. Thao tác áp dụng sẽ thay thế văn bản của đoạn gốc.</sys:String>
-    <sys:String x:Key="Str_Paragraph_Unsupported">Không tìm thấy đoạn văn được hỗ trợ. Phiên bản đầu tiên này hỗ trợ văn bản nằm ngang với một kiểu định dạng duy nhất.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Không tìm thấy đoạn văn được hỗ trợ.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Không thể chỉnh sửa đoạn văn này: {0}</sys:String>
-    <sys:String x:Key="Str_Paragraph_MixedStyles">Đoạn văn này dùng nhiều phông chữ hoặc cỡ chữ khác nhau. Văn bản mới chỉ dùng một kiểu, nên định dạng này sẽ không được giữ lại.</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">Đoạn văn này dùng nhiều phông chữ, cỡ chữ hoặc màu sắc khác nhau. Văn bản mới chỉ dùng một kiểu, nên định dạng này sẽ không được giữ lại.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Phông chữ xem trước: {0}. Phông chữ này sẽ được nhúng vào PDF đã chỉnh sửa.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Đang chuẩn bị bản xem trước...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Tài liệu đã thay đổi. Hãy mở lại công cụ chỉnh sửa đoạn văn để tiếp tục.</sys:String>

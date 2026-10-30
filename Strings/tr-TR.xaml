@@ -231,6 +231,10 @@ Sayfa, işaretli alanları karartılmış kendi görüntüsüyle değiştirilebi
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Açıldı {0} (salt okunur - standart dışı XRef tablosu) - {1} sayfa</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Açıldı {0} (onarılmış kopya - değişiklikleri korumak için kaydedin) - {1} sayfa</sys:String>
     <sys:String x:Key="Str_Save_ReferenceRepairs">Bozuk başvurular onarılarak kaydedildi. Eksik içerik kurtarılmadı.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedEncrypted">Bu PDF hasarlı ve parola korumalı olduğundan KillerPDF onu onaramaz veya kaydedemez. Özgün dosya değiştirilmedi.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedSigned">Bu PDF hasarlı ve dijital imza içeriyor. Kaydetmek imzayı bozacağından dosya değiştirilmedi.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedCertified">Bu PDF hasarlı ve yazarı tarafından sertifikalandırılmış. Kaydetmek sertifikasyonu bozacağından dosya değiştirilmedi.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedUsageRights">Bu PDF hasarlı ve Reader kullanım haklarını içeriyor. Kaydetmek bu hakları bozacağından dosya değiştirilmedi.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Açıldı {0} (rasterize edilerek onarıldı - değişiklikleri korumak için kaydedin) - {1} sayfa</sys:String>
     <sys:String x:Key="Str_PageOf">Sayfa {0} / {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">Sayfa {0} / {1}  ({2} bağlantı)</sys:String>
@@ -674,6 +678,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Drop_Merge">Tek bir PDF'de birleştir</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Ayrı ayrı aç</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Açılacak PDF veya görüntü bulunamadı.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Onarılamayan {0} dosya atlandı.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Bu, {0} ayrı sekme açacak. Devam edilsin mi?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Bu klasör veya arşiv {0} dosya içeriyor. KillerPDF yalnızca ilk {1} tanesini açacak. Devam edilsin mi?</sys:String>
     <sys:String x:Key="Str_Status_Merged">{0} dosya birleştirildi - henüz kaydedilmedi</sys:String>
@@ -1001,6 +1006,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_DocInfo_Producer">Üretici</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Kaydet</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">İptal</sys:String>
+    <sys:String x:Key="Str_DocInfo_UnreadableKept">Bu dosyadaki bazı ayrıntılar okunamadığı için boş görünüyor. Yerine yeni bir değer yazmadığınız sürece olduğu gibi kalırlar.</sys:String>
     <sys:String x:Key="Str_LinkRemoveFailed">Bağlantı kaldırılamadı:</sys:String>
     <sys:String x:Key="Str_LinkBlocked">Engellenen bağlantı (desteklenmeyen tür):</sys:String>
     <sys:String x:Key="Str_LinkOpenFailed">Bağlantı açılamadı</sys:String>
@@ -1350,6 +1356,8 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Search_NoMatches">Eşleşme yok</sys:String>
     <sys:String x:Key="Str_Search_Error">Arama hatası</sys:String>
     <sys:String x:Key="Str_Search_Summary">{0} eşleşme, {1} sayfa</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">Bu sayfalar okunamadığı için aranmadı: {0}</sys:String>
+    <sys:String x:Key="Str_Search_NoMatchesPartial">Okunabilir sayfalarda eşleşme yok. {0} sayfa okunamadı.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Önceki eşleşme (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Sonraki eşleşme (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Kapat (Esc)</sys:String>
@@ -1839,9 +1847,9 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Paragraph_Right">Sağ</sys:String>
     <sys:String x:Key="Str_Paragraph_Overflow">Metin sığmıyor. Kutuyu büyütün veya yazı tipi boyutunu ya da satır aralığını azaltın.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Önizleme hazır. Uygulama işlemi özgün paragraf metnini değiştirir.</sys:String>
-    <sys:String x:Key="Str_Paragraph_Unsupported">Desteklenen bir paragraf bulunamadı. Bu ilk sürüm, tek stilde yatay metni destekler.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Desteklenen bir paragraf bulunamadı.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Bu paragraf düzenlenemez: {0}</sys:String>
-    <sys:String x:Key="Str_Paragraph_MixedStyles">Bu paragraf farklı yazı tiplerini veya boyutlarını bir arada kullanıyor. Yeni metin tek bir stil kullanır, bu nedenle bu biçimlendirme korunmaz.</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">Bu paragraf farklı yazı tiplerini, boyutlarını veya renklerini bir arada kullanıyor. Yeni metin tek bir stil kullanır, bu nedenle bu biçimlendirme korunmaz.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Önizleme yazı tipi: {0}. Bu yazı tipi düzenlenen PDF'ye gömülecektir.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Önizleme hazırlanıyor...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Belge değişti. Devam etmek için paragraf düzenlemeyi yeniden açın.</sys:String>

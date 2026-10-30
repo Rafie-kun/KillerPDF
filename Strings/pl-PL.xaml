@@ -212,6 +212,7 @@ Stronę można zastąpić jej obrazem z zaczernionymi zaznaczonymi obszarami. Te
     <sys:String x:Key="Str_DocInfo_Producer">Producent</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Zapisz</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Anuluj</sys:String>
+    <sys:String x:Key="Str_DocInfo_UnreadableKept">Niektórych informacji w tym pliku nie udało się odczytać, więc są puste. Pozostaną bez zmian, dopóki nie wpiszesz zamiennika.</sys:String>
     <sys:String x:Key="Str_KS_Find">Znajdź tekst</sys:String>
     <sys:String x:Key="Str_KS_Replace">Znajdź i zamień</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Następny / poprzedni wynik</sys:String>
@@ -248,6 +249,10 @@ Stronę można zastąpić jej obrazem z zaczernionymi zaznaczonymi obszarami. Te
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Otwarto {0} (tylko do odczytu - niestandardowa tabela XRef) - {1} stronę(y)</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Otwarto naprawioną kopię {0} (zapisz, aby zachować zmiany) - {1} stronę(y)</sys:String>
     <sys:String x:Key="Str_Save_ReferenceRepairs">Zapisano z naprawionymi nieprawidłowymi odwołaniami. Brakująca zawartość nie została odzyskana.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedEncrypted">Ten plik PDF jest uszkodzony i chroniony hasłem, więc KillerPDF nie może go naprawić ani zapisać. Oryginalny plik nie został zmieniony.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedSigned">Ten plik PDF jest uszkodzony i zawiera podpis cyfrowy. Zapisanie naruszyłoby podpis, więc plik nie został zmieniony.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedCertified">Ten plik PDF jest uszkodzony i został certyfikowany przez autora. Zapisanie naruszyłoby certyfikację, więc plik nie został zmieniony.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedUsageRights">Ten plik PDF jest uszkodzony i zawiera prawa użytkowania programu Reader. Zapisanie naruszyłoby je, więc plik nie został zmieniony.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Otwarto rasteryzowaną naprawioną kopię {0} (zapisz, aby zachować zmiany) - {1} stronę(y)</sys:String>
     <sys:String x:Key="Str_PageOf">Strona {0} z {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">Strona {0} z {1} (linki: {2})</sys:String>
@@ -739,6 +744,7 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Drop_Merge">Połącz w jeden PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Otwórz osobno</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Nie znaleziono plików PDF ani obrazów do otwarcia.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Pominięto pliki, których nie udało się naprawić (liczba: {0}).</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Spowoduje to otwarcie {0} oddzielnych kart. Kontynuować?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Ten folder lub archiwum zawiera {0} plików. KillerPDF otworzy tylko pierwsze {1}. Kontynuować?</sys:String>
     <sys:String x:Key="Str_Status_Merged">Połączono {0} plików - jeszcze nie zapisano</sys:String>
@@ -1358,6 +1364,8 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Search_NoMatches">Brak wyników</sys:String>
     <sys:String x:Key="Str_Search_Error">Błąd wyszukiwania</sys:String>
     <sys:String x:Key="Str_Search_Summary">{0} wyników na {1} stronach</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">Nie udało się odczytać tych stron, więc nie zostały przeszukane: {0}</sys:String>
+    <sys:String x:Key="Str_Search_NoMatchesPartial">Brak wyników na czytelnych stronach. Liczba stron, których nie udało się odczytać: {0}.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Poprzedni wynik (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Następny wynik (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Zamknij (Esc)</sys:String>
@@ -1847,9 +1855,9 @@ Przeskalować je do obsługiwanego rozmiaru? Strony zachowują swój wygląd i p
     <sys:String x:Key="Str_Paragraph_Right">Do prawej</sys:String>
     <sys:String x:Key="Str_Paragraph_Overflow">Tekst się nie mieści. Powiększ ramkę lub zmniejsz rozmiar czcionki albo interlinię.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Podgląd gotowy. Zastosowanie zmian zastąpi oryginalny tekst akapitu.</sys:String>
-    <sys:String x:Key="Str_Paragraph_Unsupported">Nie znaleziono obsługiwanego akapitu. Ta pierwsza wersja obsługuje tekst poziomy w jednym stylu.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Nie znaleziono obsługiwanego akapitu.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Tego akapitu nie można edytować: {0}</sys:String>
-    <sys:String x:Key="Str_Paragraph_MixedStyles">Ten akapit łączy różne czcionki lub rozmiary. Nowy tekst używa jednego stylu, więc to formatowanie nie zostanie zachowane.</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">Ten akapit łączy różne czcionki, rozmiary lub kolory. Nowy tekst używa jednego stylu, więc to formatowanie nie zostanie zachowane.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Czcionka podglądu: {0}. Ta czcionka zostanie osadzona w edytowanym pliku PDF.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Przygotowywanie podglądu...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Dokument został zmieniony. Otwórz ponownie edycję akapitu, aby kontynuować.</sys:String>

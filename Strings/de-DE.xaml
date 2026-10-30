@@ -231,6 +231,10 @@ Die Seite kann durch ein Bild ihrer selbst ersetzt werden, in dem die markierten
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Geöffnet: {0} (schreibgeschützt - nicht standardisierte XRef-Tabelle) - {1} Seite(n)</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Geöffnet: {0} (reparierte Kopie - zum Beibehalten der Änderungen speichern) - {1} Seite(n)</sys:String>
     <sys:String x:Key="Str_Save_ReferenceRepairs">Mit Reparaturen an fehlerhaften Referenzen gespeichert. Fehlende Inhalte wurden nicht wiederhergestellt.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedEncrypted">Dieses PDF ist beschädigt und passwortgeschützt, daher kann KillerPDF es weder reparieren noch speichern. Die Originaldatei wurde nicht geändert.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedSigned">Dieses PDF ist beschädigt und enthält eine digitale Signatur. Beim Speichern würde die Signatur ungültig, daher wurde die Datei nicht geändert.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedCertified">Dieses PDF ist beschädigt und vom Autor zertifiziert. Beim Speichern ginge die Zertifizierung verloren, daher wurde die Datei nicht geändert.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedUsageRights">Dieses PDF ist beschädigt und enthält Reader-Nutzungsrechte. Beim Speichern gingen diese verloren, daher wurde die Datei nicht geändert.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Geöffnet: {0} (Raster-Reparatur - zum Beibehalten der Änderungen speichern) - {1} Seite(n)</sys:String>
     <sys:String x:Key="Str_PageOf">Seite {0} von {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">Seite {0} von {1}  ({2} Link(s))</sys:String>
@@ -674,6 +678,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Drop_Merge">In einer PDF zusammenführen</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Einzeln öffnen</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Keine PDFs oder Bilder zum Öffnen gefunden.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">{0} Datei(en), die nicht repariert werden konnten, wurden übersprungen.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Dies öffnet {0} separate Tabs. Fortfahren?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Dieser Ordner bzw. dieses Archiv enthält {0} Dateien. KillerPDF öffnet nur die ersten {1}. Fortfahren?</sys:String>
     <sys:String x:Key="Str_Status_Merged">{0} Dateien zusammengeführt - noch nicht gespeichert</sys:String>
@@ -1007,6 +1012,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_DocInfo_Producer">Produzent</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Speichern</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Abbrechen</sys:String>
+    <sys:String x:Key="Str_DocInfo_UnreadableKept">Einige Angaben in dieser Datei konnten nicht gelesen werden und erscheinen daher leer. Sie bleiben unverändert, sofern Sie keinen Ersatz eingeben.</sys:String>
     <sys:String x:Key="Str_LinkRemoveFailed">Entfernen des Links fehlgeschlagen:</sys:String>
     <sys:String x:Key="Str_LinkBlocked">Blockierter Link (nicht unterstützter Typ):</sys:String>
     <sys:String x:Key="Str_LinkOpenFailed">Link konnte nicht geöffnet werden</sys:String>
@@ -1359,6 +1365,8 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Search_NoMatches">Keine Treffer</sys:String>
     <sys:String x:Key="Str_Search_Error">Suchfehler</sys:String>
     <sys:String x:Key="Str_Search_Summary">{0} Treffer auf {1} Seiten</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">Diese Seiten konnten nicht gelesen werden und wurden daher nicht durchsucht: {0}</sys:String>
+    <sys:String x:Key="Str_Search_NoMatchesPartial">Keine Treffer auf den lesbaren Seiten. {0} Seiten konnten nicht gelesen werden.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Vorheriger Treffer (Umschalt+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Nächster Treffer (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Schließen (Esc)</sys:String>
@@ -1848,9 +1856,9 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Paragraph_Right">Rechts</sys:String>
     <sys:String x:Key="Str_Paragraph_Overflow">Der Text passt nicht in den Rahmen. Vergrößern Sie ihn oder verringern Sie Schriftgröße oder Zeilenabstand.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Vorschau bereit. Anwenden ersetzt den ursprünglichen Absatztext.</sys:String>
-    <sys:String x:Key="Str_Paragraph_Unsupported">Kein unterstützter Absatz gefunden. Diese erste Version unterstützt horizontalen Text in einem einheitlichen Stil.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Kein unterstützter Absatz gefunden.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Dieser Absatz kann nicht bearbeitet werden: {0}</sys:String>
-    <sys:String x:Key="Str_Paragraph_MixedStyles">Dieser Absatz enthält verschiedene Schriftarten oder Schriftgrößen. Der neue Text verwendet einen einheitlichen Stil, daher wird diese Formatierung nicht übernommen.</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">Dieser Absatz enthält verschiedene Schriftarten, Schriftgrößen oder Farben. Der neue Text verwendet einen einheitlichen Stil, daher wird diese Formatierung nicht übernommen.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Vorschauschrift: {0}. Diese Schrift wird in die bearbeitete PDF eingebettet.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Vorschau wird vorbereitet...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Das Dokument wurde geändert. Öffnen Sie die Absatzbearbeitung erneut, um fortzufahren.</sys:String>

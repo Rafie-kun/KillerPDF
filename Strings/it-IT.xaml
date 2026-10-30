@@ -212,6 +212,7 @@ La pagina può essere sostituita da un'immagine di sé stessa con le aree contra
     <sys:String x:Key="Str_DocInfo_Producer">Produttore</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Salva</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Annulla</sys:String>
+    <sys:String x:Key="Str_DocInfo_UnreadableKept">Alcuni dettagli di questo file non sono stati letti e risultano vuoti. Restano invariati a meno che tu non inserisca un valore sostitutivo.</sys:String>
     <sys:String x:Key="Str_KS_Find">Trova testo</sys:String>
     <sys:String x:Key="Str_KS_Replace">Trova e sostituisci</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Risultato precedente/successivo</sys:String>
@@ -248,6 +249,10 @@ La pagina può essere sostituita da un'immagine di sé stessa con le aree contra
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Aperto {0} (sola lettura - tabella XRef non standard) - {1} pagine</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Aperto {0} (copia riparata - salva per mantenere le modifiche) - {1} pagine</sys:String>
     <sys:String x:Key="Str_Save_ReferenceRepairs">Salvato con riparazioni ai riferimenti non validi. Il contenuto mancante non è stato recuperato.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedEncrypted">Questo PDF è danneggiato e protetto da password, quindi KillerPDF non può ripararlo né salvarlo. Il file originale non è stato modificato.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedSigned">Questo PDF è danneggiato e contiene una firma digitale. Il salvataggio invaliderebbe la firma, quindi il file non è stato modificato.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedCertified">Questo PDF è danneggiato e certificato dal suo autore. Il salvataggio invaliderebbe la certificazione, quindi il file non è stato modificato.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedUsageRights">Questo PDF è danneggiato e contiene diritti di utilizzo di Reader. Il salvataggio li invaliderebbe, quindi il file non è stato modificato.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Aperto {0} (riparazione rasterizzata - salva per mantenere le modifiche) - {1} pagine</sys:String>
     <sys:String x:Key="Str_PageOf">Pagina {0} / {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">Pagina {0} / {1}  ({2} collegamento/i)</sys:String>
@@ -757,6 +762,7 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Drop_Merge">Unisci i file in un unico file PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Apri i file separatamente</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Nessun PDF o immagine trovata da aprire.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Ignorati {0} file che non è stato possibile riparare.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Verranno aperte {0} schede separate. Vuoi continuare?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Questa cartella o archivio contiene {0} file. KillerPDF aprirà solo i primi {1}. Vuoi continuare?</sys:String>
     <sys:String x:Key="Str_Status_Merged">Uniti {0} file: non ancora salvati</sys:String>
@@ -1370,6 +1376,8 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Search_NoMatches">Nessuna corrispondenza</sys:String>
     <sys:String x:Key="Str_Search_Error">Errore ricerca</sys:String>
     <sys:String x:Key="Str_Search_Summary">{0} corrispondenze in {1} pagine</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">Non è stato possibile leggere queste pagine, quindi la ricerca le ha escluse: {0}</sys:String>
+    <sys:String x:Key="Str_Search_NoMatchesPartial">Nessuna corrispondenza nelle pagine leggibili. Non è stato possibile leggere {0} pagine.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Corrispondenza precedente (Maiusc+Invio)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Corrispondenza successiva (Invio)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Chiudi (Esc)</sys:String>
@@ -1859,9 +1867,9 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Paragraph_Right">Destra</sys:String>
     <sys:String x:Key="Str_Paragraph_Overflow">Il testo non entra nel riquadro. Ingrandiscilo o riduci la dimensione del carattere o l’interlinea.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Anteprima pronta. Applica sostituisce il testo del paragrafo originale.</sys:String>
-    <sys:String x:Key="Str_Paragraph_Unsupported">Nessun paragrafo supportato trovato. Questa prima versione supporta il testo orizzontale con un unico stile.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Nessun paragrafo supportato trovato.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Questo paragrafo non può essere modificato: {0}</sys:String>
-    <sys:String x:Key="Str_Paragraph_MixedStyles">Questo paragrafo combina caratteri o dimensioni diversi. Il nuovo testo usa un solo stile, quindi questa formattazione non verrà mantenuta.</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">Questo paragrafo combina caratteri, dimensioni o colori diversi. Il nuovo testo usa un solo stile, quindi questa formattazione non verrà mantenuta.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Carattere dell’anteprima: {0}. Questo carattere verrà incorporato nel PDF modificato.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Preparazione dell’anteprima...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Il documento è cambiato. Riapri la modifica del paragrafo per continuare.</sys:String>

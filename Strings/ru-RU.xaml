@@ -212,6 +212,7 @@
     <sys:String x:Key="Str_DocInfo_Producer">Производитель</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Сохранить</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Отменить</sys:String>
+    <sys:String x:Key="Str_DocInfo_UnreadableKept">Некоторые сведения в этом файле не удалось прочитать, поэтому они отображаются пустыми. Они останутся без изменений, пока вы не введете замену.</sys:String>
     <sys:String x:Key="Str_KS_Find">Найти текст</sys:String>
     <sys:String x:Key="Str_KS_Replace">Найти и заменить</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Следующий / предыдущий результат</sys:String>
@@ -248,6 +249,10 @@
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Открыто {0} (только-для-чтения - не-стандартная XRef таблица) - {1} страница(ы)</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Открыто {0} (восстановленная копия - сохраните, чтобы сохранить изменения) - {1} страница(ы)</sys:String>
     <sys:String x:Key="Str_Save_ReferenceRepairs">Сохранено с исправлением некорректных ссылок на объекты. Отсутствующее содержимое не восстановлено.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedEncrypted">Этот PDF поврежден и защищен паролем, поэтому KillerPDF не может его восстановить или сохранить. Исходный файл не изменен.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedSigned">Этот PDF поврежден и содержит цифровую подпись. Сохранение нарушит подпись, поэтому файл не изменен.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedCertified">Этот PDF поврежден и сертифицирован автором. Сохранение нарушит сертификацию, поэтому файл не изменен.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedUsageRights">Этот PDF поврежден и содержит права на использование Reader. Сохранение нарушит их, поэтому файл не изменен.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Открыто {0} (растрированный ремонт - сохранить, чтобы сохранить изменения) - {1} страница(ы)</sys:String>
     <sys:String x:Key="Str_PageOf">Страница {0} из {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">Страница {0} из {1}  ({2} ссылка(и))</sys:String>
@@ -757,6 +762,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Drop_Merge">Объединить в один PDF-файл</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Открыть отдельно</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Не найдено PDF или изображений чтобы открыть.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Пропущено файлов, которые не удалось восстановить: {0}.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Будет открыто {0} отдельных вкладок. Продолжить?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Эта папка или архив содержит файлов: {0}. KillerPDF откроет только первые {1}. Продолжить?</sys:String>
     <sys:String x:Key="Str_Status_Merged">Объединено {0} файлов - пока не сохранены</sys:String>
@@ -1373,6 +1379,8 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Search_NoMatches">Нет совпадений</sys:String>
     <sys:String x:Key="Str_Search_Error">Ошибка поиска</sys:String>
     <sys:String x:Key="Str_Search_Summary">{0} совпадений на {1} страницах</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">Эти страницы не удалось прочитать, поэтому поиск по ним не выполнялся: {0}</sys:String>
+    <sys:String x:Key="Str_Search_NoMatchesPartial">Нет совпадений на читаемых страницах. Не удалось прочитать страниц: {0}.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Предыдущее совпадение (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Следующее совпадение (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Закрыть (Esc)</sys:String>
@@ -1862,9 +1870,9 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Paragraph_Right">По правому краю</sys:String>
     <sys:String x:Key="Str_Paragraph_Overflow">Текст не помещается. Увеличьте рамку или уменьшите размер шрифта либо межстрочный интервал.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Предпросмотр готов. Применение заменит исходный текст абзаца.</sys:String>
-    <sys:String x:Key="Str_Paragraph_Unsupported">Поддерживаемый абзац не найден. Эта первая версия поддерживает горизонтальный текст в одном стиле.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Поддерживаемый абзац не найден.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Этот абзац нельзя редактировать: {0}</sys:String>
-    <sys:String x:Key="Str_Paragraph_MixedStyles">В этом абзаце смешаны разные шрифты или размеры. Новый текст использует один стиль, поэтому это форматирование не сохранится.</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">В этом абзаце смешаны разные шрифты, размеры или цвета. Новый текст использует один стиль, поэтому это форматирование не сохранится.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Шрифт предпросмотра: {0}. Этот шрифт будет встроен в отредактированный PDF.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Подготовка предпросмотра...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Документ изменился. Снова откройте редактирование абзаца, чтобы продолжить.</sys:String>

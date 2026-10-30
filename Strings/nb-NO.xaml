@@ -212,6 +212,7 @@ Siden kan erstattes med et bilde av seg selv der de markerte områdene er sverte
     <sys:String x:Key="Str_DocInfo_Producer">Produsent</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Lagre</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Avbryt</sys:String>
+    <sys:String x:Key="Str_DocInfo_UnreadableKept">Noen detaljer i denne filen kunne ikke leses, så de vises tomme. De beholdes som de er med mindre du skriver inn en erstatning.</sys:String>
     <sys:String x:Key="Str_KS_Find">Finn tekst</sys:String>
     <sys:String x:Key="Str_KS_Replace">Finn og erstatt</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Neste / forrige treff</sys:String>
@@ -248,6 +249,10 @@ Siden kan erstattes med et bilde av seg selv der de markerte områdene er sverte
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Åpnet {0} (skrivebeskyttet, ikke-standard XRef-tabell) - {1} side(r)</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Åpnet {0} (reparert kopi, lagre for å beholde endringer) - {1} side(r)</sys:String>
     <sys:String x:Key="Str_Save_ReferenceRepairs">Lagret med reparasjoner av ugyldige referanser. Manglende innhold ble ikke gjenopprettet.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedEncrypted">Denne PDF-en er skadet og passordbeskyttet, så KillerPDF kan verken reparere eller lagre den. Den opprinnelige filen er ikke endret.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedSigned">Denne PDF-en er skadet og har en digital signatur. Lagring ville ødelagt signaturen, så filen er ikke endret.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedCertified">Denne PDF-en er skadet og sertifisert av forfatteren. Lagring ville ødelagt sertifiseringen, så filen er ikke endret.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedUsageRights">Denne PDF-en er skadet og har Reader-bruksrettigheter. Lagring ville ødelagt dem, så filen er ikke endret.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Åpnet {0} (rasterisert reparasjon, lagre for å beholde endringer) - {1} side(r)</sys:String>
     <sys:String x:Key="Str_PageOf">Side {0} av {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">Side {0} av {1}  ({2} lenke(r))</sys:String>
@@ -757,6 +762,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Drop_Merge">Slå sammen til én PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Åpne hver for seg</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Fant ingen PDF-er eller bilder å åpne.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Hoppet over {0} fil(er) som ikke kunne repareres.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Dette åpner {0} separate faner. Vil du fortsette?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Denne mappen eller dette arkivet har {0} filer. KillerPDF åpner bare de første {1}. Vil du fortsette?</sys:String>
     <sys:String x:Key="Str_Status_Merged">Slo sammen {0} filer - ikke lagret ennå</sys:String>
@@ -1370,6 +1376,8 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Search_NoMatches">Ingen treff</sys:String>
     <sys:String x:Key="Str_Search_Error">Søkefeil</sys:String>
     <sys:String x:Key="Str_Search_Summary">{0} treff på {1} sider</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">Disse sidene kunne ikke leses, så de ble ikke søkt gjennom: {0}</sys:String>
+    <sys:String x:Key="Str_Search_NoMatchesPartial">Ingen treff på de lesbare sidene. {0} sider kunne ikke leses.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Forrige treff (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Neste treff (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Lukk (Esc)</sys:String>
@@ -1859,9 +1867,9 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Paragraph_Right">Høyre</sys:String>
     <sys:String x:Key="Str_Paragraph_Overflow">Teksten får ikke plass. Utvid rammen eller reduser skriftstørrelsen eller linjeavstanden.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Forhåndsvisningen er klar. Bruk erstatter den opprinnelige avsnittsteksten.</sys:String>
-    <sys:String x:Key="Str_Paragraph_Unsupported">Fant ingen støttede avsnitt. Denne første versjonen støtter vannrett tekst med én stil.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Fant ingen støttede avsnitt.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Dette avsnittet kan ikke redigeres: {0}</sys:String>
-    <sys:String x:Key="Str_Paragraph_MixedStyles">Dette avsnittet blander skrifttyper eller størrelser. Den nye teksten bruker én stil, så denne formateringen blir ikke med videre.</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">Dette avsnittet blander skrifttyper, størrelser eller farger. Den nye teksten bruker én stil, så denne formateringen blir ikke med videre.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Skrift i forhåndsvisningen: {0}. Denne skriften bygges inn i den redigerte PDF-filen.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Forbereder forhåndsvisning...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Dokumentet er endret. Åpne avsnittsredigeringen på nytt for å fortsette.</sys:String>

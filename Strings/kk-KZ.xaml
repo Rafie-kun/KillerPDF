@@ -134,6 +134,7 @@
     <sys:String x:Key="Str_DocInfo_Producer">Өндіруші</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Сақтау</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Болдырмау</sys:String>
+    <sys:String x:Key="Str_DocInfo_UnreadableKept">Осы файлдағы кейбір мәліметтерді оқу мүмкін болмады, сондықтан олар бос көрсетіледі. Ауыстыру мәтінін енгізбесеңіз, олар сол күйінде қалады.</sys:String>
     <sys:String x:Key="Str_KS_Find">Мәтінді табу</sys:String>
     <sys:String x:Key="Str_KS_Replace">Табу және ауыстыру</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Келесі / алдыңғы нәтиже</sys:String>
@@ -170,6 +171,10 @@
     <sys:String x:Key="Str_OpenedReadOnlyXRef">{0} ашылды (тек оқу - стандартты емес XRef кестесі) - {1} бет</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">{0} ашылды (жөнделген көшірме - өзгерістерді сақтаңыз) - {1} бет</sys:String>
     <sys:String x:Key="Str_Save_ReferenceRepairs">Жарамсыз ішкі сілтемелер түзетіліп сақталды. Жетіспейтін мазмұн қалпына келтірілмеді.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedEncrypted">Бұл PDF зақымдалған және құпиясөзбен қорғалған, сондықтан KillerPDF оны жөндей де, сақтай да алмайды. Бастапқы файл өзгертілген жоқ.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedSigned">Бұл PDF зақымдалған және цифрлық қолтаңбасы бар. Сақтау қолтаңбаны бұзады, сондықтан файл өзгертілген жоқ.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedCertified">Бұл PDF зақымдалған және авторы сертификаттаған. Сақтау сертификаттауды бұзады, сондықтан файл өзгертілген жоқ.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedUsageRights">Бұл PDF зақымдалған және Reader пайдалану құқықтары бар. Сақтау оларды бұзады, сондықтан файл өзгертілген жоқ.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">{0} ашылды (растрленген жөндеу - өзгерістерді сақтаңыз) - {1} бет</sys:String>
     <sys:String x:Key="Str_PageOf">{0} / {1} бет</sys:String>
     <sys:String x:Key="Str_PageOfLinks">{0} / {1} бет  ({2} сілтеме)</sys:String>
@@ -677,6 +682,7 @@ Windows параметрлері - Әдепкі қолданбалар ашыл�
     <sys:String x:Key="Str_Drop_Merge">Бір PDF-ке біріктіру</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Бөлек ашу</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Ашуға PDF немесе сурет табылмады.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Жөндеу мүмкін болмаған {0} файл өткізіп жіберілді.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Бұл {0} бөлек қойынды ашады. Жалғастыру керек пе?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Бұл қалтада немесе мұрағатта {0} файл бар. KillerPDF тек алғашқы {1} файлды ашады. Жалғастыру керек пе?</sys:String>
     <sys:String x:Key="Str_Status_Merged">{0} файл біріктірілді - әлі сақталмаған</sys:String>
@@ -1271,6 +1277,8 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Search_NoMatches">Сәйкестік жоқ</sys:String>
     <sys:String x:Key="Str_Search_Error">Іздеу қатесі</sys:String>
     <sys:String x:Key="Str_Search_Summary">{1} бетте {0} сәйкестік</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">Бұл беттерді оқу мүмкін болмады, сондықтан олардан іздеу жасалмады: {0}</sys:String>
+    <sys:String x:Key="Str_Search_NoMatchesPartial">Оқуға болатын беттерде сәйкестік жоқ. {0} бетті оқу мүмкін болмады.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Алдыңғы сәйкестік (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Келесі сәйкестік (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Жабу (Esc)</sys:String>
@@ -1862,9 +1870,9 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Paragraph_Right">Оңға</sys:String>
     <sys:String x:Key="Str_Paragraph_Overflow">Мәтін сыймайды. Жақтауды үлкейтіңіз немесе қаріп өлшемін не жоларалық интервалды кішірейтіңіз.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Алдын ала қарау дайын. Өзгерістерді қолдану бастапқы абзац мәтінін ауыстырады.</sys:String>
-    <sys:String x:Key="Str_Paragraph_Unsupported">Қолдау көрсетілетін абзац табылмады. Бұл алғашқы нұсқа бір стильдегі көлденең мәтінді қолдайды.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Қолдау көрсетілетін абзац табылмады.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Бұл абзацты өңдеу мүмкін емес: {0}</sys:String>
-    <sys:String x:Key="Str_Paragraph_MixedStyles">Бұл абзацта әртүрлі қаріптер немесе өлшемдер араласқан. Жаңа мәтін бір стильді пайдаланады, сондықтан бұл пішімдеу сақталмайды.</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">Бұл абзацта әртүрлі қаріптер, өлшемдер немесе түстер араласқан. Жаңа мәтін бір стильді пайдаланады, сондықтан бұл пішімдеу сақталмайды.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Алдын ала қарау қарпі: {0}. Бұл қаріп өңделген PDF файлына ендіріледі.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Алдын ала қарау дайындалуда...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Құжат өзгерді. Жалғастыру үшін абзацты өңдеуді қайта ашыңыз.</sys:String>

@@ -212,6 +212,7 @@ Stránku lze nahradit jejím obrázkem se začerněnými označenými oblastmi. 
     <sys:String x:Key="Str_DocInfo_Producer">Producent</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Uložit</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Zrušit</sys:String>
+    <sys:String x:Key="Str_DocInfo_UnreadableKept">Některé údaje v tomto souboru se nepodařilo přečíst, proto se zobrazují prázdné. Zůstanou beze změny, pokud nezadáte náhradu.</sys:String>
     <sys:String x:Key="Str_KS_Find">Najít text</sys:String>
     <sys:String x:Key="Str_KS_Replace">Najít a nahradit</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Další / předchozí výsledek</sys:String>
@@ -248,6 +249,10 @@ Stránku lze nahradit jejím obrázkem se začerněnými označenými oblastmi. 
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Otevřeno {0} (jen pro čtení - nestandardní tabulka XRef) - stránek: {1}</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Otevřeno {0} (opravená kopie - změny zachováte uložením) - stránek: {1}</sys:String>
     <sys:String x:Key="Str_Save_ReferenceRepairs">Uloženo s opravami neplatných referencí. Chybějící obsah nebyl obnoven.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedEncrypted">Tento PDF je poškozený a chráněný heslem, proto jej KillerPDF nemůže opravit ani uložit. Původní soubor nebyl změněn.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedSigned">Tento PDF je poškozený a obsahuje digitální podpis. Uložením by se podpis narušil, proto soubor nebyl změněn.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedCertified">Tento PDF je poškozený a certifikovaný autorem. Uložením by se certifikace narušila, proto soubor nebyl změněn.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedUsageRights">Tento PDF je poškozený a obsahuje práva k použití v aplikaci Reader. Uložením by se tato práva narušila, proto soubor nebyl změněn.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Otevřeno {0} (rastrová oprava - změny zachováte uložením) - stránek: {1}</sys:String>
     <sys:String x:Key="Str_PageOf">Stránka {0} z {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">Stránka {0} z {1}  (odkazů: {2})</sys:String>
@@ -748,6 +753,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Drop_Merge">Sloučit do jednoho PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Otevřít samostatně</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Nebyly nalezeny žádné PDF ani obrázky k otevření.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Přeskočeno souborů, které se nepodařilo opravit: {0}.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Otevřou se samostatné karty (počet: {0}). Pokračovat?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Tato složka nebo archiv obsahuje soubory (počet: {0}). KillerPDF otevře jen prvních {1}. Pokračovat?</sys:String>
     <sys:String x:Key="Str_Status_Merged">Sloučeno souborů: {0} - zatím neuloženo</sys:String>
@@ -1355,6 +1361,8 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Search_NoMatches">Žádné shody</sys:String>
     <sys:String x:Key="Str_Search_Error">Chyba hledání</sys:String>
     <sys:String x:Key="Str_Search_Summary">{0} shod na {1} stránkách</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">Tyto stránky se nepodařilo přečíst, proto v nich nebylo hledáno: {0}</sys:String>
+    <sys:String x:Key="Str_Search_NoMatchesPartial">Na čitelných stránkách nejsou žádné shody. Počet stránek, které se nepodařilo přečíst: {0}.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Předchozí shoda (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Další shoda (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Zavřít (Esc)</sys:String>
@@ -1844,9 +1852,9 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Paragraph_Right">Vpravo</sys:String>
     <sys:String x:Key="Str_Paragraph_Overflow">Text se nevejde. Zvětšete rámeček nebo zmenšete velikost písma či řádkování.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Náhled je připraven. Použitím změn nahradíte původní text odstavce.</sys:String>
-    <sys:String x:Key="Str_Paragraph_Unsupported">Nebyl nalezen žádný podporovaný odstavec. Tato první verze podporuje vodorovný text v jednom stylu.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Nebyl nalezen žádný podporovaný odstavec.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Tento odstavec nelze upravit: {0}</sys:String>
-    <sys:String x:Key="Str_Paragraph_MixedStyles">Tento odstavec kombinuje různá písma nebo velikosti. Nový text používá jeden styl, takže se toto formátování nepřenese.</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">Tento odstavec kombinuje různá písma, velikosti nebo barvy. Nový text používá jeden styl, takže se toto formátování nepřenese.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Písmo náhledu: {0}. Toto písmo bude vloženo do upraveného PDF.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Příprava náhledu...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Dokument se změnil. Pokračujte opětovným otevřením úprav odstavce.</sys:String>

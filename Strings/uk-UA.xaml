@@ -212,6 +212,7 @@
     <sys:String x:Key="Str_DocInfo_Producer">Виробник PDF</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Зберегти</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Скасувати</sys:String>
+    <sys:String x:Key="Str_DocInfo_UnreadableKept">Деякі відомості в цьому файлі не вдалося прочитати, тому вони відображаються порожніми. Вони залишаться без змін, доки ви не введете заміну.</sys:String>
     <sys:String x:Key="Str_KS_Find">Знайти текст</sys:String>
     <sys:String x:Key="Str_KS_Replace">Знайти й замінити</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Наступний / попередній результат</sys:String>
@@ -248,6 +249,10 @@
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Відкрито {0} (лише для читання - нестандартна таблиця XRef) - сторінок: {1}</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Відкрито {0} (відновлена копія - збережіть, щоб зберегти зміни) - сторінок: {1}</sys:String>
     <sys:String x:Key="Str_Save_ReferenceRepairs">Збережено з виправленням некоректних посилань на об’єкти. Відсутній вміст не відновлено.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedEncrypted">Цей PDF пошкоджено та захищено паролем, тому KillerPDF не може його відновити чи зберегти. Початковий файл не змінено.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedSigned">Цей PDF пошкоджено, і він містить цифровий підпис. Збереження порушило б підпис, тому файл не змінено.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedCertified">Цей PDF пошкоджено, і його сертифікував автор. Збереження порушило б сертифікацію, тому файл не змінено.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedUsageRights">Цей PDF пошкоджено, і він містить права на використання Reader. Збереження порушило б їх, тому файл не змінено.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Відкрито {0} (растрове відновлення - збережіть, щоб зберегти зміни) - сторінок: {1}</sys:String>
     <sys:String x:Key="Str_PageOf">Сторінка {0} з {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">Сторінка {0} з {1}  (посилань: {2})</sys:String>
@@ -757,6 +762,7 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Drop_Merge">Об'єднати в один PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Відкрити окремо</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Не знайдено PDF чи зображень для відкриття.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Пропущено файлів, які не вдалося відновити: {0}.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Буде відкрито окремих вкладок: {0}. Продовжити?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">У цій папці або архіві файлів: {0}. KillerPDF відкриє лише перші {1}. Продовжити?</sys:String>
     <sys:String x:Key="Str_Status_Merged">Об'єднано файлів: {0} - ще не збережено</sys:String>
@@ -1370,6 +1376,8 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Search_NoMatches">Збігів немає</sys:String>
     <sys:String x:Key="Str_Search_Error">Помилка пошуку</sys:String>
     <sys:String x:Key="Str_Search_Summary">Збігів: {0} на сторінках: {1}</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">Ці сторінки не вдалося прочитати, тому пошук у них не виконувався: {0}</sys:String>
+    <sys:String x:Key="Str_Search_NoMatchesPartial">Збігів на читабельних сторінках немає. Не вдалося прочитати сторінок: {0}.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Попередній збіг (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Наступний збіг (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Закрити (Esc)</sys:String>
@@ -1859,9 +1867,9 @@ KillerPDF не створюватиме двох установлених коп
     <sys:String x:Key="Str_Paragraph_Right">Праворуч</sys:String>
     <sys:String x:Key="Str_Paragraph_Overflow">Текст не вміщується. Збільште рамку або зменште розмір шрифту чи міжрядковий інтервал.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Попередній перегляд готовий. Застосування замінить початковий текст абзацу.</sys:String>
-    <sys:String x:Key="Str_Paragraph_Unsupported">Підтримуваний абзац не знайдено. Ця перша версія підтримує горизонтальний текст в одному стилі.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Підтримуваний абзац не знайдено.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Цей абзац не можна редагувати: {0}</sys:String>
-    <sys:String x:Key="Str_Paragraph_MixedStyles">Цей абзац поєднує різні шрифти або розміри. Новий текст використовує один стиль, тому це форматування не збережеться.</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">Цей абзац поєднує різні шрифти, розміри або кольори. Новий текст використовує один стиль, тому це форматування не збережеться.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Шрифт попереднього перегляду: {0}. Цей шрифт буде вбудовано у відредагований PDF.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Підготовка попереднього перегляду...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Документ змінився. Знову відкрийте редагування абзацу, щоб продовжити.</sys:String>

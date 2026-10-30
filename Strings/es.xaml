@@ -231,6 +231,10 @@ La página se puede sustituir por una imagen de sí misma con las áreas marcada
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Abierto {0} (solo lectura - tabla XRef no estándar) - {1} página(s)</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Abierto {0} (copia reparada - guarda para conservar cambios) - {1} página(s)</sys:String>
     <sys:String x:Key="Str_Save_ReferenceRepairs">Guardado con reparaciones en las referencias dañadas. No se recuperó el contenido faltante.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedEncrypted">Este PDF está dañado y protegido con contraseña, por lo que KillerPDF no puede repararlo ni guardarlo. El archivo original no se ha modificado.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedSigned">Este PDF está dañado y lleva una firma digital. Al guardarlo se invalidaría la firma, por lo que el archivo no se modificó.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedCertified">Este PDF está dañado y certificado por su autor. Al guardarlo se perdería la certificación, por lo que el archivo no se modificó.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedUsageRights">Este PDF está dañado y tiene derechos de uso de Reader. Al guardarlo se perderían, por lo que el archivo no se modificó.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Abierto {0} (reparación rasterizada - guarda para conservar cambios) - {1} página(s)</sys:String>
     <sys:String x:Key="Str_PageOf">Página {0} de {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">Página {0} de {1}  ({2} enlace(s))</sys:String>
@@ -674,6 +678,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Drop_Merge">Combinar en un solo PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Abrir por separado</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">No se encontraron PDF ni imágenes para abrir.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Se omitieron {0} archivo(s) que no se pudieron reparar.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Esto abrirá {0} pestañas separadas. ¿Continuar?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Esta carpeta o archivo tiene {0} archivos. KillerPDF abrirá solo los primeros {1}. ¿Continuar?</sys:String>
     <sys:String x:Key="Str_Status_Merged">{0} archivos combinados - sin guardar todavía</sys:String>
@@ -1001,6 +1006,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_DocInfo_Producer">Productor</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Guardar</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Cancelar</sys:String>
+    <sys:String x:Key="Str_DocInfo_UnreadableKept">No se pudieron leer algunos datos de este archivo, por lo que aparecen en blanco. Se conservan tal cual a menos que escriba un valor nuevo.</sys:String>
     <sys:String x:Key="Str_LinkRemoveFailed">No se pudo quitar el enlace:</sys:String>
     <sys:String x:Key="Str_LinkBlocked">Enlace bloqueado (tipo no compatible):</sys:String>
     <sys:String x:Key="Str_LinkOpenFailed">No se pudo abrir el enlace</sys:String>
@@ -1350,6 +1356,8 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Search_NoMatches">Sin coincidencias</sys:String>
     <sys:String x:Key="Str_Search_Error">Error de búsqueda</sys:String>
     <sys:String x:Key="Str_Search_Summary">{0} coincidencias en {1} páginas</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">No se pudieron leer estas páginas, por lo que no se buscó en ellas: {0}</sys:String>
+    <sys:String x:Key="Str_Search_NoMatchesPartial">Sin coincidencias en las páginas legibles. No se pudieron leer {0} páginas.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Coincidencia anterior (Mayús+Intro)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Siguiente coincidencia (Intro)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Cerrar (Esc)</sys:String>
@@ -1839,9 +1847,9 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Paragraph_Right">Derecha</sys:String>
     <sys:String x:Key="Str_Paragraph_Overflow">El texto no cabe. Amplía el cuadro o reduce el tamaño de fuente o el interlineado.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Vista previa lista. Aplicar reemplaza el texto del párrafo original.</sys:String>
-    <sys:String x:Key="Str_Paragraph_Unsupported">No se encontró ningún párrafo compatible. Esta primera versión admite texto horizontal con un solo estilo.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">No se encontró ningún párrafo compatible.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Este párrafo no se puede editar: {0}</sys:String>
-    <sys:String x:Key="Str_Paragraph_MixedStyles">Este párrafo combina fuentes o tamaños distintos. El texto nuevo usa un solo estilo, por lo que ese formato no se conservará.</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">Este párrafo combina fuentes, tamaños o colores distintos. El texto nuevo usa un solo estilo, por lo que ese formato no se conservará.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Fuente de la vista previa: {0}. Esta fuente se incrustará en el PDF editado.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Preparando vista previa...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">El documento ha cambiado. Vuelve a abrir la edición de párrafos para continuar.</sys:String>

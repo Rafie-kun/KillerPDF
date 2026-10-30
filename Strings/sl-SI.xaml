@@ -194,6 +194,7 @@
     <sys:String x:Key="Str_DocInfo_Producer">Proizvajalec</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Shrani</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Prekliči</sys:String>
+    <sys:String x:Key="Str_DocInfo_UnreadableKept">Nekaterih podrobnosti v tej datoteki ni bilo mogoče prebrati, zato so prazne. Ostanejo, kakršne so, razen če vnesete nadomestilo.</sys:String>
     <sys:String x:Key="Str_KS_Find">Poišči besedilo</sys:String>
     <sys:String x:Key="Str_KS_Replace">Poišči in zamenjaj</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Naslednji / prejšnji rezultat</sys:String>
@@ -226,6 +227,10 @@
     <sys:String x:Key="Str_OpenedReadOnlyXRef">Odprto samo za branje zaradi nestandardne tabele XRef: {0} (strani: {1})</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">Odprta je popravljena kopija datoteke {0}; shranite za ohranitev sprememb (strani: {1})</sys:String>
     <sys:String x:Key="Str_Save_ReferenceRepairs">Shranjeno s popravljenimi neveljavnimi sklici. Manjkajoča vsebina ni bila obnovljena.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedEncrypted">Ta PDF je poškodovan in zaščiten z geslom, zato ga KillerPDF ne more popraviti ali shraniti. Izvirna datoteka ni bila spremenjena.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedSigned">Ta PDF je poškodovan in vsebuje digitalni podpis. Shranjevanje bi razveljavilo podpis, zato datoteka ni bila spremenjena.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedCertified">Ta PDF je poškodovan in ga je certificiral avtor. Shranjevanje bi razveljavilo certifikacijo, zato datoteka ni bila spremenjena.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedUsageRights">Ta PDF je poškodovan in vsebuje pravice za uporabo v programu Reader. Shranjevanje bi jih razveljavilo, zato datoteka ni bila spremenjena.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Odprta je rastrirana popravljena kopija datoteke {0}; shranite za ohranitev sprememb (strani: {1})</sys:String>
     <sys:String x:Key="Str_PageOf">Stran {0} od {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">Stran {0} od {1}  (povezave: {2})</sys:String>
@@ -696,6 +701,7 @@
     <sys:String x:Key="Str_Drop_Merge">Združi v en PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Odpri ločeno</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Ni datotek PDF ali slik za odpiranje.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">Število preskočenih datotek, ki jih ni bilo mogoče popraviti: {0}.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Odprlo se bo {0} ločenih zavihkov. Želite nadaljevati?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Ta mapa ali arhiv vsebuje {0} datotek. KillerPDF bo odprl samo prvih {1}. Želite nadaljevati?</sys:String>
     <sys:String x:Key="Str_Status_Merged">Združene datoteke: {0}, še niso shranjene</sys:String>
@@ -1266,6 +1272,8 @@
     <sys:String x:Key="Str_Search_NoMatches">Ni ujemanj</sys:String>
     <sys:String x:Key="Str_Search_Error">Napaka pri iskanju</sys:String>
     <sys:String x:Key="Str_Search_Summary">Ujemanja: {0}, na straneh: {1}</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">Teh strani ni bilo mogoče prebrati, zato niso bile preiskane: {0}</sys:String>
+    <sys:String x:Key="Str_Search_NoMatchesPartial">Ni ujemanj na berljivih straneh. Število strani, ki jih ni bilo mogoče prebrati: {0}.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Prejšnje ujemanje (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Naslednje ujemanje (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Zapri (Esc)</sys:String>
@@ -1749,9 +1757,9 @@
     <sys:String x:Key="Str_Paragraph_Right">Desno</sys:String>
     <sys:String x:Key="Str_Paragraph_Overflow">Besedilo se ne prilega. Povečajte okvir ali zmanjšajte velikost pisave oziroma razmik med vrsticami.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Predogled je pripravljen. Uporabi nadomesti izvirno besedilo odstavka.</sys:String>
-    <sys:String x:Key="Str_Paragraph_Unsupported">Ni podprtega odstavka. Ta prva različica podpira vodoravno besedilo v enem slogu.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Ni podprtega odstavka.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Tega odstavka ni mogoče urejati: {0}</sys:String>
-    <sys:String x:Key="Str_Paragraph_MixedStyles">Ta odstavek vsebuje različne pisave ali velikosti. Novo besedilo uporablja en slog, zato se to oblikovanje ne bo ohranilo.</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">Ta odstavek vsebuje različne pisave, velikosti ali barve. Novo besedilo uporablja en slog, zato se to oblikovanje ne bo ohranilo.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Pisava predogleda: {0}. Ta pisava bo vdelana v urejeni PDF.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Pripravljanje predogleda...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Dokument se je spremenil. Za nadaljevanje znova odprite urejanje odstavka.</sys:String>

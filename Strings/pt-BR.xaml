@@ -212,6 +212,7 @@ A página pode ser substituída por uma imagem dela mesma com as áreas marcadas
     <sys:String x:Key="Str_DocInfo_Producer">Produtor</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">Salvar</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">Cancelar</sys:String>
+    <sys:String x:Key="Str_DocInfo_UnreadableKept">Alguns detalhes deste arquivo não puderam ser lidos e aparecem em branco. Eles permanecem como estão, a menos que você digite um substituto.</sys:String>
     <sys:String x:Key="Str_KS_Find">Localizar texto</sys:String>
     <sys:String x:Key="Str_KS_Replace">Localizar e substituir</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">Resultado seguinte / anterior</sys:String>
@@ -248,6 +249,10 @@ A página pode ser substituída por uma imagem dela mesma com as áreas marcadas
     <sys:String x:Key="Str_OpenedReadOnlyXRef">{0} aberto (somente leitura - tabela XRef não padrão) - {1} página(s)</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">{0} aberto (cópia reparada - salve para manter as alterações) - {1} página(s)</sys:String>
     <sys:String x:Key="Str_Save_ReferenceRepairs">Salvo com reparos nas referências inválidas. O conteúdo ausente não foi recuperado.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedEncrypted">Este PDF está danificado e protegido por senha, então o KillerPDF não pode repará-lo nem salvá-lo. O arquivo original não foi alterado.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedSigned">Este PDF está danificado e tem uma assinatura digital. Salvar invalidaria a assinatura, então o arquivo não foi alterado.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedCertified">Este PDF está danificado e certificado pelo autor. Salvar invalidaria a certificação, então o arquivo não foi alterado.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedUsageRights">Este PDF está danificado e tem direitos de uso do Reader. Salvar os invalidaria, então o arquivo não foi alterado.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">{0} aberto (reparo rasterizado - salve para manter as alterações) - {1} página(s)</sys:String>
     <sys:String x:Key="Str_PageOf">Página {0} de {1}</sys:String>
     <sys:String x:Key="Str_PageOfLinks">Página {0} de {1}  ({2} link(s))</sys:String>
@@ -757,6 +762,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Drop_Merge">Mesclar em um único PDF</sys:String>
     <sys:String x:Key="Str_Drop_Separate">Abrir separadamente</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">Nenhum PDF ou imagem encontrado para abrir.</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">{0} arquivo(s) que não puderam ser reparados foram ignorados.</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">Isso abrirá {0} guias separadas. Continuar?</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">Esta pasta ou arquivo compactado tem {0} arquivos. O KillerPDF abrirá apenas os primeiros {1}. Continuar?</sys:String>
     <sys:String x:Key="Str_Status_Merged">{0} arquivos mesclados - ainda não salvo</sys:String>
@@ -1370,6 +1376,8 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Search_NoMatches">Nenhuma correspondência</sys:String>
     <sys:String x:Key="Str_Search_Error">Erro na pesquisa</sys:String>
     <sys:String x:Key="Str_Search_Summary">{0} correspondências em {1} páginas</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">Estas páginas não puderam ser lidas, então não foram pesquisadas: {0}</sys:String>
+    <sys:String x:Key="Str_Search_NoMatchesPartial">Nenhuma correspondência nas páginas legíveis. {0} páginas não puderam ser lidas.</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">Correspondência anterior (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">Próxima correspondência (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">Fechar (Esc)</sys:String>
@@ -1859,9 +1867,9 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Paragraph_Right">Direita</sys:String>
     <sys:String x:Key="Str_Paragraph_Overflow">O texto não cabe. Aumente a caixa ou reduza o tamanho da fonte ou o espaçamento entre linhas.</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">Prévia pronta. Aplicar substitui o texto do parágrafo original.</sys:String>
-    <sys:String x:Key="Str_Paragraph_Unsupported">Nenhum parágrafo compatível foi encontrado. Esta primeira versão aceita texto horizontal em um único estilo.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">Nenhum parágrafo compatível foi encontrado.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Este parágrafo não pode ser editado: {0}</sys:String>
-    <sys:String x:Key="Str_Paragraph_MixedStyles">Este parágrafo mistura fontes ou tamanhos diferentes. O novo texto usa um único estilo, então essa formatação não será mantida.</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">Este parágrafo mistura fontes, tamanhos ou cores diferentes. O novo texto usa um único estilo, então essa formatação não será mantida.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Fonte da prévia: {0}. Esta fonte será incorporada ao PDF editado.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Preparando prévia...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">O documento foi alterado. Reabra a edição de parágrafo para continuar.</sys:String>

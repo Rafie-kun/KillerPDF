@@ -212,6 +212,7 @@
     <sys:String x:Key="Str_DocInfo_Producer">生成ソフト</sys:String>
     <sys:String x:Key="Str_DocInfo_Save">保存</sys:String>
     <sys:String x:Key="Str_DocInfo_Cancel">キャンセル</sys:String>
+    <sys:String x:Key="Str_DocInfo_UnreadableKept">このファイルの一部の情報は読み取れなかったため、空白で表示されています。置き換えの内容を入力しない限り、そのまま保持されます。</sys:String>
     <sys:String x:Key="Str_KS_Find">テキストを検索</sys:String>
     <sys:String x:Key="Str_KS_Replace">検索と置換</sys:String>
     <sys:String x:Key="Str_KS_NextPrevResult">次の結果 / 前の結果</sys:String>
@@ -248,6 +249,10 @@
     <sys:String x:Key="Str_OpenedReadOnlyXRef">{0} を開きました (読み取り専用 - 非標準 XRef テーブル) - {1} ページ</sys:String>
     <sys:String x:Key="Str_OpenedRepaired">{0} を開きました (修復済みコピー - 変更を保存するには保存が必要) - {1} ページ</sys:String>
     <sys:String x:Key="Str_Save_ReferenceRepairs">壊れた参照を修復して保存しました。欠落した内容は復元されていません。</sys:String>
+    <sys:String x:Key="Str_Save_DamagedEncrypted">この PDF は破損しており、パスワードで保護されているため、KillerPDF では修復も保存もできません。元のファイルは変更されていません。</sys:String>
+    <sys:String x:Key="Str_Save_DamagedSigned">この PDF は破損しており、デジタル署名が含まれています。保存すると署名が無効になるため、ファイルは変更されていません。</sys:String>
+    <sys:String x:Key="Str_Save_DamagedCertified">この PDF は破損しており、作成者によって認定されています。保存すると認定が無効になるため、ファイルは変更されていません。</sys:String>
+    <sys:String x:Key="Str_Save_DamagedUsageRights">この PDF は破損しており、Reader の使用権限が含まれています。保存するとそれらが無効になるため、ファイルは変更されていません。</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">{0} を開きました (ラスタライズ修復 - 変更を保存するには保存が必要) - {1} ページ</sys:String>
     <sys:String x:Key="Str_PageOf">{0} / {1} ページ</sys:String>
     <sys:String x:Key="Str_PageOfLinks">{0} / {1} ページ  ({2} リンク)</sys:String>
@@ -757,6 +762,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Drop_Merge">1つの PDF に結合</sys:String>
     <sys:String x:Key="Str_Drop_Separate">個別に開く</sys:String>
     <sys:String x:Key="Str_Drop_NothingOpenable">開ける PDF または画像が見つかりませんでした。</sys:String>
+    <sys:String x:Key="Str_Drop_SkippedFiles">修復できなかったファイルを {0} 件スキップしました。</sys:String>
     <sys:String x:Key="Str_Drop_ManyTabs">{0} 個のタブを個別に開きます。続行しますか？</sys:String>
     <sys:String x:Key="Str_Drop_TooMany">このフォルダーまたはアーカイブには {0} 個のファイルがあります。KillerPDF は最初の {1} 個のみを開きます。続行しますか？</sys:String>
     <sys:String x:Key="Str_Status_Merged">{0} 個のファイルを結合しました - 未保存です</sys:String>
@@ -1370,6 +1376,8 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Search_NoMatches">一致なし</sys:String>
     <sys:String x:Key="Str_Search_Error">検索エラー</sys:String>
     <sys:String x:Key="Str_Search_Summary">{1} ページに {0} 件の一致</sys:String>
+    <sys:String x:Key="Str_Search_PagesSkipped">次のページは読み取れなかったため、検索されませんでした：{0}</sys:String>
+    <sys:String x:Key="Str_Search_NoMatchesPartial">読み取れたページに一致はありません。{0} ページは読み取れませんでした。</sys:String>
     <sys:String x:Key="Str_Search_PreviousTT">前の一致 (Shift+Enter)</sys:String>
     <sys:String x:Key="Str_Search_NextTT">次の一致 (Enter)</sys:String>
     <sys:String x:Key="Str_Search_CloseTT">閉じる (Esc)</sys:String>
@@ -1859,9 +1867,9 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Paragraph_Right">右揃え</sys:String>
     <sys:String x:Key="Str_Paragraph_Overflow">テキストが収まりません。枠を広げるか、フォントサイズまたは行間隔を小さくしてください。</sys:String>
     <sys:String x:Key="Str_Paragraph_Ready">プレビューの準備ができました。適用すると元の段落テキストが置き換えられます。</sys:String>
-    <sys:String x:Key="Str_Paragraph_Unsupported">対応する段落が見つかりませんでした。この初期バージョンでは、単一のスタイルの横書きテキストに対応しています。</sys:String>
+    <sys:String x:Key="Str_Paragraph_Unsupported">対応する段落が見つかりませんでした。</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">この段落は編集できません: {0}</sys:String>
-    <sys:String x:Key="Str_Paragraph_MixedStyles">この段落には複数のフォントまたはサイズが混在しています。新しいテキストは単一のスタイルを使用するため、この書式は引き継がれません。</sys:String>
+    <sys:String x:Key="Str_Paragraph_MixedStyles">この段落には複数のフォント、サイズ、または色が混在しています。新しいテキストは単一のスタイルを使用するため、この書式は引き継がれません。</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">プレビューのフォント: {0}。このフォントは編集後のPDFに埋め込まれます。</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">プレビューを準備中...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">ドキュメントが変更されました。段落編集を開き直して続行してください。</sys:String>
