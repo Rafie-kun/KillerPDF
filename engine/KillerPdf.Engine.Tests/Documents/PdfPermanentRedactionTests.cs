@@ -39,6 +39,34 @@ public sealed class PdfPermanentRedactionTests
                     new PdfRedactionRegion(0, new PdfContentBounds(0, 0, 10, 10))])));
     }
 
+    [Theory]
+    [InlineData("cross")]
+    [InlineData("duplicate")]
+    [InlineData("case")]
+    public void ReviewedAttachmentRemovalTargetsTheReviewedFileWhateverItsKeyAndListedName(string scenario)
+    {
+        (byte[] source, _, _) = PdfAttachmentReaderTests.KeyedScenario(scenario);
+        PdfDocument document = PdfDocument.Open(source);
+        PdfAttachmentInfo[] listed = [.. PdfAttachmentReader.Read(document)];
+        for (int row = 0; row < listed.Length; row++)
+        {
+            PdfRedactionReview review = PdfRedactionReview.FromAttachments(document);
+            for (int index = 0; index < listed.Length; index++)
+                if (index != row) review = review.Exclude("attachment:" + index);
+
+            PdfAttachmentRedactionResult result =
+                PdfPermanentRedaction.ApplyReviewedAttachments(document, review);
+
+            PdfAttachmentInfo kept = Assert.Single(
+                PdfAttachmentReader.Read(PdfDocument.Open(result.Document)));
+            PdfAttachmentInfo other = listed[1 - row];
+            Assert.Equal(other.NameTreeKey, kept.NameTreeKey);
+            Assert.Equal(other.Data.ToArray(), kept.Data.ToArray());
+            Assert.DoesNotContain(System.Text.Encoding.ASCII.GetString(listed[row].Data.Span),
+                System.Text.Encoding.Latin1.GetString(result.Document.Span));
+        }
+    }
+
     [Fact]
     public void ReviewedCommentsArePermanentlyRemovedAndVerified()
     {

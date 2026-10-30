@@ -47,6 +47,93 @@ public sealed class MergeBookmarkFallbackTests : IDisposable
         Assert.Equal(3, PdfPageInformation.Read(PdfDocument.Open(merged)).Count);
     }
 
+    // One damaged outline costs only that source its bookmarks, and the caller is told which (F3-004).
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void MergeFiles_KeepsTheBookmarksOfHealthySourcesAndNamesTheDamagedOne(int damagedIndex)
+    {
+        string[] paths =
+        [
+            Write("alpha.pdf", Bookmarked("Alpha chapter")),
+            Write("beta.pdf", Bookmarked("Beta chapter")),
+            Write("gamma.pdf", Bookmarked("Gamma chapter"))
+        ];
+        string[] healthyTitles = [.. new[] { "Alpha chapter", "Beta chapter", "Gamma chapter" }.Where((_, index) => index != damagedIndex)];
+        paths[damagedIndex] = Write("damaged.pdf", DamagedOutline());
+
+        byte[] merged = PdfEngineIntegration.MergeFiles(paths, out IReadOnlyList<string> warnings);
+
+        Assert.Equal(4, PdfPageInformation.Read(PdfDocument.Open(merged)).Count);
+        Assert.Equal(healthyTitles, Titles(merged));
+        string warning = Assert.Single(warnings);
+        Assert.Contains(paths[damagedIndex], warning);
+    }
+
+    [Fact]
+    public void MergeFiles_DropsEachDamagedOutlineSeparately()
+    {
+        string[] paths =
+        [
+            Write("one.pdf", DamagedOutline()),
+            Write("two.pdf", Bookmarked("Healthy chapter")),
+            Write("three.pdf", DamagedOutline())
+        ];
+
+        byte[] merged = PdfEngineIntegration.MergeFiles(paths, out IReadOnlyList<string> warnings);
+
+        Assert.Equal(["Healthy chapter"], Titles(merged));
+        Assert.Equal(2, warnings.Count);
+        Assert.Contains(paths[0], warnings[0]);
+        Assert.Contains(paths[2], warnings[1]);
+    }
+
+    // A folder or archive import skips unreadable entries, but a damaged outline leaves the pages readable.
+    [Fact]
+    public void MergeReadableFiles_KeepsThePagesOfASourceWithADamagedOutline()
+    {
+        string[] paths = [Write("healthy.pdf", Bookmarked("Healthy chapter")), Write("damaged.pdf", DamagedOutline())];
+
+        byte[] merged = PdfEngineIntegration.MergeReadableFiles(paths);
+
+        Assert.Equal(3, PdfPageInformation.Read(PdfDocument.Open(merged)).Count);
+        Assert.Equal(["Healthy chapter"], Titles(merged));
+    }
+
+    [Fact]
+    public void MergeFiles_ReportsNothingWhenEveryOutlineIsHealthy()
+    {
+        string[] paths = [Write("a.pdf", Bookmarked("Alpha chapter")), Write("b.pdf", Bookmarked("Beta chapter"))];
+
+        byte[] merged = PdfEngineIntegration.MergeFiles(paths, out IReadOnlyList<string> warnings);
+
+        Assert.Equal(["Alpha chapter", "Beta chapter"], Titles(merged));
+        Assert.Empty(warnings);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void MergeDocuments_KeepsTheBookmarksOfHealthySourcesAndNamesTheDamagedOne(int damagedIndex)
+    {
+        byte[][] sources = [Bookmarked("Alpha chapter"), Bookmarked("Beta chapter"), Bookmarked("Gamma chapter")];
+        string[] healthyTitles = [.. new[] { "Alpha chapter", "Beta chapter", "Gamma chapter" }.Where((_, index) => index != damagedIndex)];
+        sources[damagedIndex] = DamagedOutline();
+
+        byte[] merged = PdfEngineIntegration.MergeDocuments(sources, out IReadOnlyList<string> warnings);
+
+        Assert.Equal(healthyTitles, Titles(merged));
+        Assert.Contains($"document {damagedIndex + 1}", Assert.Single(warnings));
+    }
+
+    private static byte[] Bookmarked(string title) =>
+        new PdfDocumentBuilder().AddBlankPage().AddBookmark(title, 0).Build();
+
+    private static string[] Titles(byte[] pdf) =>
+        [.. PdfBookmarkReader.Read(PdfDocument.Open(pdf)).Select(bookmark => bookmark.Title)];
+
     // Two pages and two top-level bookmarks, with the second bookmark's /Prev pointing at the wrong object.
     private static byte[] DamagedOutline()
     {

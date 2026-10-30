@@ -271,7 +271,9 @@ public static class PdfPermanentRedaction
             PrepareRemoval(document, allowSignatureInvalidation);
         var editor = new PdfIncrementalPageEditor(editingSource);
         foreach (var (Match, Attachment) in targets)
-            editor.RemoveAttachment(Attachment.FileName);
+            editor.RemoveAttachmentByKey(Attachment.NameTreeKey
+                ?? throw new InvalidOperationException(
+                    "A reviewed attachment has no name-tree key."));
         PdfDocumentWriteResult written = PdfDocumentWriter.WriteWithReport(PdfDocument.Open(editor.Build()),
             new PdfDocumentWriteOptions
             {
@@ -281,11 +283,14 @@ public static class PdfPermanentRedaction
             });
         byte[] output = written.Bytes;
         PdfDocument reopened = PdfDocument.Open(output);
-        string[] remaining = [.. PdfAttachmentReader.Read(reopened)
-            .Select(item => item.FileName)];
-        string[] expected = [.. current.Select(item => item.FileName)
-            .Except(targets.Select(item => item.Attachment.FileName), StringComparer.Ordinal)];
-        if (!remaining.SequenceEqual(expected, StringComparer.Ordinal)
+        // Files are identified by name-tree key, since several can list the same file name.
+        PdfAttachmentInfo[] reopenedAttachments = [.. PdfAttachmentReader.Read(reopened)];
+        string[] remaining = [.. reopenedAttachments.Select(item => item.FileName)];
+        string[] removedKeys = [.. targets.Select(item => item.Attachment.NameTreeKey!)];
+        string[] expectedKeys = [.. current.Select(item => item.NameTreeKey!)
+            .Where(key => !removedKeys.Contains(key, StringComparer.Ordinal))];
+        if (!reopenedAttachments.Select(item => item.NameTreeKey!)
+                .SequenceEqual(expectedKeys, StringComparer.Ordinal)
             || reopened.CrossReferences.Sections.Count != 1)
             throw new InvalidOperationException(
                 "The saved document did not preserve the reviewed attachment-removal result.");

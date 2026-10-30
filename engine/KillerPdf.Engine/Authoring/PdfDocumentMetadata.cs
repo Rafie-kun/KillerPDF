@@ -23,6 +23,13 @@ public sealed record PdfDocumentMetadata
     public DateTimeOffset? CreationDate { get; init; }
     /// <summary>Gets the most recent document modification date.</summary>
     public DateTimeOffset? ModificationDate { get; init; }
+    /// <summary>
+    /// Gets the descriptive entries of an existing document to keep exactly as they are: any of Title,
+    /// Author, Subject, Keywords, Creator, Producer, CreationDate, ModDate, Trapped and Lang. It applies
+    /// when saving over a document and is for entries that could not be read, so their values are not
+    /// available to pass back in.
+    /// </summary>
+    public IReadOnlyList<string> PreservedInfoKeys { get; init; } = [];
     /// <summary>Gets whether the document has been trapped for printing.</summary>
     public PdfTrappedStatus? Trapped
     {

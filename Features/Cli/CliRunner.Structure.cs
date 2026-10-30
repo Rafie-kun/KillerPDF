@@ -324,8 +324,13 @@ namespace KillerPDF.Features
             }
             if (!CliInspectEditInput(pos[0], pos[1], out string source, out string output, out _, con)) return 2;
             IReadOnlyList<PdfEngineIntegration.AttachmentEditorItem> items = PdfEngineIntegration.ReadAttachmentEditorItems(source);
-            PdfEngineIntegration.AttachmentEditorItem? target = items.FirstOrDefault(item =>
-                string.Equals(item.FileName, pos[2], StringComparison.OrdinalIgnoreCase));
+            PdfEngineIntegration.AttachmentEditorItem? target =
+                PdfEngineIntegration.FindAttachmentEditorItem(items, pos[2], out bool ambiguous);
+            if (ambiguous)
+            {
+                con.WriteLine($"Several attachments are named {pos[2]}.");
+                return 2;
+            }
             if (target is null)
             {
                 con.WriteLine($"The document has no attachment named {pos[2]}.");

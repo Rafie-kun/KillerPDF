@@ -30,6 +30,11 @@ public sealed record PdfDocumentInformation
     public DateTimeOffset? ModificationDate { get; init; }
     /// <summary>Gets the document trapping status.</summary>
     public PdfTrappedStatus? Trapped { get; init; }
+    /// <summary>
+    /// Gets the descriptive entries that exist in the file but could not be read, such as a bad date or
+    /// undecodable text. A save that does not carry these over would delete them.
+    /// </summary>
+    public IReadOnlyList<string> UnreadableKeys { get; init; } = [];
     /// <summary>Gets the header version.</summary>
     public required PdfVersion Version { get; init; }
     /// <summary>Gets the number of leaf pages in the page tree.</summary>
@@ -58,18 +63,48 @@ public sealed record PdfDocumentInformation
             // Optional, damaged metadata must not prevent access to the document's pages or /Info.
             xmp = null;
         }
+        string? title = Text(document, info, "Title") ?? xmp?.Title;
+        string? author = Text(document, info, "Author") ?? xmp?.Author;
+        string? subject = Text(document, info, "Subject") ?? xmp?.Subject;
+        string? keywords = Text(document, info, "Keywords") ?? xmp?.Keywords;
+        string? creator = Text(document, info, "Creator") ?? xmp?.Creator;
+        string? producer = Text(document, info, "Producer") ?? xmp?.Producer;
+        string? language = CatalogText(document, pageTree.Catalog, "Lang");
+        DateTimeOffset? creationDate = Date(document, info, "CreationDate") ?? xmp?.CreationDate;
+        DateTimeOffset? modificationDate = Date(document, info, "ModDate") ?? xmp?.ModificationDate;
+        PdfTrappedStatus? trapped = ReadTrapped(document, info) ?? xmp?.Trapped;
+        // An entry that is present but read as nothing is unreadable, which differs from an absent one.
+        var unreadable = new List<string>();
+        void Check(string key, bool readable, PdfDictionary? source)
+        {
+            if (!readable && source is not null
+                && source.TryGetValue(new PdfName(Encoding.ASCII.GetBytes(key)), out PdfObject? raw)
+                && Resolve(document, raw) is not PdfNull)
+                unreadable.Add(key);
+        }
+        Check("Title", title is not null, info);
+        Check("Author", author is not null, info);
+        Check("Subject", subject is not null, info);
+        Check("Keywords", keywords is not null, info);
+        Check("Creator", creator is not null, info);
+        Check("Producer", producer is not null, info);
+        Check("CreationDate", creationDate.HasValue, info);
+        Check("ModDate", modificationDate.HasValue, info);
+        Check("Trapped", trapped.HasValue, info);
+        Check("Lang", language is not null, pageTree.Catalog);
         return new PdfDocumentInformation
         {
-            Title = Text(document, info, "Title") ?? xmp?.Title,
-            Author = Text(document, info, "Author") ?? xmp?.Author,
-            Subject = Text(document, info, "Subject") ?? xmp?.Subject,
-            Keywords = Text(document, info, "Keywords") ?? xmp?.Keywords,
-            Creator = Text(document, info, "Creator") ?? xmp?.Creator,
-            Producer = Text(document, info, "Producer") ?? xmp?.Producer,
-            Language = CatalogText(document, pageTree.Catalog, "Lang"),
-            CreationDate = Date(document, info, "CreationDate") ?? xmp?.CreationDate,
-            ModificationDate = Date(document, info, "ModDate") ?? xmp?.ModificationDate,
-            Trapped = ReadTrapped(document, info) ?? xmp?.Trapped,
+            Title = title,
+            Author = author,
+            Subject = subject,
+            Keywords = keywords,
+            Creator = creator,
+            Producer = producer,
+            Language = language,
+            CreationDate = creationDate,
+            ModificationDate = modificationDate,
+            Trapped = trapped,
+            UnreadableKeys = Array.AsReadOnly(unreadable.ToArray()),
             Version = document.Header.Version,
             PageCount = pageTree.Pages.Count,
             InitialView = PdfInitialView.Read(document, pageTree)
@@ -118,8 +153,10 @@ public sealed record PdfDocumentInformation
                 // Z means universal time either way.
                 if (sign is not ('+' or '-' or 'Z')) throw new FormatException();
                 string compact = suffix[1..].Replace("'", string.Empty, StringComparison.Ordinal);
-                if (compact.Length != 4 || !int.TryParse(compact[..2], out int oh)
-                    || !int.TryParse(compact[2..], out int om)) throw new FormatException();
+                // The minutes are optional in ISO 32000, so +01 is an hour-only offset.
+                if (compact.Length is not (2 or 4) || !int.TryParse(compact[..2], out int oh)) throw new FormatException();
+                int om = 0;
+                if (compact.Length == 4 && !int.TryParse(compact[2..], out om)) throw new FormatException();
                 offset = sign == 'Z' ? TimeSpan.Zero : new TimeSpan(oh, om, 0) * (sign == '-' ? -1 : 1);
             }
             return new DateTimeOffset(year, month, day, hour, minute, second, offset);

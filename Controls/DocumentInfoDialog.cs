@@ -41,6 +41,17 @@ namespace KillerPDF
             _keywords = AddField(owner, body, L("Str_DocInfo_Keywords"), _info.Keywords, wrap: true);
             _creator  = AddField(owner, body, L("Str_DocInfo_Creator"),  _info.Creator);
 
+            if (_info.UnreadableKeys.Count > 0)
+                body.Children.Add(new TextBlock
+                {
+                    Text = LOr("Str_DocInfo_UnreadableKept",
+                        "Some details in this file could not be read, so they appear blank. They stay as they are unless you type a replacement."),
+                    FontSize = 11,
+                    Foreground = UiKit.Brush("MutedTextBrush"),
+                    TextWrapping = TextWrapping.Wrap,
+                    Margin = new Thickness(0, 4, 0, 0)
+                });
+
             body.Children.Add(new TextBlock
             {
                 Text = BuildSummary(filePath),
@@ -127,5 +138,8 @@ namespace KillerPDF
         }
 
         private static string L(string key) => Application.Current?.TryFindResource(key) as string ?? key;
+
+        // A string another change is adding falls back to its English text until the resource exists.
+        private static string LOr(string key, string fallback) => Application.Current?.TryFindResource(key) as string ?? fallback;
     }
 }

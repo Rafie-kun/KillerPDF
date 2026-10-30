@@ -103,7 +103,7 @@ internal static partial class PdfEngineIntegration
     internal sealed record AttachmentEditorItem(
         string OriginalFileName, string FileName, string? Description,
         string MimeType, PdfAssociatedFileRelationship Relationship, int ByteCount,
-        bool Remove = false);
+        bool Remove = false, string? Key = null);
 
     internal sealed record FormEdits(
         IReadOnlyDictionary<string, string> TextValues,
@@ -147,14 +147,15 @@ internal static partial class PdfEngineIntegration
 
     // An incremental merge appends to its first document's bytes, so that document must open
     // strictly. When it cannot, the merge starts from an empty document and copies it in instead.
-    private static (PdfIncrementalPageEditor Editor, PdfDocument? CopiedFirst) OpenMergeTarget(byte[] first)
+    private static (PdfIncrementalPageEditor Editor, PdfDocument? CopiedFirst) OpenMergeTarget(
+        byte[] first, bool includeBookmarks = true)
     {
         try { return (new PdfIncrementalPageEditor(PdfDocument.Open(first)), null); }
         catch (Exception strict) when (IsImportFailure(strict))
         {
             PdfDocument copied = OpenPageSource(first);
             var editor = new PdfIncrementalPageEditor(PdfDocument.Open(new PdfDocumentBuilder().Build()))
-                .AddImportedDocument(copied);
+                .AddImportedDocument(copied, includeBookmarks);
             return (editor, copied);
         }
     }
@@ -352,7 +353,26 @@ internal static partial class PdfEngineIntegration
         return [.. PdfAttachmentReader.Read(PdfDocument.Open(File.ReadAllBytes(path)))
             .Select(attachment => new AttachmentEditorItem(
                 attachment.FileName, attachment.FileName, attachment.Description,
-                attachment.MimeType, attachment.Relationship, attachment.Data.Length))];
+                attachment.MimeType, attachment.Relationship, attachment.Data.Length,
+                Key: attachment.NameTreeKey))];
+    }
+
+    // Picks the row a caller means by a name: the listed name first, exactly and then ignoring case, and
+    // only when no listed name matches the name-tree key. Several matches are ambiguous, not a guess.
+    internal static AttachmentEditorItem? FindAttachmentEditorItem(
+        IReadOnlyList<AttachmentEditorItem> items, string name, out bool ambiguous)
+    {
+        ambiguous = false;
+        foreach (Func<AttachmentEditorItem, string?> selector in new Func<AttachmentEditorItem, string?>[]
+                     { item => item.FileName, item => item.Key })
+            foreach (StringComparison comparison in new[] { StringComparison.Ordinal, StringComparison.OrdinalIgnoreCase })
+            {
+                AttachmentEditorItem[] matches = [.. items.Where(item =>
+                    string.Equals(selector(item), name, comparison))];
+                if (matches.Length > 1) { ambiguous = true; return null; }
+                if (matches.Length == 1) return matches[0];
+            }
+        return null;
     }
 
     internal static void AddAttachment(string path, string fileName, byte[] data)
@@ -362,6 +382,9 @@ internal static partial class PdfEngineIntegration
         ReplaceWithBuiltResult(path, result);
     }
 
+    // Each row names its file by name-tree key, since two files can list the same name and a file's key
+    // can be another file's listed name. A row built without a key is matched by its original listed
+    // name, which must pick exactly one file.
     internal static void ApplyAttachmentEdits(
         string path, IReadOnlyList<AttachmentEditorItem> edits)
     {
@@ -369,62 +392,80 @@ internal static partial class PdfEngineIntegration
         ArgumentNullException.ThrowIfNull(edits);
         byte[] result = File.ReadAllBytes(path);
         PdfAttachmentInfo[] current = [.. PdfAttachmentReader.Read(PdfDocument.Open(result))];
-        if (!current.Select(item => item.FileName).OrderBy(name => name, StringComparer.Ordinal)
-            .SequenceEqual(edits.Select(item => item.OriginalFileName)
-                .OrderBy(name => name, StringComparer.Ordinal), StringComparer.Ordinal))
+        string[] keys = [.. edits.Select(edit => edit.Key ?? KeyOfListedName(current, edit.OriginalFileName))];
+        if (!current.Select(item => item.NameTreeKey!).OrderBy(key => key, StringComparer.Ordinal)
+            .SequenceEqual(keys.OrderBy(key => key, StringComparer.Ordinal), StringComparer.Ordinal))
             throw new InvalidOperationException("The attachment list changed before it was saved.");
 
-        AttachmentEditorItem[] remaining = [.. edits.Where(edit => !edit.Remove)];
-        if (remaining.Any(edit => string.IsNullOrWhiteSpace(edit.FileName)
-                || string.IsNullOrWhiteSpace(edit.MimeType))
-            || remaining.Select(edit => edit.FileName)
-                .Distinct(StringComparer.OrdinalIgnoreCase).Count() != remaining.Length)
+        // A name must be valid and unique only where the user changed it, so a file that shares a name
+        // with another can still have its description or type edited.
+        var rows = edits.Select((edit, index) => (Edit: edit, Key: keys[index])).ToArray();
+        var remaining = rows.Where(row => !row.Edit.Remove).ToArray();
+        bool Renamed(AttachmentEditorItem edit) =>
+            !string.Equals(edit.OriginalFileName, edit.FileName, StringComparison.Ordinal);
+        if (remaining.Any(row => string.IsNullOrWhiteSpace(row.Edit.FileName)
+                || string.IsNullOrWhiteSpace(row.Edit.MimeType))
+            || remaining.Any(row => Renamed(row.Edit) && remaining.Any(other =>
+                other.Key != row.Key
+                && string.Equals(other.Edit.FileName, row.Edit.FileName, StringComparison.OrdinalIgnoreCase))))
             throw new InvalidOperationException("Attachment names and MIME types must be valid and unique.");
 
-        foreach (AttachmentEditorItem edit in edits.Where(edit => edit.Remove))
+        if (rows.Any(row => row.Edit.Remove))
+        {
+            var removal = new PdfIncrementalPageEditor(PdfDocument.Open(result));
+            foreach (var row in rows.Where(row => row.Edit.Remove)) removal.RemoveAttachmentByKey(row.Key);
+            result = removal.Build();
+        }
+
+        // A rename makes the new name the key. Every renamed file moves to a temporary name first, so
+        // two files can swap names, and each row's key is followed through both moves.
+        var finalKeys = new Dictionary<string, string>(StringComparer.Ordinal);
+        var temporaryKeys = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var row in remaining.Where(row => Renamed(row.Edit)))
+        {
+            string temporary = $"killerpdf-{Guid.NewGuid():N}{Path.GetExtension(row.Edit.FileName)}";
+            result = new PdfIncrementalPageEditor(PdfDocument.Open(result))
+                .RenameAttachmentByKey(row.Key, temporary).Build();
+            temporaryKeys[row.Key] = temporary;
+        }
+        foreach (var row in remaining.Where(row => Renamed(row.Edit)))
         {
             result = new PdfIncrementalPageEditor(PdfDocument.Open(result))
-                .RemoveAttachment(edit.OriginalFileName).Build();
+                .RenameAttachmentByKey(temporaryKeys[row.Key], row.Edit.FileName).Build();
+            finalKeys[row.Key] = row.Edit.FileName;
         }
 
-        var workingNames = new Dictionary<string, string>(StringComparer.Ordinal);
-        foreach (AttachmentEditorItem edit in remaining.Where(edit =>
-                     !string.Equals(edit.OriginalFileName, edit.FileName, StringComparison.Ordinal)))
+        var originals = current.ToDictionary(item => item.NameTreeKey!, StringComparer.Ordinal);
+        foreach (var row in remaining)
         {
-            string extension = Path.GetExtension(edit.FileName);
-            string temporary = $"killerpdf-{Guid.NewGuid():N}{extension}";
-            result = PdfAttachmentMacro.Execute(
-                PdfAttachmentMacro.RenameStep(edit.OriginalFileName, temporary), result).ToArray();
-            workingNames[edit.OriginalFileName] = temporary;
-        }
-        foreach (AttachmentEditorItem edit in remaining.Where(edit =>
-                     !string.Equals(edit.OriginalFileName, edit.FileName, StringComparison.Ordinal)))
-        {
-            result = PdfAttachmentMacro.Execute(
-                PdfAttachmentMacro.RenameStep(
-                    workingNames[edit.OriginalFileName], edit.FileName), result).ToArray();
-        }
-
-        var originals = current.ToDictionary(item => item.FileName, StringComparer.Ordinal);
-        foreach (AttachmentEditorItem edit in remaining)
-        {
-            PdfAttachmentInfo original = originals[edit.OriginalFileName];
+            PdfAttachmentInfo original = originals[row.Key];
+            AttachmentEditorItem edit = row.Edit;
+            string key = finalKeys.TryGetValue(row.Key, out string? renamedKey) ? renamedKey : row.Key;
             if (!string.Equals(edit.Description, original.Description, StringComparison.Ordinal))
             {
-                result = PdfAttachmentMacro.Execute(
-                    PdfAttachmentMacro.DescriptionStep(edit.FileName,
-                        string.IsNullOrEmpty(edit.Description) ? null : edit.Description),
-                    result).ToArray();
+                if (!string.IsNullOrEmpty(edit.Description) && string.IsNullOrWhiteSpace(edit.Description))
+                    throw new ArgumentException("An attachment description cannot be whitespace.");
+                result = new PdfIncrementalPageEditor(PdfDocument.Open(result))
+                    .SetAttachmentDescriptionByKey(key,
+                        string.IsNullOrEmpty(edit.Description) ? null : edit.Description).Build();
             }
             if (!string.Equals(edit.MimeType, original.MimeType, StringComparison.Ordinal)
                 || edit.Relationship != original.Relationship)
             {
-                result = PdfAttachmentMacro.Execute(
-                    PdfAttachmentMacro.ClassificationStep(
-                        edit.FileName, edit.MimeType, edit.Relationship), result).ToArray();
+                result = new PdfIncrementalPageEditor(PdfDocument.Open(result))
+                    .SetAttachmentClassificationByKey(key, edit.MimeType, edit.Relationship).Build();
             }
         }
         ReplaceWithBuiltResult(path, result);
+    }
+
+    private static string KeyOfListedName(PdfAttachmentInfo[] current, string listedName)
+    {
+        PdfAttachmentInfo[] matches = [.. current.Where(item =>
+            string.Equals(item.FileName, listedName, StringComparison.Ordinal))];
+        return matches.Length == 1
+            ? matches[0].NameTreeKey!
+            : throw new InvalidOperationException("The attachment list changed before it was saved.");
     }
 
     internal static IReadOnlyList<PdfNavigationFinding> InspectNavigation(string path)
@@ -1182,35 +1223,117 @@ internal static partial class PdfEngineIntegration
     }
 
     /// <summary>Merges complete PDF documents while preserving the first document byte prefix.</summary>
-    internal static byte[] MergeDocuments(IReadOnlyList<byte[]> sources)
+    internal static byte[] MergeDocuments(IReadOnlyList<byte[]> sources) =>
+        MergeDocuments(sources, out _);
+
+    /// <summary>
+    /// Merges complete PDF documents while preserving the first document byte prefix. A source whose
+    /// bookmarks are damaged merges without them, and the warnings name each such source.
+    /// </summary>
+    internal static byte[] MergeDocuments(
+        IReadOnlyList<byte[]> sources, out IReadOnlyList<string> warnings)
     {
         ArgumentNullException.ThrowIfNull(sources);
         if (sources.Count == 0)
             throw new ArgumentException("At least one PDF document is required.", nameof(sources));
+        warnings = [];
 
         if (sources.Count == 1)
         {
             OpenPageSource(sources[0]);
             return sources[0].ToArray();
         }
-        try
+        var fallback = new MergeBookmarkFallback(index => $"document {index + 1}");
+        while (true)
         {
-            return MergeDocuments(sources, clearBookmarks: false);
-        }
-        catch (Exception ex) when (IsBookmarkGraphFailure(ex))
-        {
-            // The pages are fine; a damaged outline in any source must not fail the merge.
-            return MergeDocuments(sources, clearBookmarks: true);
+            try
+            {
+                byte[] merged = MergeDocuments(sources, fallback);
+                warnings = fallback.Warnings;
+                return merged;
+            }
+            catch (Exception ex) when (IsBookmarkGraphFailure(ex) && fallback.Advance())
+            {
+                // The pages are fine; a damaged outline must cost only that source its bookmarks.
+            }
         }
     }
 
-    private static byte[] MergeDocuments(IReadOnlyList<byte[]> sources, bool clearBookmarks)
+    private static byte[] MergeDocuments(IReadOnlyList<byte[]> sources, MergeBookmarkFallback fallback)
     {
-        PdfIncrementalPageEditor editor = OpenMergeTarget(sources[0]).Editor;
+        (PdfIncrementalPageEditor editor, PdfDocument? copiedFirst) =
+            OpenMergeTarget(sources[0], !fallback.Omitted.Contains(0));
+        var indexes = new Dictionary<PdfDocument, int>();
+        if (copiedFirst is not null) indexes.Add(copiedFirst, 0);
         for (int index = 1; index < sources.Count; index++)
-            editor.AddImportedDocument(OpenPageSource(sources[index]));
-        if (clearBookmarks) editor.ClearBookmarks();
-        return editor.Build();
+        {
+            PdfDocument source = OpenPageSource(sources[index]);
+            indexes.Add(source, index);
+            editor.AddImportedDocument(source, !fallback.Omitted.Contains(index));
+        }
+        fallback.Apply(editor);
+        try
+        {
+            return editor.Build();
+        }
+        catch (Exception ex) when (IsBookmarkGraphFailure(ex))
+        {
+            fallback.Note(editor, indexes);
+            throw;
+        }
+    }
+
+    // A damaged outline costs only the document it belongs to. The build says which document failed,
+    // and the next attempt leaves that one's bookmarks out and keeps everyone else's. Only a failure
+    // that names no document clears every outline.
+    private sealed class MergeBookmarkFallback(Func<int, string> describe)
+    {
+        private int? _failedIndex;
+        private bool _failedTarget;
+        private bool _dropTarget;
+        private bool _clearAll;
+        private readonly List<string> _warnings = [];
+
+        internal HashSet<int> Omitted { get; } = [];
+        internal IReadOnlyList<string> Warnings => _warnings;
+
+        internal void Apply(PdfIncrementalPageEditor editor)
+        {
+            if (_dropTarget) editor.DropTargetBookmarks();
+            if (_clearAll) editor.ClearBookmarks();
+        }
+
+        internal void Note(PdfIncrementalPageEditor editor, IReadOnlyDictionary<PdfDocument, int> indexes)
+        {
+            _failedIndex = editor.FailedImportSource is PdfDocument failed
+                && indexes.TryGetValue(failed, out int index) ? index : null;
+            _failedTarget = editor.FailedBookmarksInTarget;
+        }
+
+        // False when another attempt would change nothing, so the original failure is raised.
+        internal bool Advance()
+        {
+            if (_clearAll) return false;
+            if (_failedIndex is int index && Omitted.Add(index))
+                _warnings.Add(Describe(index));
+            else if (_failedTarget && !_dropTarget)
+            {
+                _dropTarget = true;
+                _warnings.Add(Describe(0));
+            }
+            else
+            {
+                _clearAll = true;
+                _warnings.Clear();
+                _warnings.Add("Some bookmarks were damaged, so the merged file has none.");
+            }
+            _failedIndex = null;
+            _failedTarget = false;
+            return true;
+        }
+
+        private string Describe(int index) =>
+            $"The bookmarks in {describe(index)} were damaged, so they were left out of the merged file.";
     }
 
     /// <summary>Rebuilds a complete document graph into a clean engine-authored page tree.</summary>
@@ -1523,35 +1646,53 @@ internal static partial class PdfEngineIntegration
     }
 
     /// <summary>Merges PDF documents and image frames through one engine page tree.</summary>
-    internal static byte[] MergeFiles(IReadOnlyList<string> paths)
+    internal static byte[] MergeFiles(IReadOnlyList<string> paths) => MergeFiles(paths, out _);
+
+    /// <summary>
+    /// Merges PDF documents and image frames through one engine page tree. A PDF whose bookmarks are
+    /// damaged merges without them, and the warnings name each such file.
+    /// </summary>
+    internal static byte[] MergeFiles(IReadOnlyList<string> paths, out IReadOnlyList<string> warnings)
     {
         ArgumentNullException.ThrowIfNull(paths);
         if (paths.Count == 0)
             throw new ArgumentException("At least one input file is required.", nameof(paths));
+        warnings = [];
 
-        try
+        var fallback = new MergeBookmarkFallback(index => $"\"{paths[index]}\"");
+        while (true)
         {
-            return MergeFiles(paths, clearBookmarks: false);
-        }
-        catch (Exception ex) when (IsBookmarkGraphFailure(ex))
-        {
-            // The pages are fine; a damaged outline in any source must not fail the merge.
-            return MergeFiles(paths, clearBookmarks: true);
+            try
+            {
+                byte[] merged = MergeFiles(paths, fallback);
+                warnings = fallback.Warnings;
+                return merged;
+            }
+            catch (Exception ex) when (IsBookmarkGraphFailure(ex) && fallback.Advance())
+            {
+                // The pages are fine; a damaged outline must cost only that file its bookmarks.
+            }
         }
     }
 
-    private static byte[] MergeFiles(IReadOnlyList<string> paths, bool clearBookmarks)
+    private static byte[] MergeFiles(IReadOnlyList<string> paths, MergeBookmarkFallback fallback)
     {
         bool firstIsPdf = string.Equals(Path.GetExtension(paths[0]), ".pdf",
             StringComparison.OrdinalIgnoreCase);
         PdfIncrementalPageEditor editor;
         var sourcePaths = new Dictionary<PdfDocument, string>();
+        var indexes = new Dictionary<PdfDocument, int>();
         try
         {
             if (firstIsPdf)
             {
-                (editor, PdfDocument? copiedFirst) = OpenMergeTarget(File.ReadAllBytes(paths[0]));
-                if (copiedFirst is not null) sourcePaths.Add(copiedFirst, paths[0]);
+                (editor, PdfDocument? copiedFirst) = OpenMergeTarget(
+                    File.ReadAllBytes(paths[0]), !fallback.Omitted.Contains(0));
+                if (copiedFirst is not null)
+                {
+                    sourcePaths.Add(copiedFirst, paths[0]);
+                    indexes.Add(copiedFirst, 0);
+                }
             }
             else editor = new PdfIncrementalPageEditor(PdfDocument.Open(new PdfDocumentBuilder().Build()));
         }
@@ -1559,7 +1700,7 @@ internal static partial class PdfEngineIntegration
         {
             throw WithImportSource(paths[0], ex);
         }
-        foreach (string path in paths.Skip(firstIsPdf ? 1 : 0))
+        foreach ((string path, int index) in paths.Select((path, index) => (path, index)).Skip(firstIsPdf ? 1 : 0))
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(path);
             try
@@ -1569,7 +1710,8 @@ internal static partial class PdfEngineIntegration
                 {
                     PdfDocument source = OpenPageSource(File.ReadAllBytes(path));
                     sourcePaths.Add(source, path);
-                    editor.AddImportedDocument(source);
+                    indexes.Add(source, index);
+                    editor.AddImportedDocument(source, !fallback.Omitted.Contains(index));
                     continue;
                 }
                 AppendImageFrames(editor, path);
@@ -1579,8 +1721,16 @@ internal static partial class PdfEngineIntegration
                 throw WithImportSource(path, ex);
             }
         }
-        if (clearBookmarks) editor.ClearBookmarks();
-        return BuildImportedDocuments(editor, sourcePaths);
+        fallback.Apply(editor);
+        try
+        {
+            return BuildImportedDocuments(editor, sourcePaths);
+        }
+        catch (Exception ex) when (IsBookmarkGraphFailure(ex))
+        {
+            fallback.Note(editor, indexes);
+            throw;
+        }
     }
 
     internal static bool IsImportFailure(Exception exception) =>
@@ -1611,6 +1761,7 @@ internal static partial class PdfEngineIntegration
         // Each PDF is read and parsed once; a retry only rebuilds the editor without the rejected one.
         var opened = new Dictionary<string, PdfDocument>(StringComparer.OrdinalIgnoreCase);
         var unreadable = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var withoutBookmarks = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         while (true)
         {
             PdfDocument empty = PdfDocument.Open(new PdfDocumentBuilder().Build());
@@ -1626,7 +1777,7 @@ internal static partial class PdfEngineIntegration
                     {
                         if (!opened.TryGetValue(path, out PdfDocument? document))
                             opened[path] = document = OpenPageSource(File.ReadAllBytes(path));
-                        editor.AddImportedDocument(document);
+                        editor.AddImportedDocument(document, !withoutBookmarks.Contains(path));
                         sourcePaths[document] = path;
                     }
                     else
@@ -1643,6 +1794,11 @@ internal static partial class PdfEngineIntegration
             try
             {
                 return editor.Build();
+            }
+            // A damaged outline leaves the pages readable, so that file loses only its bookmarks.
+            catch (Exception ex) when (IsBookmarkGraphFailure(ex) && editor.FailedImportSource is PdfDocument damaged
+                && sourcePaths.TryGetValue(damaged, out string? damagedPath) && withoutBookmarks.Add(damagedPath))
+            {
             }
             // A PDF can open and import yet be rejected while its pages are built (#455). It is
             // skipped like any other unreadable entry and the rest is built again; each pass
@@ -1950,6 +2106,33 @@ internal static partial class PdfEngineIntegration
     internal sealed record ImportedDocument(
         string Path, IReadOnlyList<int> PageRotations, string? OriginalPath = null);
 
+    /// <summary>
+    /// Validates that a document can be merged, not only opened. A file the strict parser opens passes
+    /// as it always has. A file only compatibility recovery opens must also survive a trial page copy,
+    /// because the page copy applies its strict checks to what recovery rebuilt, and a file that fails
+    /// that should be offered a repair instead of failing the merge.
+    /// </summary>
+    internal static void ValidateImportable(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        byte[] bytes = File.ReadAllBytes(path);
+        try
+        {
+            _ = new PdfIncrementalPageEditor(PdfDocument.Open(bytes)).PageCount;
+            return;
+        }
+        catch (Exception strict) when (IsImportFailure(strict))
+        {
+            // Recovery is the only way in, so the trial below decides.
+        }
+        PdfDocument source = OpenPageSource(bytes);
+        int count = new PdfIncrementalPageEditor(source).PageCount;
+        if (count == 0) return;
+        new PdfIncrementalPageEditor(PdfDocument.Open(new PdfDocumentBuilder().Build()))
+            .InsertImportedPages(0, source, [.. Enumerable.Range(0, count)])
+            .Build();
+    }
+
     /// <summary>Validates that the engine can open a document for page-copy operations.</summary>
     internal static void ValidateDocument(string path)
     {
@@ -2007,6 +2190,33 @@ internal static partial class PdfEngineIntegration
         ReplaceWithBuiltResult(destinationPath, editor.Build());
     }
 
+    // The Document Info dialog edits the five text fields and carries the rest through from what was read.
+    // A value the reader could not interpret shows as blank there, so it is kept as it is unless the user
+    // typed a replacement into its field, and saving never deletes what the user did not touch.
+    internal static PdfDocumentMetadata CompleteDocumentMetadata(
+        PdfDocumentInformation info, PdfDocumentMetadata edited)
+    {
+        ArgumentNullException.ThrowIfNull(info);
+        ArgumentNullException.ThrowIfNull(edited);
+        bool Typed(string key) => key switch
+        {
+            "Title" => !string.IsNullOrEmpty(edited.Title),
+            "Author" => !string.IsNullOrEmpty(edited.Author),
+            "Subject" => !string.IsNullOrEmpty(edited.Subject),
+            "Keywords" => !string.IsNullOrEmpty(edited.Keywords),
+            "Creator" => !string.IsNullOrEmpty(edited.Creator),
+            _ => false
+        };
+        return edited with
+        {
+            Language = info.Language,
+            CreationDate = info.CreationDate,
+            ModificationDate = info.ModificationDate,
+            Trapped = info.Trapped,
+            PreservedInfoKeys = [.. info.UnreadableKeys.Where(key => !Typed(key))]
+        };
+    }
+
     /// <summary>Writes complete descriptive document metadata incrementally.</summary>
     internal static void ApplyDocumentMetadata(string path, PdfDocumentMetadata metadata)
     {
@@ -2021,7 +2231,13 @@ internal static partial class PdfEngineIntegration
         catch (ArgumentException exception) when (
             metadata.Language is not null && exception.ParamName == nameof(metadata))
         {
-            editor.SetMetadata(metadata with { Language = null });
+            // The writer refuses a language tag that is not valid BCP 47, so the entry already in the
+            // file stays as it is rather than being dropped.
+            editor.SetMetadata(metadata with
+            {
+                Language = null,
+                PreservedInfoKeys = [.. metadata.PreservedInfoKeys.Append("Lang").Distinct(StringComparer.Ordinal)]
+            });
         }
         byte[] result = editor.Build();
         ReplaceWithBuiltResult(path, result);

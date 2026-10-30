@@ -403,6 +403,211 @@ public sealed class PdfAttachmentReaderTests
         ], attachment.CollectionValues);
     }
 
+    public static TheoryData<string, string> KeyedScenariosAndOperations()
+    {
+        var data = new TheoryData<string, string>();
+        foreach (string scenario in new[] { "cross", "duplicate", "case" })
+            foreach (string operation in new[] { "remove", "rename", "replace", "description", "classification" })
+                data.Add(scenario, operation);
+        return data;
+    }
+
+    [Theory]
+    [MemberData(nameof(KeyedScenariosAndOperations))]
+    public void AttachmentEditsByKeyTouchExactlyThatFile(string scenario, string operation)
+    {
+        (byte[] source, string target, string other) = KeyedScenario(scenario);
+        PdfAttachmentInfo[] before = [.. PdfAttachmentReader.Read(PdfDocument.Open(source))];
+        PdfAttachmentInfo untouched = Assert.Single(before, item => item.NameTreeKey == other);
+        PdfAttachmentInfo targeted = Assert.Single(before, item => item.NameTreeKey == target);
+        var editor = new PdfIncrementalPageEditor(PdfDocument.Open(source));
+        switch (operation)
+        {
+            case "remove": editor.RemoveAttachmentByKey(target); break;
+            case "rename": editor.RenameAttachmentByKey(target, "renamed.txt"); break;
+            case "replace": editor.ReplaceAttachmentByKey(target, "changed"u8.ToArray()); break;
+            case "description": editor.SetAttachmentDescriptionByKey(target, "New note"); break;
+            case "classification":
+                editor.SetAttachmentClassificationByKey(target, "text/plain", PdfAssociatedFileRelationship.Source);
+                break;
+        }
+
+        PdfAttachmentInfo[] after = [.. PdfAttachmentReader.Read(PdfDocument.Open(editor.Build()))];
+
+        PdfAttachmentInfo kept = Assert.Single(after, item => item.NameTreeKey == other);
+        Assert.Equal(untouched.FileName, kept.FileName);
+        Assert.Equal(untouched.Data.ToArray(), kept.Data.ToArray());
+        if (operation == "remove")
+        {
+            Assert.Single(after);
+            return;
+        }
+        Assert.Equal(2, after.Length);
+        string changedKey = operation == "rename" ? "renamed.txt" : target;
+        PdfAttachmentInfo changed = Assert.Single(after, item => item.NameTreeKey == changedKey);
+        Assert.Equal(operation == "rename" ? "renamed.txt" : targeted.FileName, changed.FileName);
+        Assert.Equal(operation == "replace" ? "changed"u8.ToArray() : targeted.Data.ToArray(), changed.Data.ToArray());
+        if (operation == "description") Assert.Equal("New note", changed.Description);
+        if (operation == "classification")
+        {
+            Assert.Equal("text/plain", changed.MimeType);
+            Assert.Equal(PdfAssociatedFileRelationship.Source, changed.Relationship);
+        }
+    }
+
+    [Fact]
+    public void RemoveAttachmentByNameUsesTheListedNameBeforeAnotherFilesKey()
+    {
+        (byte[] source, _, _) = KeyedScenario("cross");
+
+        byte[] output = new PdfIncrementalPageEditor(PdfDocument.Open(source))
+            .RemoveAttachment("Y").Build();
+
+        // Key X lists itself as Y, and key Y lists itself as Z. "Y" names the file at key X.
+        PdfAttachmentInfo kept = Assert.Single(PdfAttachmentReader.Read(PdfDocument.Open(output)));
+        Assert.Equal("Y", kept.NameTreeKey);
+        Assert.Equal("Z", kept.FileName);
+        Assert.Equal("PAYLOAD2"u8.ToArray(), kept.Data.ToArray());
+    }
+
+    [Theory]
+    [InlineData("remove")]
+    [InlineData("rename")]
+    [InlineData("replace")]
+    [InlineData("description")]
+    [InlineData("classification")]
+    public void AttachmentEditsByNameRefuseAListedNameSeveralFilesShare(string operation)
+    {
+        (byte[] source, _, _) = KeyedScenario("duplicate");
+        var editor = new PdfIncrementalPageEditor(PdfDocument.Open(source));
+
+        ArgumentException error = Assert.Throws<ArgumentException>(() =>
+        {
+            switch (operation)
+            {
+                case "remove": editor.RemoveAttachment("dup.txt"); break;
+                case "rename": editor.RenameAttachment("dup.txt", "renamed.txt"); break;
+                case "replace": editor.ReplaceAttachment("dup.txt", "changed"u8.ToArray()); break;
+                case "description": editor.SetAttachmentDescription("dup.txt", "Note"); break;
+                default:
+                    editor.SetAttachmentClassification("dup.txt", "text/plain", PdfAssociatedFileRelationship.Data);
+                    break;
+            }
+        });
+        Assert.Contains("Several attachments are named dup.txt.", error.Message);
+    }
+
+    [Fact]
+    public void RemoveAttachmentByKeyRefusesAKeyThatIsOnlyAListedName()
+    {
+        (byte[] source, _, _) = KeyedScenario("duplicate");
+        var editor = new PdfIncrementalPageEditor(PdfDocument.Open(source));
+
+        Assert.Throws<ArgumentException>(() => editor.RemoveAttachmentByKey("dup.txt"));
+        Assert.Throws<ArgumentException>(() => editor.RemoveAttachmentByKey("K2"));
+        editor.RemoveAttachmentByKey("k2");
+        Assert.Throws<ArgumentException>(() => editor.RemoveAttachmentByKey("k2"));
+    }
+
+    [Theory]
+    [InlineData("cross")]
+    [InlineData("duplicate")]
+    [InlineData("case")]
+    public void RemovingAnAttachmentByKeyKeepsTheOtherFilesAssociation(string scenario)
+    {
+        (byte[] source, string target, string other) = KeyedScenario(scenario, associatedFiles: true);
+
+        byte[] output = new PdfIncrementalPageEditor(PdfDocument.Open(source))
+            .RemoveAttachmentByKey(target).Build();
+
+        PdfDocument document = PdfDocument.Open(output);
+        PdfAttachmentInfo kept = Assert.Single(PdfAttachmentReader.Read(document));
+        Assert.Equal(other, kept.NameTreeKey);
+        PdfDictionary catalog = ResolveDictionary(document, document.Trailer[Name("Root")]);
+        PdfArray associated = Assert.IsType<PdfArray>(catalog[Name("AF")]);
+        PdfIndirectReference remaining = Assert.IsType<PdfIndirectReference>(Assert.Single(associated));
+        Assert.Equal(kept.FileSpecificationObjectNumber, remaining.ObjectNumber);
+    }
+
+    [Theory]
+    [InlineData("cross")]
+    [InlineData("duplicate")]
+    [InlineData("case")]
+    public void SanitizeStripsEveryAttachmentWhateverTheirKeysAndListedNames(string scenario)
+    {
+        (byte[] source, _, _) = KeyedScenario(scenario);
+
+        PdfOptimizationResult result = PdfOptimizer.CreatePlan(PdfDocument.Open(source),
+            new PdfOptimizationOptions
+            {
+                RemoveAttachments = true,
+                PackObjects = false,
+                CompressStructure = false
+            }).Apply();
+
+        Assert.Empty(PdfAttachmentReader.Read(PdfDocument.Open(result.Data)));
+    }
+
+    [Fact]
+    public void ANewAttachmentWhoseNameMatchesARetainedKeyApartFromCaseIsStillRefused()
+    {
+        (byte[] source, _, _) = KeyedScenario("case");
+        var editor = new PdfIncrementalPageEditor(PdfDocument.Open(source))
+            .AddAttachment("A.TXT", "new"u8.ToArray());
+
+        Assert.Throws<ArgumentException>(() => editor.Build());
+    }
+
+    /// <summary>
+    /// Builds attachments whose name-tree key, listed file name and payload are all chosen by the caller,
+    /// as files from PDFBox, LaTeX and hand-edited tools can be. Keys are written in byte order.
+    /// </summary>
+    internal static byte[] KeyedAttachments(
+        bool associatedFiles, params (string Key, string Listed, string Payload)[] items)
+    {
+        var objects = new List<string>
+        {
+            "",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] >>"
+        };
+        var names = new System.Text.StringBuilder();
+        var specifications = new System.Text.StringBuilder();
+        foreach ((string key, string listed, string payload) in items.OrderBy(item => item.Key, StringComparer.Ordinal))
+        {
+            int specification = objects.Count + 1;
+            objects.Add($"<< /Type /Filespec /F ({listed}) /UF ({listed}) /EF << /F {specification + 1} 0 R >> >>");
+            objects.Add($"<< /Type /EmbeddedFile /Length {payload.Length} >>\nstream\n{payload}\nendstream");
+            names.Append($"({key}) {specification} 0 R ");
+            specifications.Append($"{specification} 0 R ");
+        }
+        objects[0] = "<< /Type /Catalog /Pages 2 0 R /Names << /EmbeddedFiles << /Names [" + names + "] >> >>"
+            + (associatedFiles ? " /AF [" + specifications + "]" : "") + " >>";
+        var text = new System.Text.StringBuilder("%PDF-2.0\n");
+        var offsets = new List<int>();
+        for (int index = 0; index < objects.Count; index++)
+        {
+            offsets.Add(text.Length);
+            text.Append($"{index + 1} 0 obj\n{objects[index]}\nendobj\n");
+        }
+        int xref = text.Length;
+        text.Append($"xref\n0 {objects.Count + 1}\n0000000000 65535 f \n");
+        foreach (int offset in offsets) text.Append($"{offset:0000000000} 00000 n \n");
+        text.Append($"trailer\n<< /Size {objects.Count + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
+        return System.Text.Encoding.Latin1.GetBytes(text.ToString());
+    }
+
+    /// <summary>The three shapes where a listed name is not an identity: crossed, repeated and case-only keys.</summary>
+    internal static (byte[] Source, string TargetKey, string OtherKey) KeyedScenario(
+        string scenario, bool associatedFiles = false) => scenario switch
+        {
+            // Key X lists Y and key Y lists Z, so each file's key is another file's listed name.
+            "cross" => (KeyedAttachments(associatedFiles, ("X", "Y", "PAYLOAD1"), ("Y", "Z", "PAYLOAD2")), "Y", "X"),
+            "duplicate" => (KeyedAttachments(associatedFiles, ("k1", "dup.txt", "PAYLOAD1"), ("k2", "dup.txt", "PAYLOAD2")), "k2", "k1"),
+            "case" => (KeyedAttachments(associatedFiles, ("A.txt", "A.txt", "PAYLOAD1"), ("a.txt", "a.txt", "PAYLOAD2")), "a.txt", "A.txt"),
+            _ => throw new ArgumentOutOfRangeException(nameof(scenario))
+        };
+
     private static PdfDictionary ResolveDictionary(PdfDocument document, PdfObject value) =>
         Assert.IsType<PdfDictionary>(value is PdfIndirectReference reference
             ? document.Resolve(reference) : value);

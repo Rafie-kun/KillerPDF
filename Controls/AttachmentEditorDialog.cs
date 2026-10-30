@@ -96,8 +96,11 @@ internal sealed class AttachmentEditorDialog : Window
             [.. edits.Where(edit => !edit.Remove)];
         if (remaining.Any(edit => string.IsNullOrWhiteSpace(edit.FileName)
                 || string.IsNullOrWhiteSpace(edit.MimeType))
-            || remaining.Select(edit => edit.FileName)
-                .Distinct(System.StringComparer.OrdinalIgnoreCase).Count() != remaining.Length)
+            // A name is checked only where it changed, so a file that shares a name with another can
+            // still have its description or type edited.
+            || remaining.Any(edit => !string.Equals(edit.FileName, edit.OriginalFileName, System.StringComparison.Ordinal)
+                && remaining.Any(other => !ReferenceEquals(other, edit)
+                    && string.Equals(other.FileName, edit.FileName, System.StringComparison.OrdinalIgnoreCase))))
         {
             KillerDialog.Show(this, L("Str_Attachment_Invalid"),
                 "KillerPDF", MessageBoxButton.OK, MessageBoxImage.Warning);

@@ -468,14 +468,20 @@ namespace KillerPDF.Shell
             // Repairs below are awaited; the import goes only into the document it was dropped on.
             var isTargetCurrent = CaptureDocumentOrigin();
             var imports = new List<PdfEngineIntegration.ImportedDocument>();
+            int notRepaired = 0;   // files whose repair was declined or failed, so the merge says they were left out
             foreach (var f in files)
             {
                 string? importPath = null;
                 if (PdfImport.IsPdfPath(f))
                 {
                     importPath = f;
-                    try { PdfEngineIntegration.ValidateDocument(importPath); }
-                    catch { importPath = await RepairPdfForImportAsync(f); }
+                    // Checking a damaged file copies its pages, so it runs off the UI thread.
+                    try { await Task.Run(() => PdfEngineIntegration.ValidateImportable(f)); }
+                    catch
+                    {
+                        importPath = await RepairPdfForImportAsync(f);
+                        if (importPath is null) notRepaired++;
+                    }
                 }
                 else
                 {
@@ -496,7 +502,11 @@ namespace KillerPDF.Shell
                 catch { /* skip anything still unreadable after repair */ }
             }
             if (_doc is null || !isTargetCurrent()) return;
-            if (imports.Count == 0) { SetStatus(Loc("Str_Drop_NothingOpenable")); return; }
+            if (imports.Count == 0)
+            {
+                SetStatus(Loc(notRepaired > 0 ? "Str_Drop_MergeCanceled" : "Str_Drop_NothingOpenable"));
+                return;
+            }
             try
             {
                 UndoEntry? documentUndo = CaptureDocumentUndo();
@@ -512,7 +522,11 @@ namespace KillerPDF.Shell
                         PdfEngineIntegration.RemapRotationsAfterDocumentInsertion(rotations, imports, insertAt),
                     selectedPageAfterReload: insertAt,
                     documentUndo: documentUndo);
-                SetStatus(string.Format(Loc("Str_Status_Merged"), imports.Count));
+                string merged = string.Format(Loc("Str_Status_Merged"), imports.Count);
+                // Str_Drop_SkippedFiles is added with the other strings; until then the English text stands in.
+                string skipped = Application.Current.TryFindResource("Str_Drop_SkippedFiles") as string
+                    ?? "Skipped {0} file(s) that could not be repaired.";
+                SetStatus(notRepaired > 0 ? merged + " " + string.Format(skipped, notRepaired) : merged);
             }
             catch (Exception ex)
             {

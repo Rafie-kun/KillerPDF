@@ -620,11 +620,12 @@ namespace KillerPDF.Features
                 { con.WriteLine("Output file cannot also be an input."); return 2; }
             }
 
-            byte[] merged = PdfEngineIntegration.MergeFiles(inputs);
+            byte[] merged = PdfEngineIntegration.MergeFiles(inputs, out IReadOnlyList<string> warnings);
             CliEnsureParentDir(outPath);
             AtomicFileOutput.Write(outPath, merged);
             int pageCount = KillerPdf.Engine.Documents.PdfDocumentInformation
                 .Read(KillerPdf.Engine.Documents.PdfDocument.Open(merged)).PageCount;
+            foreach (string warning in warnings) con.WriteLine("Warning: " + warning);
             con.WriteLine($"Merged {inputs.Count} files ({pageCount} pages) -> {outPath}");
             return 0;
         }

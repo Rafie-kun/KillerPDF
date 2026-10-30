@@ -73,4 +73,33 @@ public sealed class PdfAttachmentMacroTests
         Assert.Equal("payload"u8.ToArray(), attachment.Data.ToArray());
         Assert.DoesNotContain("payload", macro.ToJson(), StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void RemoveStepStripsEveryAttachmentWhenListedNamesRepeat()
+    {
+        (byte[] source, _, _) = PdfAttachmentReaderTests.KeyedScenario("duplicate");
+
+        PdfDocument sanitized = PdfDocument.Open(
+            PdfAttachmentMacro.Execute(PdfAttachmentMacro.RemoveStep(), source));
+
+        Assert.Empty(PdfAttachmentReader.Read(sanitized));
+    }
+
+    [Fact]
+    public void EditStepsPickTheListedNameAndRefuseOneSeveralFilesShare()
+    {
+        (byte[] crossed, _, _) = PdfAttachmentReaderTests.KeyedScenario("cross");
+        (byte[] repeated, _, _) = PdfAttachmentReaderTests.KeyedScenario("duplicate");
+
+        // "Y" is the name listed for the file at key X, even though another file is stored under key Y.
+        PdfAttachmentInfo[] renamed = [.. PdfAttachmentReader.Read(PdfDocument.Open(
+            PdfAttachmentMacro.Execute(PdfAttachmentMacro.RenameStep("Y", "Q.txt"), crossed)))];
+        Assert.Equal(["PAYLOAD1", "PAYLOAD2"], renamed.OrderBy(item => item.FileName, StringComparer.Ordinal)
+            .Select(item => System.Text.Encoding.ASCII.GetString(item.Data.Span)));
+        Assert.Equal(["Q.txt", "Z"], renamed.Select(item => item.FileName).OrderBy(name => name, StringComparer.Ordinal));
+
+        ArgumentException error = Assert.Throws<ArgumentException>(() => PdfAttachmentMacro.Execute(
+            PdfAttachmentMacro.DescriptionStep("dup.txt", "Note"), repeated));
+        Assert.Contains("Several attachments are named dup.txt.", error.Message);
+    }
 }

@@ -125,6 +125,9 @@ namespace KillerPDF.Shell
                 }
                 catch (Exception ex2)
                 {
+                    // The document was assigned before the finish step threw (a PDF with no pages, for one),
+                    // so nothing may count as opened.
+                    AbandonFailedOpen();
                     KillerDialog.Show(this, string.Format(Loc("Str_Dlg_FailedOpen"), ex2.Message), Loc("Str_Dlg_AppTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
@@ -1130,13 +1133,7 @@ namespace KillerPDF.Shell
             if (dlg.Saved && editedMetadata is not null)
             {
                 if (!EnsureEditable()) return;
-                var completeMetadata = editedMetadata with
-                {
-                    Language = info.Language,
-                    CreationDate = info.CreationDate,
-                    ModificationDate = info.ModificationDate,
-                    Trapped = info.Trapped
-                };
+                var completeMetadata = PdfEngineIntegration.CompleteDocumentMetadata(info, editedMetadata);
                 try
                 {
                     SaveTempAndReload(
@@ -1164,6 +1161,9 @@ namespace KillerPDF.Shell
             var dlg = new Controls.FileDialog(Controls.FileDialogMode.Open)
                           { Filter = Loc("Str_Filter_Pdf") + "|*.pdf", Title = Loc("Str_Dlg_SelectMerge"), Multiselect = true };
             if (dlg.ShowDialog(this) != true) return;
+            // Checking a damaged file copies its pages, so it runs off the UI thread, and the import
+            // goes only into the document the merge was started on.
+            var isTargetCurrent = CaptureDocumentOrigin();
             try
             {
                 var imports = new List<PdfEngineIntegration.ImportedDocument>();
@@ -1174,7 +1174,7 @@ namespace KillerPDF.Shell
                         string importPath = file;
                         try
                         {
-                            PdfEngineIntegration.ValidateDocument(importPath);
+                            await Task.Run(() => PdfEngineIntegration.ValidateImportable(file));
                         }
                         catch
                         {
@@ -1198,6 +1198,7 @@ namespace KillerPDF.Shell
                         throw PdfEngineIntegration.WithImportSource(file, ex);
                     }
                 }
+                if (_doc is null || !isTargetCurrent()) return;
                 int insertAt = insertionIndex ?? _doc.PageCount;
                 int importedPages = imports.Sum(import => import.PageRotations.Count);
                 ReloadWithRemappedAnnotations(

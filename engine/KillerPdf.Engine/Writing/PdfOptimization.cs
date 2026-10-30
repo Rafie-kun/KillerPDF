@@ -213,6 +213,7 @@ public sealed partial class PdfOptimizationPlan
     private readonly PdfReferenceRepair[] _referenceRepairs;
     private readonly PdfOptimizationOptions _options;
     private readonly string[] _attachmentNames;
+    private readonly string[] _attachmentKeys;
     private readonly string[] _formFieldNames;
     private readonly int[] _resourcePages;
     private readonly int[] _thumbnailPages;
@@ -232,13 +233,15 @@ public sealed partial class PdfOptimizationPlan
         IEnumerable<int> unreachableObjectNumbers,
         IEnumerable<int> compressedStreamObjectNumbers,
         PdfDocument? originalDocument = null,
-        IEnumerable<PdfReferenceRepair>? referenceRepairs = null)
+        IEnumerable<PdfReferenceRepair>? referenceRepairs = null,
+        IEnumerable<string>? attachmentKeys = null)
     {
         _document = document;
         _originalDocument = originalDocument ?? document;
         _referenceRepairs = referenceRepairs?.ToArray() ?? [];
         _options = options;
         _attachmentNames = [.. attachmentNames];
+        _attachmentKeys = attachmentKeys is null ? _attachmentNames : [.. attachmentKeys];
         _formFieldNames = [.. formFieldNames];
         _resourcePages = [.. resourcePages];
         _thumbnailPages = [.. thumbnailPages];
@@ -512,7 +515,7 @@ public sealed partial class PdfOptimizationPlan
                             content.ReadInstructions(pageIndex)));
             }
             if (removesAttachments)
-                foreach (string name in _attachmentNames) editor.RemoveAttachment(name);
+                foreach (string key in _attachmentKeys) editor.RemoveAttachmentByKey(key);
             if (removesOpenAction) editor.ClearOpenAction();
             if (removesBookmarks) editor.ClearBookmarks();
             if (removesFormFields)
@@ -585,8 +588,10 @@ public static class PdfOptimizer
         if (repairs.Length > 0)
             changes.Add(PdfOptimizationChangeKind.RepairHarmlessArtifacts);
         PdfPageTree tree = PdfPageTree.Read(document);
-        string[] attachmentNames = options.RemoveAttachments
-            ? [.. PdfAttachmentReader.Read(document).Select(attachment => attachment.FileName)] : [];
+        PdfAttachmentInfo[] attachments = options.RemoveAttachments
+            ? [.. PdfAttachmentReader.Read(document)] : [];
+        string[] attachmentNames = [.. attachments.Select(attachment => attachment.FileName)];
+        string[] attachmentKeys = [.. attachments.Select(attachment => attachment.NameTreeKey!)];
         bool hasAttachmentAnnotations = options.RemoveAttachments
             && tree.Pages.SelectMany((_, pageIndex) =>
                 PdfAttachmentReader.ReadPageAnnotations(document, pageIndex)).Any();
@@ -650,7 +655,7 @@ public static class PdfOptimizer
             optionalContentGroups.Where(group => !group.IsInitiallyVisible)
                 .Select(group => group.Name),
             repairs, comments.Length, unreachableObjectNumbers,
-            compressedStreamObjectNumbers, original, referenceRepairs);
+            compressedStreamObjectNumbers, original, referenceRepairs, attachmentKeys);
     }
 
     internal static IReadOnlyList<int> UnusedResourcePages(PdfDocument document)
