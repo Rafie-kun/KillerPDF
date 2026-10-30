@@ -507,6 +507,7 @@ namespace KillerPDF.Controls
             Color coverBg = SampleCoverColor(pageIdx, sampleRect);
             Color inkColor = SampleTextColor(pageIdx, sampleRect, coverBg);
             cover.SetColor(coverBg);
+            RememberTextToolDefaults();
             _textColor = inkColor; _textOpacity = inkColor.A;
             _textFontSize = Math.Max(1, boxFontCanvas / syInv);   // canvas units -> points
             // Replacing raw PDF text starts from the detected font and its face styling. PDF fonts
@@ -626,6 +627,7 @@ namespace KillerPDF.Controls
             Rect canvasLine = TextTurn.FromReading(lineRect, turn);
             Color background = SampleCoverColor(pageIdx, canvasLine);
             Color inkColor = SampleTextColor(pageIdx, canvasLine, background);
+            RememberTextToolDefaults();
             _textColor = inkColor; _textOpacity = inkColor.A;
             _textFontSize = Math.Max(1, boxFontCanvas / syInv);   // canvas units -> points
             _textFontName = string.IsNullOrEmpty(fontName) ? "Segoe UI" : fontName;
@@ -1023,6 +1025,7 @@ namespace KillerPDF.Controls
         // "Ctrl+Z with nothing left in the box" path.
         private void CancelActiveTextEdit()
         {
+            RestoreTextToolDefaults();
             RemoveTextEditHandles();
             RemoveReeditCoverOutline();   // edit canceled; drop the cover hint (repaint follows)
             if (_activeTextBox is not null)
@@ -1124,10 +1127,35 @@ namespace KillerPDF.Controls
             return ta;
         }
 
+        // Editing a line of the page borrows its look for the edit box and the text bar. The tool's
+        // own settings return when the edit ends, so page ink never becomes the default for new text.
+        private sealed record TextToolDefaults(Color Color, byte Opacity, double FontSize, string FontName,
+            bool Bold, bool Italic, bool Strike, bool Underline, double LetterSpacing);
+        private TextToolDefaults? _defaultsBeforePageEdit;
+
+        private void RememberTextToolDefaults() => _defaultsBeforePageEdit ??= new(_textColor, _textOpacity,
+            _textFontSize, _textFontName, _textBold, _textItalic, _textStrike, _textUnderline, _textLetterSpacing);
+
+        private void RestoreTextToolDefaults()
+        {
+            if (_defaultsBeforePageEdit is not { } saved) return;
+            _defaultsBeforePageEdit = null;
+            (_textColor, _textOpacity, _textFontSize, _textFontName) = (saved.Color, saved.Opacity, saved.FontSize, saved.FontName);
+            (_textBold, _textItalic, _textStrike, _textUnderline) = (saved.Bold, saved.Italic, saved.Strike, saved.Underline);
+            _textLetterSpacing = saved.LetterSpacing;
+            if (_currentTool == EditTool.Text) ShowTextSettings();
+        }
+
         private void CommitActiveTextBox()
         {
             if (_activeTextBox is null) return;
-            var tb = _activeTextBox;
+            try { CommitTextBoxContents(); }
+            finally { RestoreTextToolDefaults(); }
+        }
+
+        private void CommitTextBoxContents()
+        {
+            var tb = _activeTextBox!;
             _activeTextBox = null;
             RemoveTextEditHandles();
             RemoveReeditCoverOutline();   // the re-edit is ending; drop its cover hint (repaint follows)

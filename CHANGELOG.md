@@ -21,6 +21,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Changed
 
+- Editing a line of the page no longer changes the Text tool's own color, font and size. The bar shows the line's look during the edit, and your settings return when it ends, so white heading text cannot become the invisible default for new text.
 - The text bar takes less room: Edit paragraph is a normal-sized button under the color swatches, and the opacity sliders fold into one row in a narrow window.
 
 ## [1.9.0] - 2026-10-29
