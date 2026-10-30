@@ -13,12 +13,16 @@ The 1.9.1 engine clears redacted content from every copy that hides it, edits at
 - Added `RemoveAttachmentByKey`, `RenameAttachmentByKey`, `ReplaceAttachmentByKey`, `SetAttachmentDescriptionByKey` and `SetAttachmentClassificationByKey` to `PdfIncrementalPageEditor`. Keys match exactly, and the name-based methods now refuse a name that several files share.
 - Added `includeBookmarks` overloads of `AddImportedDocument` and `InsertImportedDocument`, plus `DropTargetBookmarks` and `FailedBookmarksInTarget`, so a damaged outline costs only the document it belongs to.
 - Added `PdfDocumentInformation.UnreadableKeys` and `PdfDocumentMetadata.PreservedInfoKeys`, so a save keeps entries it could not read.
-- Added `PdfParagraphEditor.DefaultBox`, the `PdfParagraphCandidate` members `TextLeft`, `FirstBaseline`, `TextRight`, `FirstLineIndent` and `RowTexts`, a `PdfTextReflow.Wrap` overload with a first-line indent, `PdfExtractionFont.IsType3`, and `PdfParagraphRefusalCode.NoText`.
+- Added `ReadLinkAnnotationIndexes` to `PdfLinkReader`, so a caller can reach a link the reader could not parse.
+- Added `PdfParagraphEditor.DefaultBox`, the `PdfParagraphCandidate` members `TextLeft`, `FirstBaseline`, `TextRight`, `FirstLineIndent` and `RowTexts`, a `PdfTextReflow.Wrap` overload with a first-line indent, `PdfExtractionFont.IsType3`, `PdfParagraphRefusalCode.NoText`, and the `PdfParagraphCandidate` members `RightLimit` and `HyphenGuesses`.
 
 ### Changed
 
 - `PdfRedactionSearch.Find` accepts null pages: a page that could not be read keeps its number and has no matches.
 - A rewrite that merges page resources repeats until nothing more merges, and stream identity ignores `/Length`.
+- A full rewrite treats catalog Reader usage rights like a signature: it refuses without `AllowSignatureInvalidation` and removes `/Perms` when allowed. `RemoveEncryption` is exempt, so opening a protected file still works.
+- Reading a named signature no longer requires `/Type`, which is optional, and a bad date or text value costs only that value.
+- A page frame is now one box everywhere: `PdfPageContentReader`, the renderer and redaction all use the crop box cut to the media box.
 
 ### Fixed
 
