@@ -113,7 +113,7 @@ internal static class PreviewComSmoke
         }
     }
 
-    internal static int Run(Window owner, string appPath, string folder) => FormWorkflowFailureSmoke.WithCleanup(owner, () =>
+    internal static int Run(Window owner, string appPath, string folder, bool explorer = false) => FormWorkflowFailureSmoke.WithCleanup(owner, () =>
     {
         const string classId = "{0EB8F20D-6E18-4B80-9CDF-FF663C52B5BD}";
         const string appId = "{CC8F3FF2-266A-4827-9CFA-964310EB6676}";
@@ -211,6 +211,7 @@ internal static class PreviewComSmoke
                             finally { Marshal.FinalReleaseComObject(instance); }
                         }
                     }
+                    if (explorer) PreviewExplorerSmoke.Verify(folder);
                     completion.TrySetResult(true);
                 }
                 catch (Exception error) { completion.TrySetException(error); }
@@ -218,7 +219,17 @@ internal static class PreviewComSmoke
             client.SetApartmentState(ApartmentState.STA);
             client.IsBackground = true;
             client.Start();
-            Wait(() => completion.Task.IsCompleted, "native preview checks with a responsive host window");
+            if (explorer)
+            {
+                var watch = System.Diagnostics.Stopwatch.StartNew();
+                while (!completion.Task.IsCompleted)
+                {
+                    Pump();
+                    if (watch.Elapsed > TimeSpan.FromSeconds(60)) throw new TimeoutException("Native and Explorer preview checks timed out.");
+                    Thread.Sleep(10);
+                }
+            }
+            else Wait(() => completion.Task.IsCompleted, "native preview checks with a responsive host window");
             completion.Task.GetAwaiter().GetResult();
         }
         finally
