@@ -13,6 +13,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Deleting a form field retires its pending text and formatting, so a recreated field cannot inherit them. Undo restores the deleted field's values.
 - A failed form conversion or flattening keeps pending field values and formatting intact.
 - Image export asks before replacing numbered output files and preserves existing images when a write fails.
+- Separation exports keep inks with punctuation or case differences in separate files and require approval to replace existing plates.
 - Data merge refuses to overwrite its input template, even with the command line overwrite option.
 - Failed text replacement leaves the document and overlays unchanged and reports the error instead of claiming success.
 - Redacting a shared image preserves the transparency and colors of untouched pages that use a different mask or color settings.

@@ -171,7 +171,7 @@ namespace KillerPDF.Features
         {
             if (pos.Count is < 1 or > 2)
             {
-                con.WriteLine("Usage: KillerPDF.exe --separations <in.pdf> [<outputFolder>] [--pages <range>] [--dpi <n>] [--json] [--password <password>]");
+                con.WriteLine("Usage: KillerPDF.exe --separations <in.pdf> [<outputFolder>] [--pages <range>] [--dpi <n>] [--json] [--password <password>] [--overwrite]");
                 return 2;
             }
             string inPath = Path.GetFullPath(pos[0]);
@@ -204,19 +204,41 @@ namespace KillerPDF.Features
             Directory.CreateDirectory(outDir);
             string baseName = Path.GetFileNameWithoutExtension(inPath);
             int digits = Math.Max(3, session.PageCount.ToString().Length);
-            int written = 0;
-            foreach (int page in pages)
-            {
-                int rotation = rotations is not null && page < rotations.Length ? rotations[page] : 0;
-                foreach (var plate in preview.Plates.Where(plate => plate.PageIndexes.Contains(page)))
+            var outputs = pages.SelectMany(page => preview.Plates.Select((plate, index) => (Plate: plate, Index: index))
+                .Where(item => item.Plate.PageIndexes.Contains(page)).Select(item =>
                 {
-                    var (pixels, width, height) = CliDisplayedPage(session.RenderPlate(page, plate.Name), rotation);
-                    string safe = new([.. plate.Name.Select(c => char.IsLetterOrDigit(c) ? c : '-')]);
-                    File.WriteAllBytes(Path.Combine(outDir,
-                            $"{baseName}-page-{(page + 1).ToString().PadLeft(digits, '0')}-{safe}.png"),
-                        BitmapHelpers.RenderToPng(pixels, width, height, dpi));
+                    string safe = new([.. item.Plate.Name.Select(c => char.IsLetterOrDigit(c) ? c : '-')]);
+                    string path = Path.GetFullPath(Path.Combine(outDir,
+                        $"{baseName}-page-{(page + 1).ToString().PadLeft(digits, '0')}-{safe}-ink-{item.Index + 1:000}.png"));
+                    return (Page: page, Name: item.Plate.Name, Path: path);
+                })).ToArray();
+            string[] paths = [.. outputs.Select(output => output.Path)];
+            if (paths.Distinct(StringComparer.OrdinalIgnoreCase).Count() != paths.Length)
+            {
+                con.WriteLine("Separation output filenames must be unique.");
+                return 2;
+            }
+            HashSet<string>? approved = options.ContainsKey("--overwrite")
+                ? paths.ToHashSet(StringComparer.OrdinalIgnoreCase) : null;
+            try { PdfRasterize.ValidateImageOutputs(paths, approved); }
+            catch (IOException error) { con.WriteLine(error.Message + " Use --overwrite to replace existing plates."); return 2; }
+            int written = 0;
+            try
+            {
+                foreach (var output in outputs)
+                {
+                    int rotation = rotations is not null && output.Page < rotations.Length ? rotations[output.Page] : 0;
+                    var (pixels, width, height) = CliDisplayedPage(session.RenderPlate(output.Page, output.Name), rotation);
+                    byte[] image = BitmapHelpers.RenderToPng(pixels, width, height, dpi);
+                    if (approved is not null) AtomicFileOutput.Write(output.Path, image);
+                    else AtomicFileOutput.WriteNew(output.Path, image);
                     written++;
                 }
+            }
+            catch (Exception error) when (error is not OutOfMemoryException)
+            {
+                con.WriteLine($"Separation export stopped after {written} of {outputs.Length} plate images. " + error.Message);
+                return 1;
             }
             con.WriteLine($"Wrote {written} plate images for {pages.Count} pages at {dpi:0} dpi into {outDir}");
             return 0;
