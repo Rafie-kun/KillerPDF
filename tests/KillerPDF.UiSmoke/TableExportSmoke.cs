@@ -226,6 +226,12 @@ internal static class TableExportSmoke
                 return FormWorkflowFailureSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-form-delete-recreate")
                 return FormWorkflowFailureSmoke.Run(owner, folder, deletion: true);
+            if (windowSessionCase == "--verify-page-navigation-replace-write-failure")
+                return ReplacementFailureSmoke.Run(owner, folder, reopen: false);
+            if (windowSessionCase == "--verify-page-navigation-replace-reopen-failure")
+                return ReplacementFailureSmoke.Run(owner, folder, reopen: true);
+            if (windowSessionCase == "--verify-page-navigation-replace-fallback-history")
+                return ReplacementFailureSmoke.RunFallback(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-other-pane-save")
                 return OtherPaneSaveSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-dialog-buttons-theme")

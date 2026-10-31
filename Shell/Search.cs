@@ -498,6 +498,7 @@ namespace KillerPDF.Shell
             var (page, left, bottom, right, top) = Search.CurrentMatch.Value;
             var result = ActiveViewer.ReplaceTextExt(find, _replaceBox?.Text ?? "", Search.MatchCase, Search.WholeWord,
                 (page, left, bottom, right, top));
+            if (result.Failed) return;
             if (result.Occurrences == 0)
             {
                 // Nothing replaceable here (turned text, say): step past it rather than stall.
@@ -513,7 +514,8 @@ namespace KillerPDF.Shell
             string find = _searchBox?.Text ?? "";
             if (find.Length == 0 || _doc is null) return;
             if (!EnsureEditable()) return;
-            AfterReplace(find, ActiveViewer.ReplaceTextExt(find, _replaceBox?.Text ?? "", Search.MatchCase, Search.WholeWord));
+            var result = ActiveViewer.ReplaceTextExt(find, _replaceBox?.Text ?? "", Search.MatchCase, Search.WholeWord);
+            if (!result.Failed) AfterReplace(find, result);
         }
 
         // Replaced text no longer reads as the search text, so the fresh search moves the cursor

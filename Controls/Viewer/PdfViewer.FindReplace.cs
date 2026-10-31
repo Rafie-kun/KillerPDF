@@ -9,7 +9,7 @@ using EngineDocs = KillerPdf.Engine.Documents;
 namespace KillerPDF.Controls
 {
     /// <summary>What a Find and Replace pass changed.</summary>
-    internal readonly record struct TextReplaceResult(int Occurrences, int Lines, int SkippedTurnedLines);
+    internal readonly record struct TextReplaceResult(int Occurrences, int Lines, int SkippedTurnedLines, bool Failed = false);
 
     // Find and Replace (#422). Each PDF line that contains the search text gets the same edit the
     // Text tool makes when a line is double-clicked: the line is rewritten in the page content, in
@@ -138,7 +138,11 @@ namespace KillerPDF.Controls
                     SaveTempAndReload(keepAnnotations: true, preserveZoom: true,
                         finalizeSavedFile: path => failed = PdfEngineIntegration.ReplaceTextLines(path, edits));
                 }
-                catch (Exception ex) when (ex is InvalidOperationException or System.IO.IOException) { }
+                catch (Exception ex) when (ex is not OutOfMemoryException)
+                {
+                    ReportEditFailure(ex);
+                    return new TextReplaceResult(0, 0, skippedTurned, Failed: true);
+                }
                 finally { Mouse.OverrideCursor = null; }
                 foreach (int index in failed)
                 {
