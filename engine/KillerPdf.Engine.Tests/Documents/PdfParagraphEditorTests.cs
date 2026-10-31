@@ -650,6 +650,21 @@ public sealed class PdfParagraphEditorTests
         Assert.Equal("filine fi", Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0)).Text);
     }
 
+    // Web exports leave zero-width spaces around links. They print nothing and need no shaping.
+    [Fact]
+    public void ZeroWidthCharactersAreNotText()
+    {
+        PdfDocument source = Raw("BT /F3 10 Tf 30 250 Td (See https://~example.org~ now) Tj ET", fonts:
+            "/F3 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding << /Type /Encoding /Differences [126 /uni200B] >> >>");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        Assert.Equal("See https://example.org now", candidate.Text);
+        PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion, new PdfContentBounds(20, 100, 280, 262),
+            "See https://​example.org﻿ now today", Font(), 10, 12, PdfParagraphAlignment.Left);
+        Assert.False(plan.HasOverflow, plan.OverflowReason);
+        Assert.Contains("See https://example.org now today", new PdfPageContentReader(PdfDocument.Open(plan.GetPreviewDocument())).Read(0).Text,
+            StringComparison.Ordinal);
+    }
+
     // microtype stretches each line by up to 2 percent, which is typesetting and not a style.
     [Fact]
     public void FontExpansionThatChangesFromLineToLineIsEditable()

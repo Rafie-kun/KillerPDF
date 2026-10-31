@@ -336,7 +336,7 @@ public static class PdfParagraphEditor
                     text.Append(letter.Value);
                     previous = letter;
                 }
-                return ExpandLigatures(text.ToString().Trim());
+                return PlainLetters(text.ToString()).Trim();
             }
         }
 
@@ -593,7 +593,7 @@ public static class PdfParagraphEditor
                 bool breaks = index + 1 < words.Count && word.Text.TrimEnd() is { Length: >= 2 } text && text[^1] is '-' or '‐'
                     && char.IsLetter(text[^2]) && words[index + 1].BoundingBox.Left < word.BoundingBox.Right
                     && words[index + 1].BoundingBox.Top < word.BoundingBox.Bottom + 1;
-                string whole = Bare(ExpandLigatures(word.Text)).Replace('‐', '-');
+                string whole = Bare(PlainLetters(word.Text)).Replace('‐', '-');
                 if (!broken && !breaks) _words.Add(whole);
                 if (whole.Contains('-')) _compounds.Add(whole);
                 broken = breaks;
@@ -601,7 +601,9 @@ public static class PdfParagraphEditor
         }
     }
 
-    private static string ExpandLigatures(string text) => text.Replace("ﬀ", "ff", StringComparison.Ordinal)
+    // Zero-width spaces and joiners print nothing, and web exports leave them around links.
+    private static string PlainLetters(string text) => string.Concat(text.Where(letter => letter is not ('​' or '‌' or '‍' or '⁠' or '﻿')))
+        .Replace("ﬀ", "ff", StringComparison.Ordinal)
         .Replace("ﬁ", "fi", StringComparison.Ordinal).Replace("ﬂ", "fl", StringComparison.Ordinal)
         .Replace("ﬃ", "ffi", StringComparison.Ordinal).Replace("ﬄ", "ffl", StringComparison.Ordinal)
         .Replace("ﬅ", "st", StringComparison.Ordinal).Replace("ﬆ", "st", StringComparison.Ordinal);
@@ -793,7 +795,7 @@ public static class PdfParagraphEditor
         kept && leading == source.Leading ? source.RowSpans[0].Baseline - source.RowSpans[index].Baseline : index * leading;
 
     private static string Normalized(string text) =>
-        ExpandLigatures(text.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n'));
+        PlainLetters(text.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n'));
 
     // The first line is shorter by the indent. A box too narrow for the indent has no first line to
     // shorten, and a first word that fits the box but not that line would be split, so the indent gives way.
