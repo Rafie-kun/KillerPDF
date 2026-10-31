@@ -1298,6 +1298,40 @@ public sealed class PdfContentRedactionTests
         Assert.Contains("visible", Letters(output, 0));
     }
 
+    // A button caption, a signature's printed name and a stamp are drawn from the annotation, with no
+    // value or contents to search, so a search of those alone reports nothing while the words stay shown.
+    [Theory]
+    [InlineData("SECRETCAPTION")]
+    [InlineData("SIGNEDBYJANE")]
+    [InlineData("STAMPBYJOHN")]
+    public void SearchFindsAndRemovesTextShownOnlyByAnAnnotationItself(string term)
+    {
+        static string Appearance(string text)
+        {
+            string content = $"BT /F1 10 Tf 2 2 Td ({text}) Tj ET";
+            return $"<< /Type /XObject /Subtype /Form /BBox [0 0 200 40] /Resources << /Font << /F1 4 0 R >> >> /Length {content.Length} >>\nstream\n{content}\nendstream";
+        }
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields [6 0 R 7 0 R] >> >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R /Annots [6 0 R 7 0 R 8 0 R] >>",
+            Helvetica,
+            Stream("BT /F1 12 Tf 72 700 Td (Plain visible text) Tj ET"),
+            "<< /Type /Annot /Subtype /Widget /FT /Btn /Ff 65536 /T (go) /MK << /CA (SECRETCAPTION) >> /Rect [100 600 300 620] /P 3 0 R /F 4 >>",
+            "<< /Type /Annot /Subtype /Widget /FT /Sig /T (sig) /Rect [100 500 300 540] /P 3 0 R /F 4 /AP << /N 9 0 R >> >>",
+            "<< /Type /Annot /Subtype /Stamp /Rect [100 400 300 440] /F 4 /AP << /N 10 0 R >> >>",
+            Appearance("SIGNEDBYJANE"),
+            Appearance("STAMPBYJOHN")]));
+        var search = new PdfRedactionSearchOptions { Kind = PdfRedactionSearchKind.ExactText, Query = term };
+
+        PdfRedactionMatch match = Assert.Single(PdfRedactionSearch.FindInAnnotations(document, search).Matches);
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [new(match.PageIndex, match.Bounds)],
+            new PdfContentRedactionOptions { ProhibitedText = [term] });
+        Assert.True(result.Verification.Succeeded);
+        Assert.DoesNotContain(term, Encoding.Latin1.GetString(result.Document.ToArray()), StringComparison.Ordinal);
+    }
+
     [Fact]
     public void FieldRedactionDropsTheXfaPacketThatMirrorsTheFieldValue()
     {

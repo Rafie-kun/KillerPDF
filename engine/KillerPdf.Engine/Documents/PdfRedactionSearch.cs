@@ -443,6 +443,24 @@ public static class PdfRedactionSearch
             AddMatches($"annotation:{comment.PageIndex}:{comment.AnnotationIndex}", comment.PageIndex,
                 [comment.Contents], bounds, PdfRedactionTargetKind.Comment);
         }
+        // A caption, a signature's printed name or a stamp is on the page with no value or contents to find.
+        var reader = new PdfPageContentReader(document);
+        PdfPageTree tree = PdfPageTree.Read(document);
+        for (int pageIndex = 0; pageIndex < pages.Count; pageIndex++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            foreach (PdfAnnotationShownText shown in PdfAnnotationShownTextReader.ReadPage(document, reader, tree, pageIndex, cancellationToken))
+            {
+                string id = $"{(shown.IsWidget ? "field" : "annotation")}:{pageIndex}:{shown.AnnotationIndex}";
+                if (results.Any(match => match.Id == id)) continue;
+                PdfContentBounds bounds = shown.Rectangle is { Width: > 0, Height: > 0 } rectangle
+                    ? new PdfContentBounds(rectangle.Left - pages[pageIndex].Left, rectangle.Bottom - pages[pageIndex].Bottom,
+                        rectangle.Right - pages[pageIndex].Left, rectangle.Top - pages[pageIndex].Bottom)
+                    : new PdfContentBounds(0, 0, 1, 1);
+                AddMatches(id, pageIndex, [shown.Text], bounds,
+                    shown.IsWidget ? PdfRedactionTargetKind.FormField : PdfRedactionTargetKind.Comment);
+            }
+        }
         return new PdfRedactionReview(results) { UnreadableAnnotationPages = Array.AsReadOnly(unreadablePages.ToArray()) };
 
         void AddMatches(string id, int pageIndex, IEnumerable<string> texts, PdfContentBounds bounds,

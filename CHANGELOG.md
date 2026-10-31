@@ -11,6 +11,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 ### Fixed
 
 - Search and redaction find a word set with a ligature, so a name like Offner in a typeset paper is redacted instead of staying on the page while verification passed. A soft hyphen, zero-width character or unidentified code inside a word no longer hides it either.
+- Redaction finds text an annotation shows with no value or contents behind it, such as a button caption, the name on a signature or the wording of a stamp. It used to say nothing matched while the words stayed on the page.
 - The Text tool keeps working in Single, Two-Page and Grid views. After a page turn, a tab switch or closing the last tab, clicking the page showed no edit box and typing did nothing, in new and existing documents alike.
 - Black-and-white scans show at their full resolution in the viewer, in exports and in print. A page of one-bit or palette image above 4 megapixels, which is any 300 dpi page, was averaged to half size at every zoom, so scans stayed soft however far you zoomed in.
 - Convert Scan to Text keeps the words it leaves as scanned sharp. The page image behind the text was stored at half resolution, so those words came out blurry beside the replaced ones, and a small scan was enlarged for no gain. The image now stays at the scan's own resolution up to about 300 dpi on A4, and recognition reads those same pixels, so more words convert.

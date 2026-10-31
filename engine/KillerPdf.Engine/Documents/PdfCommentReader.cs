@@ -195,7 +195,7 @@ public static partial class PdfCommentReader
     public static bool IsMarkup(string subtype) => subtype is "Highlight" or "Underline" or "StrikeOut"
         or "Squiggly" or "Ink" or "Square" or "Circle" or "Line" or "Polygon" or "PolyLine" or "Stamp";
 
-    private static PdfContentBounds? Bounds(PdfDocument document,
+    internal static PdfContentBounds? Bounds(PdfDocument document,
         PdfDictionary annotation, int pageIndex, int annotationIndex)
     {
         if (!annotation.TryGetValue(Name("Rect"), out PdfObject? value)) return null;

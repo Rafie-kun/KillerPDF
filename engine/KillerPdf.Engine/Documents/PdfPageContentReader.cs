@@ -188,7 +188,14 @@ public sealed class PdfPageContentReader
     }
 
     /// <summary>Extracts one zero-based page in unrotated, crop-relative PDF points.</summary>
-    public PdfPageContent Read(int pageIndex, CancellationToken cancellationToken = default)
+    public PdfPageContent Read(int pageIndex, CancellationToken cancellationToken = default) =>
+        Read(pageIndex, null, cancellationToken);
+
+    /// <summary>Extracts what one annotation appearance stream draws, with the page's resources behind its own.</summary>
+    internal PdfPageContent ReadAppearance(int pageIndex, PdfStream appearance, CancellationToken cancellationToken = default) =>
+        Read(pageIndex, appearance, cancellationToken);
+
+    private PdfPageContent Read(int pageIndex, PdfStream? appearance, CancellationToken cancellationToken)
     {
         if (pageIndex < 0 || pageIndex >= PageCount) throw new ArgumentOutOfRangeException(nameof(pageIndex));
         var page = _tree.Pages[pageIndex];
@@ -210,7 +217,13 @@ public sealed class PdfPageContentReader
         int visitedInstructions = 0;
         var initial = new Matrix(1, 0, 0, 1, -box.Left, -box.Bottom);
         instructions.Add(Instruction("cm", 1, 0, 0, 1, -box.Left, -box.Bottom));
-        if (page.Dictionary.TryGetValue(Name("Contents"), out var content))
+        if (appearance is not null)
+        {
+            var appearanceResources = appearance.Dictionary.TryGetValue(Name("Resources"), out var own)
+                ? Resolve(own) as PdfDictionary ?? resources : resources;
+            Walk(Decode(appearance), appearanceResources, initial, new(0, 0, box.Width, box.Height), 0);
+        }
+        else if (page.Dictionary.TryGetValue(Name("Contents"), out var content))
             Walk(ContentBytes(content), resources, initial, new(0, 0, box.Width, box.Height), 0);
         var text = PdfTextContentReader.ReadInstructions(instructions, fonts, cancellationToken: cancellationToken);
         return new PdfPageContent(box.Width, box.Height,
