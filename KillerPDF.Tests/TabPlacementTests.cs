@@ -181,9 +181,9 @@ public sealed class TabPlacementTests
 
     private static string Root()
     {
-        string path = Path.GetDirectoryName(GetSourcePath())!;
-        return Directory.GetParent(path)!.FullName;
+        for (DirectoryInfo? directory = new(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)
+            if (File.Exists(Path.Combine(directory.FullName, "KillerPDF.csproj"))) return directory.FullName;
+        throw new DirectoryNotFoundException("Could not locate the KillerPDF repository root.");
     }
 
-    private static string GetSourcePath([System.Runtime.CompilerServices.CallerFilePath] string path = "") => path;
 }
