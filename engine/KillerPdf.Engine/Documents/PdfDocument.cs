@@ -164,22 +164,9 @@ public sealed partial class PdfDocument
     private static PdfDocument OpenOwned(byte[] ownedSource)
     {
         var document = new PdfDocument(ownedSource, PdfCrossReferenceTable.Read(ownedSource));
-        if (!document.IsEncrypted && HoldsEncryptionDictionary(ownedSource) && document.PagesReadAsCiphertext())
+        if (!document.IsEncrypted && PdfSecurityIndicators.NamesSecurityHandler(ownedSource) && document.PagesReadAsCiphertext())
             throw new PdfLostEncryptionException();
         return document;
-    }
-
-    // A trailer rewritten without /Encrypt leaves a sound file whose pages are ciphertext, and a route
-    // that believed it would copy them out as pages nobody can read. Failing here sends such a file
-    // to recovery, where the app refuses it. A leftover dictionary over readable pages is not this.
-    private static bool HoldsEncryptionDictionary(ReadOnlySpan<byte> source) =>
-        FollowsFilterKey(source, "/Standard"u8) || FollowsFilterKey(source, "/Adobe.PubSec"u8);
-
-    private static bool FollowsFilterKey(ReadOnlySpan<byte> source, ReadOnlySpan<byte> handler)
-    {
-        for (int from = 0, index; (index = source[from..].IndexOf(handler)) >= 0; from += index + handler.Length)
-            if (source[Math.Max(0, from + index - 16)..(from + index)].IndexOf("/Filter"u8) >= 0) return true;
-        return false;
     }
 
     // The first page with content decides. Ciphertext fails to decode or reads as long runs of high

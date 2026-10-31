@@ -14,6 +14,39 @@ namespace KillerPdf.Engine.Tests.Documents;
 // recovery, where the app already refuses it on every route.
 public sealed class PdfLostEncryptionTests
 {
+    [Theory]
+    [InlineData("/F#69lter /Standard")]
+    [InlineData("/Filter /Sta#6Edard")]
+    [InlineData("/F#69lter % a security handler can follow a long comment\n /Sta#6Edard")]
+    public void EscapedSecurityNamesStillProtectCiphertextAfterTheTrailerEntryIsLost(string marker)
+    {
+        string original = Encoding.Latin1.GetString(Encrypted());
+        string changed = original.Replace("/Filter /Standard", marker, StringComparison.Ordinal);
+        Assert.NotEqual(original, changed);
+        byte[] protectedSource = Reindex(changed);
+        Assert.True(PdfDocument.Open(protectedSource, "secret").IsDecrypted);
+        byte[] lost = WithoutEncryptEntry(protectedSource);
+        Assert.Throws<PdfLostEncryptionException>(() => PdfDocumentWriter.Write(PdfDocument.Open(lost)));
+    }
+
+    private static byte[] Reindex(string source)
+    {
+        int xref = source.LastIndexOf("\nxref\n", StringComparison.Ordinal) + 1;
+        int trailer = source.IndexOf("trailer", xref, StringComparison.Ordinal);
+        int count = int.Parse(System.Text.RegularExpressions.Regex.Match(source[trailer..], @"/Size\s+(\d+)").Groups[1].Value,
+            System.Globalization.CultureInfo.InvariantCulture);
+        var table = new StringBuilder($"xref\n0 {count}\n0000000000 65535 f \n");
+        for (int index = 1; index < count; index++)
+        {
+            int offset = source.IndexOf($"\n{index} 0 obj", StringComparison.Ordinal) + 1;
+            Assert.True(offset > 0);
+            table.Append(offset.ToString("D10", System.Globalization.CultureInfo.InvariantCulture)).Append(" 00000 n \n");
+        }
+        string tail = source[trailer..];
+        int start = tail.IndexOf("startxref", StringComparison.Ordinal);
+        return Encoding.Latin1.GetBytes(source[..xref] + table + tail[..start] + $"startxref\n{xref}\n%%EOF\n");
+    }
+
     [Fact]
     public void AnEncryptedFileWhoseTrailerLostItsEntryFailsTheStrictRead()
     {

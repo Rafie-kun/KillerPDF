@@ -204,12 +204,17 @@ public sealed class DamagedSaveGuardTests : IDisposable
     }
 
     // Unfiltered ciphertext decodes without complaint, so only what it reads as can give it away.
-    [Fact]
-    public void CiphertextPagesBehindALostTrailerStayRefused()
+    [Theory]
+    [InlineData("/Filter /Standard")]
+    [InlineData("/F#69lter /Standard")]
+    [InlineData("/Filter % long comment between the key and security handler\n /Sta#6Edard")]
+    public void CiphertextPagesBehindALostTrailerStayRefused(string marker)
     {
         byte[] encrypted = PdfDocumentEncryptionWriter.EncryptWithPasswords(
             PdfDocument.Open(RawPdf("", "", "<< /Note (padding so the file has more than one stream) >>")),
             new PdfPasswordEncryptionOptions { UserPassword = "secret", OwnerPassword = "owner" });
+        encrypted = Encoding.Latin1.GetBytes(Encoding.Latin1.GetString(encrypted)
+            .Replace("/Filter /Standard", marker, StringComparison.Ordinal));
         int trailer = encrypted.AsSpan().LastIndexOf("trailer"u8);
         byte[] damaged = encrypted[..encrypted.AsSpan(0, trailer).LastIndexOf("xref"u8)];
         string path = Write("protected.pdf", damaged);
@@ -218,6 +223,7 @@ public sealed class DamagedSaveGuardTests : IDisposable
         var refusal = Assert.Throws<DamagedSaveRefusedException>(
             () => PdfEngineIntegration.RepairHarmlessSaveArtifacts(path));
         Assert.Equal(DamagedSaveRefusal.Encrypted, refusal.Reason);
+        Assert.Equal(damaged, File.ReadAllBytes(path));
     }
 
     [Fact]

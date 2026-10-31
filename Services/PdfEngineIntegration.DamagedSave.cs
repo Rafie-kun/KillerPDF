@@ -7,6 +7,7 @@ using KillerPdf.Engine.Objects;
 using KillerPdf.Engine.Parsing;
 using KillerPdf.Engine.Signing;
 using KillerPdf.Engine.Writing;
+using KillerPdf.Engine.Security;
 
 namespace KillerPDF.Services;
 
@@ -160,7 +161,7 @@ internal static partial class PdfEngineIntegration
     private static DamagedSaveRefusal? FindProtectedContent(PdfDocument recovered, ReadOnlyMemory<byte> source)
     {
         ReadOnlySpan<byte> bytes = source.Span;
-        if (recovered.IsEncrypted || (NamesEncryption(bytes) && (HidesEncryption(source) || !ReadsAsPlainText(recovered))))
+        if (recovered.IsEncrypted || (PdfSecurityIndicators.NamesEncryption(source) && (HidesEncryption(source) || !ReadsAsPlainText(recovered))))
             return DamagedSaveRefusal.Encrypted;
         if (bytes.IndexOf("/DocMDP"u8) >= 0) return DamagedSaveRefusal.Certified;
         if (bytes.IndexOf("/UR3"u8) >= 0) return DamagedSaveRefusal.UsageRights;
@@ -185,29 +186,6 @@ internal static partial class PdfEngineIntegration
         return bytes.IndexOf("/ByteRange"u8) >= 0 || bytes.IndexOf("/SigFlags"u8) >= 0
             || bytes.IndexOf("/Adobe.PPK"u8) >= 0 || bytes.IndexOf("/adbe.pkcs7.detached"u8) >= 0
             || bytes.IndexOf("/adbe.pkcs7.sha1"u8) >= 0 || bytes.IndexOf("/ETSI."u8) >= 0;
-    }
-
-    // The trailer's /Encrypt entry, or failing that the encryption dictionary it points to, whose
-    // /Filter names the security handler. Uncompressed page text could name these too, and so can
-    // a leftover from a file that was decrypted, so this alone does not make a file protected.
-    private static bool NamesEncryption(ReadOnlySpan<byte> bytes)
-    {
-        return bytes.IndexOf("/Encrypt"u8) >= 0
-            || FollowsFilterKey(bytes, "/Standard"u8) || FollowsFilterKey(bytes, "/Adobe.PubSec"u8);
-    }
-
-    private static bool FollowsFilterKey(ReadOnlySpan<byte> bytes, ReadOnlySpan<byte> handler)
-    {
-        int from = 0;
-        while (from < bytes.Length)
-        {
-            int index = bytes[from..].IndexOf(handler);
-            if (index < 0) return false;
-            int at = from + index;
-            if (bytes[Math.Max(0, at - 16)..at].IndexOf("/Filter"u8) >= 0) return true;
-            from = at + handler.Length;
-        }
-        return false;
     }
 
     // Streams and strings are encrypted separately, so a file can lose the one and keep the other.
@@ -303,7 +281,7 @@ internal static partial class PdfEngineIntegration
     /// </summary>
     internal static bool HidesEncryption(ReadOnlyMemory<byte> source)
     {
-        if (!NamesEncryption(source.Span)) return false;
+        if (!PdfSecurityIndicators.NamesEncryption(source)) return false;
         try
         {
             _ = PdfDocument.Open(source);
