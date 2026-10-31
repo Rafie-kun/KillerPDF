@@ -33,7 +33,9 @@ internal static class Program
         };
         Assembly assembly = Assembly.LoadFrom(app);
         Type type = assembly.GetType("KillerPDF.Services.PdfPageRenderSession", true)!;
-        var open = type.GetMethod("OpenEngineFirst", Flags, [typeof(string), typeof(int), typeof(int)])!;
+        var open = type.GetMethod("OpenEngineFirst", Flags, [typeof(string), typeof(int), typeof(int)])
+            ?? type.GetMethod("OpenEngineFirst", Flags, [typeof(string), typeof(int), typeof(int), typeof(bool)])
+            ?? throw new MissingMethodException(type.FullName, "OpenEngineFirst");
         var authenticatedOpen = type.GetMethod("OpenEngineFirst", Flags,
             [typeof(string), typeof(int), typeof(int), typeof(string)]);
         var render = type.GetMethod("RenderFittedPage", Flags)!;
@@ -139,7 +141,8 @@ internal static class Program
                 IDisposable Open()
                 {
                     if (!passwords.TryGetValue(relative.Replace('\\', '/'), out string[]? candidates))
-                        return (IDisposable)open.Invoke(null, [file, size, size])!;
+                        return (IDisposable)open.Invoke(null, open.GetParameters().Length == 3
+                            ? [file, size, size] : [file, size, size, false])!;
                     if (authenticatedOpen is null) throw new NotSupportedException("The app has no authenticated engine boundary.");
                     Exception? last = null;
                     foreach (string password in candidates)
