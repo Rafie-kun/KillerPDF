@@ -342,25 +342,83 @@ public sealed class PdfRedactionSearchTests
         Assert.Equal("Private data", review.Matches[0].ReasonCode);
     }
 
-    private static PdfPageContent Read(string text)
+    // A word typeset with a ligature reads as one character, so a search by its letters has to fold it.
+    [Fact]
+    public void FindsAWordSetWithALigatureByItsLetters()
+    {
+        PdfPageContent page = Read("David OFner", "<46> <FB00>");
+        PdfExtractedWord word = page.Words[^1];
+
+        PdfRedactionMatch match = Assert.Single(PdfRedactionSearch.Find([page], new PdfRedactionSearchOptions
+        {
+            Kind = PdfRedactionSearchKind.ExactText,
+            Query = "Offner"
+        }).Matches);
+
+        Assert.Equal("Offner", match.Text);
+        Assert.Equal(word.BoundingBox, Assert.Single(match.Areas));
+    }
+
+    [Fact]
+    public void APartOfALigatureWordMarksOnlyTheGlyphsThatShowIt()
+    {
+        PdfPageContent page = Read("David OFner", "<46> <FB00>");
+        PdfExtractedWord word = page.Words[^1];
+
+        PdfRedactionMatch match = Assert.Single(PdfRedactionSearch.Find([page], new PdfRedactionSearchOptions
+        {
+            Kind = PdfRedactionSearchKind.ExactText,
+            Query = "ffn"
+        }).Matches);
+
+        PdfContentBounds area = Assert.Single(match.Areas);
+        Assert.True(area.Left > word.BoundingBox.Left);
+        Assert.True(area.Right < word.BoundingBox.Right);
+    }
+
+    [Theory]
+    [InlineData("<51> <200B>")]
+    [InlineData("<51> <00AD>")]
+    [InlineData("<51> <FFFD>")]
+    public void ACharacterThatPrintsNothingDoesNotHideAWord(string entry)
+    {
+        PdfPageContent page = Read("WorQld", entry);
+
+        Assert.Single(PdfRedactionSearch.Find([page], new PdfRedactionSearchOptions
+        {
+            Kind = PdfRedactionSearchKind.ExactText,
+            Query = "World"
+        }).Matches);
+    }
+
+    private static PdfPageContent Read(string text, string? toUnicode = null)
     {
         string content = $"BT /F1 12 Tf 20 100 Td ({text}) Tj ET";
         string stream = $"<< /Length {Encoding.Latin1.GetByteCount(content)} >>\nstream\n{content}\nendstream";
-        string[] objects = ["<< /Type /Catalog /Pages 2 0 R >>",
+        List<string> objects = ["<< /Type /Catalog /Pages 2 0 R >>",
             "<< /Type /Pages /Kids [3 0 R] /Count 1 /MediaBox [0 0 300 400] /Resources << /Font << /F1 4 0 R >> >> >>",
             "<< /Type /Page /Parent 2 0 R /Contents 5 0 R >>",
-            "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>", stream];
+            toUnicode is null
+                ? "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"
+                : "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /ToUnicode 6 0 R >>",
+            stream];
+        if (toUnicode is not null)
+        {
+            string map = "/CIDInit /ProcSet findresource begin\n12 dict begin\nbegincmap\n/CMapName /Adobe-Identity-UCS def\n/CMapType 2 def\n"
+                + $"1 begincodespacerange\n<00> <FF>\nendcodespacerange\n1 beginbfchar\n{toUnicode}\nendbfchar\nendcmap\nend\nend\n";
+            objects.Add($"<< /Length {Encoding.Latin1.GetByteCount(map)} >>\nstream\n{map}\nendstream");
+        }
         var pdf = new StringBuilder("%PDF-1.7\n");
         var offsets = new List<int>();
-        for (int index = 0; index < objects.Length; index++)
+        for (int index = 0; index < objects.Count; index++)
         {
             offsets.Add(Encoding.Latin1.GetByteCount(pdf.ToString()));
             pdf.Append($"{index + 1} 0 obj\n{objects[index]}\nendobj\n");
         }
         int xref = Encoding.Latin1.GetByteCount(pdf.ToString());
-        pdf.Append($"xref\n0 6\n0000000000 65535 f \n");
+        pdf.Append($"xref\n0 {objects.Count + 1}\n0000000000 65535 f \n");
         foreach (int offset in offsets) pdf.Append($"{offset:0000000000} 00000 n \n");
-        pdf.Append($"trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
+        pdf.Append($"trailer\n<< /Size {objects.Count + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
         return new PdfPageContentReader(PdfDocument.Open(Encoding.Latin1.GetBytes(pdf.ToString()))).Read(0);
     }
 }

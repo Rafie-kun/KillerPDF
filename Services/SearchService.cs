@@ -211,6 +211,10 @@ namespace KillerPDF.Services
         {
             var result = new List<(double, double, double, double)>();
             var words = page.GetWords().ToList();
+            // Compared by what the page shows, so a word set with a ligature is found by its letters.
+            List<string> texts = [.. words.Select(word => KillerPdf.Engine.Documents.PdfSearchText.Fold(word.Text))];
+            query = KillerPdf.Engine.Documents.PdfSearchText.Fold(query);
+            if (query.Length == 0) return result;
             var comparison = matchCase ? System.StringComparison.Ordinal : System.StringComparison.OrdinalIgnoreCase;
             bool Matches(string text) => wholeWord
                 ? TextReplacePlanner.FindAll(text, query, matchCase, wholeWord: true).Count > 0
@@ -223,7 +227,7 @@ namespace KillerPDF.Services
 
             for (int i = 0; i < words.Count; i++)
             {
-                if (Matches(words[i].Text))
+                if (Matches(texts[i]))
                 {
                     var bb = words[i].BoundingBox;
                     result.Add((bb.Left, bb.Bottom, bb.Right, bb.Top));
@@ -233,10 +237,10 @@ namespace KillerPDF.Services
                 if (!isPhrase) continue;
 
                 // Multi-word match
-                string combined = words[i].Text;
+                string combined = texts[i];
                 for (int j = i + 1; j < words.Count && combined.Length < query.Length + 20; j++)
                 {
-                    combined += " " + words[j].Text;
+                    combined += " " + texts[j];
                     if (Matches(combined))
                     {
                         double minX = double.MaxValue, minY = double.MaxValue;
@@ -415,11 +419,12 @@ namespace KillerPDF.Services
             KillerPdf.Engine.Documents.PdfPageContent page, string query, bool matchCase = false, bool wholeWord = false)
         {
             var result = new List<(double, double, double, double)>();
-            string needle = query.Trim();
+            string needle = KillerPdf.Engine.Documents.PdfSearchText.Fold(query).Trim();
             if (needle.Length == 0) return result;
             var words = page.GetWords().ToList();
 
             // Page text with one space between words, and each character mapped to its word and letter.
+            // A ligature spells out to several characters that all map to its one glyph.
             var text = new System.Text.StringBuilder();
             var map = new List<(int Word, int Letter)>();
             for (int w = 0; w < words.Count; w++)
@@ -427,7 +432,7 @@ namespace KillerPDF.Services
                 if (w > 0) { text.Append(' '); map.Add((-1, -1)); }
                 var letters = words[w].Letters;
                 for (int l = 0; l < letters.Count; l++)
-                    foreach (char c in letters[l].Value) { text.Append(c); map.Add((w, l)); }
+                    foreach (char c in KillerPdf.Engine.Documents.PdfSearchText.Fold(letters[l].Value)) { text.Append(c); map.Add((w, l)); }
             }
 
             foreach (int start in TextReplacePlanner.FindAll(text.ToString(), needle, matchCase, wholeWord))

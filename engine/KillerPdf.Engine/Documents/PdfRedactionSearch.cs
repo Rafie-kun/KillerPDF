@@ -357,7 +357,9 @@ public static class PdfRedactionSearch
             if (page is null) continue;
             cancellationToken.ThrowIfCancellationRequested();
             var spans = new List<(PdfExtractedWord Word, int Start, int End)>();
-            string text = string.Join(' ', page.Words.Select(word => word.Text));
+            // Matches run over the folded text and land back on the stored characters, so a word set
+            // with a ligature is found by its letters and the areas still cover its real glyphs.
+            string text = PdfSearchText.Fold(string.Join(' ', page.Words.Select(word => word.Text)), out int[] origin);
             int offset = 0;
             foreach (PdfExtractedWord word in page.Words)
             {
@@ -368,15 +370,17 @@ public static class PdfRedactionSearch
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 if (!Accepted(options.Kind, match.Value)) continue;
+                int start = origin[match.Index];
+                int end = match.Length > 0 ? origin[match.Index + match.Length - 1] + 1 : start;
                 var words = spans.Select((span, index) => (span, index))
-                    .Where(item => item.span.End > match.Index && item.span.Start < match.Index + match.Length)
+                    .Where(item => item.span.End > start && item.span.Start < end)
                     .ToArray();
                 if (words.Length == 0) continue;
-                results.Add(new PdfRedactionMatch($"{pageIndex}:{match.Index}:{match.Length}", pageIndex,
+                results.Add(new PdfRedactionMatch($"{pageIndex}:{start}:{end - start}", pageIndex,
                     match.Value, PdfContentBounds.Union(words.Select(item => item.span.Word.BoundingBox)),
                     words[0].index, words.Length, options.ReasonCode, options.OverlayText)
                 {
-                    Areas = MatchAreas(words.Select(item => item.span), match.Index, match.Index + match.Length)
+                    Areas = MatchAreas(words.Select(item => item.span), start, end)
                 });
             }
         }
@@ -447,7 +451,7 @@ public static class PdfRedactionSearch
             foreach (string text in texts)
             {
                 if (string.IsNullOrEmpty(text)) continue;
-                foreach (Match match in expression.Matches(text))
+                foreach (Match match in expression.Matches(PdfSearchText.Fold(text)))
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     if (!Accepted(options.Kind, match.Value)) continue;
@@ -474,9 +478,10 @@ public static class PdfRedactionSearch
         if (options.Timeout <= TimeSpan.Zero || options.Timeout > TimeSpan.FromSeconds(10))
             throw new ArgumentOutOfRangeException(nameof(options), "The search timeout must be from zero through ten seconds.");
         ValidatePresentation(options.ReasonCode, options.OverlayText, nameof(options));
+        string exact = PdfSearchText.Fold(options.Query ?? string.Empty);
         string pattern = options.Kind switch
         {
-            PdfRedactionSearchKind.ExactText when !string.IsNullOrEmpty(options.Query) => Regex.Escape(options.Query),
+            PdfRedactionSearchKind.ExactText when exact.Length > 0 => Regex.Escape(exact),
             PdfRedactionSearchKind.RegularExpression when !string.IsNullOrEmpty(options.Query) => options.Query,
             PdfRedactionSearchKind.EmailAddress => EmailPattern,
             PdfRedactionSearchKind.PhoneNumber => PhonePattern,

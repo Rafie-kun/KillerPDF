@@ -22,6 +22,24 @@ public sealed class SearchRedactionCallersTests : IDisposable
         try { File.Delete(_path); } catch (IOException) { }
     }
 
+    // ---- A word typeset with a ligature reads as one character -----------------------------------
+
+    [Fact]
+    public void Search_FindsAWordSetWithALigatureByItsLetters()
+    {
+        File.WriteAllBytes(_path, LigaturePage());
+
+        Assert.Equal(1, SearchService.Search(_path, "Offner").TotalHits);
+    }
+
+    [Fact]
+    public void FindRedactionTermAreas_CoversAWordSetWithALigature()
+    {
+        File.WriteAllBytes(_path, LigaturePage());
+
+        Assert.Single(Assert.Single(SearchService.FindRedactionTermAreas(_path, "Offner")).Value);
+    }
+
     // ---- A redaction never finishes past a page it could not search (R3C-001) ------------------
 
     [Fact]
@@ -486,6 +504,16 @@ public sealed class SearchRedactionCallersTests : IDisposable
         }
         return Pdf([.. objects]);
     }
+
+    // Byte 0x46 shows the U+FB00 ligature, so the page reads as the name with one character for "ff".
+    private static byte[] LigaturePage() => Pdf(
+        "<< /Type /Catalog /Pages 2 0 R >>",
+        "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources "
+            + "<< /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica /ToUnicode 5 0 R >> >> >> >>",
+        Text("David OFner"),
+        Stream("/CIDInit /ProcSet findresource begin\n12 dict begin\nbegincmap\n/CMapName /Adobe-Identity-UCS def\n/CMapType 2 def\n"
+            + "1 begincodespacerange\n<00> <FF>\nendcodespacerange\n1 beginbfchar\n<46> <FB00>\nendbfchar\nendcmap\nend\nend\n"));
 
     private static byte[] TwoStreamPage(string first, string second) => Pdf(
         "<< /Type /Catalog /Pages 2 0 R >>",
