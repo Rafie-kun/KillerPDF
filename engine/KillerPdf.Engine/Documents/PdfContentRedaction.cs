@@ -111,6 +111,9 @@ public static partial class PdfContentRedaction
     private static readonly PdfName SubtypeName = Name("Subtype");
     private static readonly PdfName PopupName = Name("Popup");
     private static readonly PdfName ParentName = Name("Parent");
+    private static readonly PdfContentBounds EverythingDrawn = new(-1e7, -1e7, 1e7, 1e7);
+    private static readonly PdfName InReplyToName = Name("IRT");
+    private static readonly PdfName ReplyTypeName = Name("RT");
     private static readonly PdfName KidsName = Name("Kids");
     private static readonly PdfName FieldsName = Name("Fields");
     private static readonly PdfName AcroFormName = Name("AcroForm");
@@ -137,8 +140,26 @@ public static partial class PdfContentRedaction
     {
         ArgumentNullException.ThrowIfNull(document);
         PdfPageTree tree = PdfPageTree.Read(document);
-        return AnalyzePages(document, tree, GroupRegions(regions, tree.Pages.Count), cancellationToken, out _);
+        return AnalyzePages(document, tree, ReachingPastTheCrop(document, tree, GroupRegions(regions, tree.Pages.Count)),
+            cancellationToken, out _);
     }
+
+    // A region over the whole visible page means the page, and a crop box only hides what lies past it:
+    // that content would come back as soon as the crop was reset.
+    private static Dictionary<int, PdfContentBounds[]> ReachingPastTheCrop(PdfDocument document, PdfPageTree tree,
+        Dictionary<int, PdfContentBounds[]> byPage)
+    {
+        foreach (int pageIndex in byPage.Keys.ToArray())
+        {
+            PageGeometry geometry = Geometry(document, tree.Pages[pageIndex]);
+            byPage[pageIndex] = [.. byPage[pageIndex].Select(bounds => WholePage(bounds, geometry))];
+        }
+        return byPage;
+    }
+
+    private static PdfContentBounds WholePage(PdfContentBounds bounds, PageGeometry geometry) =>
+        bounds.Left <= 0.5 && bounds.Bottom <= 0.5
+        && bounds.Right >= geometry.Width - 0.5 && bounds.Top >= geometry.Height - 0.5 ? EverythingDrawn : bounds;
 
     private static PdfContentRedactionPlan AnalyzePages(PdfDocument document, PdfPageTree tree,
         Dictionary<int, PdfContentBounds[]> byPage, CancellationToken cancellationToken, out RetiredContent retired)
@@ -201,7 +222,7 @@ public static partial class PdfContentRedaction
             throw new NotSupportedException("Redacting an encrypted document requires removing its encryption.");
         PdfRedactionRegion[] regionList = [.. regions];
         PdfPageTree tree = PdfPageTree.Read(document);
-        Dictionary<int, PdfContentBounds[]> byPage = GroupRegions(regionList, tree.Pages.Count);
+        Dictionary<int, PdfContentBounds[]> byPage = ReachingPastTheCrop(document, tree, GroupRegions(regionList, tree.Pages.Count));
         PdfContentRedactionPlan plan = AnalyzePages(document, tree, byPage, cancellationToken, out RetiredContent retired);
         var approved = new HashSet<int>(options.ApprovedRasterPages);
         int[] unapproved = [.. plan.RasterPages.Where(page => !approved.Contains(page))];
@@ -384,6 +405,7 @@ public static partial class PdfContentRedaction
         HashSet<int> survivors = RewriteSurvivorPages(document, tree, update, byPage, fonts, retired, touchedContent,
             retiredStreams, retiredDescriptions, removedAnnotations, removedWidgets, cancellationToken);
         MaterializeInheritedResources(document, tree, update, [.. byPage.Keys, .. survivors], cancellationToken);
+        ReleaseReplies(document, tree, update, removedAnnotations);
 
         PdfDictionary catalog = tree.Catalog;
         var catalogEntries = catalog.ToDictionary(entry => entry.Key, entry => entry.Value);
@@ -640,9 +662,32 @@ public static partial class PdfContentRedaction
             var render = new PdfRenderOptions(quarter ? height : width, quarter ? width : height,
                 includeAnnotations: false, includeFormFields: false) { CacheResult = false };
             PdfRenderedPage rendered = renderer.Render(pageIndex, render, cancellationToken);
-            images[pageIndex] = PdfImage.FromRgb(width, height, Unrotate(rendered, geometry.Rotation, width, height));
+            byte[] rgb = Unrotate(rendered, geometry.Rotation, width, height);
+            // The covers drawn in the content run after the file's own state, which an unmatched q can
+            // leave clipped, moved or transparent, so the pixels are covered here as well.
+            foreach (PdfRedactionRegion cover in covers[pageIndex])
+                FillPixels(rgb, width, height, cover.Bounds, cover.FillColor ?? DefaultFill, geometry);
+            images[pageIndex] = PdfImage.FromRgb(width, height, rgb);
         }
         return images;
+    }
+
+    private static void FillPixels(byte[] rgb, int width, int height, PdfContentBounds area, PdfRgbColor fill, PageGeometry geometry)
+    {
+        double scaleX = width / geometry.Width, scaleY = height / geometry.Height;
+        int left = Math.Clamp((int)Math.Floor(area.Left * scaleX), 0, width);
+        int right = Math.Clamp((int)Math.Ceiling(area.Right * scaleX), 0, width);
+        int top = Math.Clamp((int)Math.Floor((geometry.Height - area.Top) * scaleY), 0, height);
+        int bottom = Math.Clamp((int)Math.Ceiling((geometry.Height - area.Bottom) * scaleY), 0, height);
+        byte red = (byte)Math.Round(fill.Red * 255), green = (byte)Math.Round(fill.Green * 255), blue = (byte)Math.Round(fill.Blue * 255);
+        for (int y = top; y < bottom; y++)
+            for (int x = left; x < right; x++)
+            {
+                int offset = (y * width + x) * 3;
+                rgb[offset] = red;
+                rgb[offset + 1] = green;
+                rgb[offset + 2] = blue;
+            }
     }
 
     /// <summary>Converts a display-oriented BGRA page bitmap into unrotated RGB samples.</summary>
@@ -736,6 +781,30 @@ public static partial class PdfContentRedaction
                 || !(IsNamed(field, SubtypeName, "Widget") || field.ContainsKey(RectName))) continue;
             if (!TryAnnotationBounds(document, field, geometry, out PdfContentBounds bounds)
                 || regions.Any(region => OverlapsOrTouches(bounds, region))) yield return item;
+        }
+    }
+
+    // A kept reply names the comment it answers, and that reference alone would keep the removed
+    // comment in the file with its text. The reply stays as a comment of its own.
+    private static void ReleaseReplies(PdfDocument document, PdfPageTree tree, PdfIncrementalUpdateBuilder update,
+        HashSet<int> removedAnnotations)
+    {
+        if (removedAnnotations.Count == 0) return;
+        foreach (PdfPageTreeEntry page in tree.Pages)
+        {
+            if (!page.Dictionary.TryGetValue(AnnotsName, out PdfObject? value)
+                || Resolve(document, value) is not PdfArray annotations) continue;
+            foreach (PdfObject item in annotations)
+            {
+                if (item is not PdfIndirectReference { ObjectNumber: var number } || removedAnnotations.Contains(number)
+                    || Resolve(document, item) is not PdfDictionary annotation
+                    || !annotation.TryGetValue(InReplyToName, out PdfObject? parent)
+                    || parent is not PdfIndirectReference { ObjectNumber: var parentNumber }
+                    || !removedAnnotations.Contains(parentNumber)) continue;
+                update.ReplaceObject(number, new PdfDictionary(annotation
+                    .Where(entry => !entry.Key.Equals(InReplyToName) && !entry.Key.Equals(ReplyTypeName))
+                    .ToDictionary(entry => entry.Key, entry => entry.Value)));
+            }
         }
     }
 
@@ -2469,8 +2538,12 @@ public static partial class PdfContentRedaction
             return font;
         }
 
-        internal int? ColorComponents(ResourceScope scope, PdfName name)
+        internal int? ColorComponents(ResourceScope scope, PdfName name) => ColorComponents(scope, name, 0);
+
+        private int? ColorComponents(ResourceScope scope, PdfName name, int depth)
         {
+            // Names can alias each other in a loop, which the page reader refuses at the same depth.
+            if (depth >= 32) return null;
             string value = name.ValueAsLatin1();
             int? standard = value switch
             {
@@ -2483,7 +2556,7 @@ public static partial class PdfContentRedaction
             PdfObject? space = scope.Lookup(ColorSpaceCategory, name);
             if (space is null) return null;
             PdfObject resolved = Resolve(document, space);
-            if (resolved is PdfName alias) return alias.Equals(name) ? null : ColorComponents(scope, alias);
+            if (resolved is PdfName alias) return alias.Equals(name) ? null : ColorComponents(scope, alias, depth + 1);
             if (resolved is not PdfArray array || array.Count == 0 || Resolve(document, array[0]) is not PdfName family) return null;
             return family.ValueAsLatin1() switch
             {

@@ -33,6 +33,7 @@ public sealed partial class PdfDocument
     private readonly Lock _objectResolutionSync = new();
     private readonly Dictionary<int, PdfObject> _objects = [];
     private readonly Dictionary<int, ObjectStreamContents> _objectStreams = [];
+    private const int MaximumResolveDepth = 64;
     private readonly HashSet<int> _resolving = [];
     private readonly HashSet<(int Number, int Generation)> _absentObjectHeaders = [];
     private PdfStandardSecurityHandler? _security;
@@ -512,6 +513,10 @@ public sealed partial class PdfDocument
 
         try
         {
+            // Parsing one object only reads another for a stream's /Length or its object stream, so
+            // real files stay shallow, and a chain of them would otherwise overflow the stack.
+            if (_resolving.Count > MaximumResolveDepth)
+                throw Error($"Resolving object {entry.ObjectNumber} is too deeply nested", EntryOffset(entry));
             PdfObject value = entry.Type switch
             {
                 PdfCrossReferenceEntryType.InUse => ReadIndirectObject(entry),

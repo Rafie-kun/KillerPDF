@@ -12,6 +12,33 @@ namespace KillerPdf.Engine.Tests.Documents;
 // Initial View read only. Damage in one value must cost that value and never the rest of the read.
 public sealed class PdfReaderToleranceTests
 {
+    // ---- Structure -------------------------------------------------------------------------------
+
+    // Each stream's /Length is the next stream, so reading one parses the next, as deep as the file goes.
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void AChainOfStreamLengthsIsDamageNotAStackOverflow(bool recovery)
+    {
+        const int First = 4, Last = 5000;
+        var objects = new List<string>
+        {
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            $"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] /Contents {First} 0 R >>"
+        };
+        for (int number = First; number < Last; number++)
+            objects.Add($"<< /Length {number + 1} 0 R >>\nstream\nx\nendstream");
+        objects.Add("1");
+        byte[] bytes = Pdf(objects);
+
+        PdfDocument document = recovery ? PdfDocument.OpenWithCompatibilityRecovery(bytes) : PdfDocument.Open(bytes);
+
+        // Reaching this line at all is the point: a stack overflow cannot be caught and ends the process.
+        Exception? failure = Record.Exception(() => new PdfPageContentReader(document).Read(0));
+        Assert.True(failure is null or FormatException or InvalidOperationException or NotSupportedException, failure?.ToString());
+    }
+
     // ---- Document Info ----
 
     [Theory]

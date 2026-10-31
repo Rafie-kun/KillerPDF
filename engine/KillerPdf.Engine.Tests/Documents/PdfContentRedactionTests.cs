@@ -1298,6 +1298,80 @@ public sealed class PdfContentRedactionTests
         Assert.Contains("visible", Letters(output, 0));
     }
 
+    // ---- Hostile structure stops as a refusal, not a stack overflow ------------------------------
+
+    [Fact]
+    public void AColorSpaceAliasLoopDoesNotOverflowTheStack()
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] /Resources << /ColorSpace << /A /B /B /A >> >> /Contents 4 0 R >>",
+            Stream("BI /W 1 /H 1 /BPC 8 /CS /A ID x EI")]));
+
+        Exception? failure = Record.Exception(() => PdfContentRedaction.Analyze(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(10, 10, 40, 40))]));
+
+        Assert.True(failure is null or FormatException or NotSupportedException or InvalidOperationException);
+    }
+
+    // ---- What a redaction leaves behind ------------------------------------------------------------
+
+    // The file's own unmatched q left the cover under a clip of the page's, so red stayed in the image.
+    [Fact]
+    public void APageImageIsCoveredEvenWhenTheContentNeverClosesItsGraphicsState()
+    {
+        PdfDocument document = PdfDocument.Open(SinglePage(
+            "1 0 0 rg 20 20 20 20 re f 0 0 5 5 re W n q",
+            "/MediaBox [0 0 100 100]"));
+        var region = new PdfRedactionRegion(0, new PdfContentBounds(10, 10, 50, 50));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document, [region],
+            new PdfContentRedactionOptions { ApprovedRasterPages = [0], RasterDpi = 72 });
+
+        Assert.True(result.Verification.Succeeded);
+        PdfRenderedPage rendered = new PdfPageRenderer(PdfDocument.Open(result.Document)).Render(0, new PdfRenderOptions(100, 100));
+        (byte red, byte green, byte blue) = Pixel(rendered, 30, 70);
+        Assert.True(red < 50 && green < 50 && blue < 50, $"The covered area shows {red},{green},{blue}.");
+    }
+
+    [Fact]
+    public void ARemovedCommentIsNotKeptAliveByAReplyOutsideTheArea()
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Annots [4 0 R 5 0 R] >>",
+            "<< /Type /Annot /Subtype /Highlight /Contents (PARENTCOMMENT) /Rect [100 100 150 120] /QuadPoints [100 120 150 120 100 100 150 100] >>",
+            "<< /Type /Annot /Subtype /Text /Contents (Reply stays) /IRT 4 0 R /RT /R /Rect [10 10 30 30] >>"]));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(90, 90, 160, 130))],
+            new PdfContentRedactionOptions { ProhibitedText = ["PARENTCOMMENT"] });
+
+        Assert.True(result.Verification.Succeeded);
+        Assert.Equal("Reply stays", Assert.Single(PdfCommentReader.Read(PdfDocument.Open(result.Document))).Contents);
+    }
+
+    [Fact]
+    public void AWholePageRedactionTakesWhatLiesPastTheCropBox()
+    {
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /CropBox [0 0 612 400] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+            Helvetica,
+            Stream("BT /F1 12 Tf 72 300 Td (VISIBLETEXT) Tj ET BT /F1 12 Tf 72 700 Td (CROPPEDAWAY) Tj ET")]));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(document,
+            [new PdfRedactionRegion(0, new PdfContentBounds(0, 0, 612, 400))]);
+
+        Assert.True(result.Verification.Succeeded);
+        string kept = string.Concat(new PdfPageContentReader(PdfDocument.Open(result.Document)).Read(0).Letters.Select(letter => letter.Value));
+        Assert.DoesNotContain("CROPPEDAWAY", kept, StringComparison.Ordinal);
+        Assert.DoesNotContain("VISIBLETEXT", kept, StringComparison.Ordinal);
+    }
+
     // A button caption, a signature's printed name and a stamp are drawn from the annotation, with no
     // value or contents to search, so a search of those alone reports nothing while the words stay shown.
     [Theory]
