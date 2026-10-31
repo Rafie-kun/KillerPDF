@@ -64,6 +64,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Updates install only a release whose checksum line names exactly the downloaded file, whose version is the offered release and newer than the running copy, and whose valid signature names the installed copy's publisher, so updates keep working after the publisher's certificate is renewed. The installer is checked again just before it starts, and portable updates roll back when the new launcher cannot be confirmed.
 
 ### Fixed
+
 - Update and uninstall helpers load PowerShell modules only from Windows' own folder, so a module planted in your Documents cannot run inside them as administrator; a failed uninstall reports the real reason and retries when a copy is still running; a stalled update says so instead of silently doing nothing; and the window no longer freezes while an update is handed off.
 - An update that cannot finish because the app did not close says so in its recovery report, the Update button stays off once an update has started, and a translation file can no longer give a setting the wrong kind of value.
 - The elevated part of an update compiles its helper code in a folder only administrators can open, so another program running as you cannot slip code into it, and an update that finished is no longer reported as failed when the app cannot be reopened afterward.
@@ -170,10 +171,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 1.8.91 fixes a crash when opening the theme picker in the packaged app and updates a vulnerable cryptography dependency.
 
 ### Fixed
+
 - Opening the theme picker and switching themes or accents no longer crashes the installed or portable app (#452).
 - The bug report window uses the family text field and scrollbars, with grain clipped to the cards and a transparent scrollbar corner.
 
 ### Security
+
 - Updated System.Security.Cryptography.Pkcs to 9.0.21 for GHSA-846f-f764-76mx and GHSA-2fmv-rv2c-59x7.
 
 ## [1.8.90] - 2026-10-14
@@ -181,10 +184,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 1.8.90 improves saving, form printing, color selection, updates, and the family look.
 
 ### Added
+
 - Added a Film Grain switch to the theme menu. It is on by default, and turning it off removes the grain texture from every surface.
 - Added Ctrl+wheel sizing in the file picker and links from the shortcuts panel to the online guide.
 
 ### Changed
+
 - Saving over a digitally signed PDF now asks first, because saving removes the signature.
 - Tooltips and status messages read as plain sentences, and the Transform tooltip lists scaling, flipping and perspective correction instead of saying scaling is coming soon.
 - The wordmarks use Punktype and Lacquer with a soft shadow on every theme, and the app, installer and website use Killer Sans in place of the typewriter font. The installer also matches the new family setup layout.
@@ -192,6 +197,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Hovered outline buttons and accent picker pills use gradients outside 98SE that start at the outline color and darken toward the bottom, and accent swatches lift on hover.
 
 ### Fixed
+
 - A failed Save or Save As no longer damages the existing file, because the new copy is finished before it replaces the file.
 - Unsaved annotations survive moving, reordering, duplicating and merging pages and removing a link.
 - Fixed color picker crashes with gradient themes (#442, #443) and a crash when Windows blocks the text extraction library (#441).
@@ -217,6 +223,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 1.8.80 adds Ukrainian, Norwegian (Bokmål), and Brazilian Portuguese support, makes document tabs detachable, and improves large PDF handling and installation.
 
 ### Added
+
 - Added Ukrainian localization.
 - Added Norwegian (Bokmål) localization.
 - Added Brazilian Portuguese localization.
@@ -245,6 +252,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Install and uninstall windows now show the film grain and the app icon in the title bar.
 
 ### Changed
+
 - Document tabs now use complete 98SE geometry and themed drag previews, and can be moved into a new window without losing their live editing state.
 - Reduced memory use when opening large PDFs.
 - The installer now offers upgrade, reinstall, uninstall, or cancel when KillerPDF is already installed.
@@ -532,16 +540,19 @@ KillerPDF 1.8 introduces The KillerPDF.Engine. Its detailed development history 
 KillerPDF 1.7.5 is a small maintenance release that closes several visible annotation, scrolling, shortcut, theme, and localization regressions. It keeps the faster scrolling introduced in 1.7.4, makes Transform trustworthy with freshly placed text, and gives the text annotation toolbar a cleaner two-row layout.
 
 ### Added
+
 - Shift+mouse wheel now scrolls wide pages horizontally, using the same scrolling path as a tilt wheel (#209, thanks Ryokoxx).
 - Ctrl+B, Ctrl+I and Ctrl+U now bold, italicize and underline while you are editing a text box. They were listed in the shortcuts for weeks without ever being wired up.
 - Hungarian OCR completes the twelve-language OCR catalog, so every language available for the KillerPDF interface now has a matching downloadable recognition model.
 
 ### Changed
+
 - The text annotation toolbar now uses a deliberate two-row layout: font above size, text color above fill color, and text opacity above fill opacity. It is taller but substantially narrower, with each lower control aligned beneath its corresponding upper control instead of leaving Fill Opacity stranded on an accidental wrapped row.
 - The sidebar moved from Ctrl+B to F9, and moving it left or right from Ctrl+Shift+B to Shift+F9. Ctrl+B was documented as bold and as the sidebar at the same time, and it was the sidebar that answered. F9 was the one function key with nothing of its own to do: the four view modes still have F5 to F8, and the wheel over the view still cycles them.
 - The current-page span badge now casts a small shadow beneath its rectangle, while its text remains independently rendered and crisp. The 98SE theme keeps the badge flat with the rest of its classic chrome.
 
 ### Fixed
+
 - Rotating a page now keeps upright text boxes, images, and signatures inside the new page bounds. Their centers still follow the rotated sheet, but an item near any shrinking edge is clamped against the post-rotation frame before it can become invisible and unrecoverable off-page. Regression coverage includes both A3 orientations and both turn directions (#169, thanks terada-d).
 - Fast wheel scrolling in Single Page and Two-Page views no longer carries its remaining momentum into an accidental page change at the edge. Scrolling keeps its existing speed; changing pages requires a deliberate second wheel gesture (#205, thanks 1mk3r).
 - Transform now commits an active text box before building its preview, so text placed immediately before opening Transform is included in both the preview and the transformed page.
@@ -561,6 +572,7 @@ KillerPDF 1.7.5 is a small maintenance release that closes several visible annot
 KillerPDF 1.7.4 keeps the convenience of one portable download while installing as a normal multi-file application, cutting initial startup time substantially. This release also fixes annotation rotation, form fields on comma-decimal locales, installation scope, and a range of viewer, dialog, and localization problems. Hungarian localization and page image export are included as well.
 
 ### Added
+
 - "Export page as image" on the Pages panel's right-click menu, including multi-page selections (#207, thanks 1mk3r).
 - Hungarian (hu-HU) localization, the twelfth interface language, in the language picker as "Magyar" (PR #214, thanks CsokiHUN).
 - Hide the toolbar from its right-click menu or Alt+M, and full screen no longer sits over other applications when you switch away (#215, thanks Subjuntivos).
@@ -568,10 +580,12 @@ KillerPDF 1.7.4 keeps the convenience of one portable download while installing 
 - The page badge fires on grid scrolling and names the visible span (#197, thanks Ryokoxx).
 
 ### Changed
+
 - KillerPDF now remains one portable download while installing as a normal multi-file application. The portable EXE carries one compressed, verified payload and cleans up its temporary files after use; installed shortcuts launch the inner app directly, avoiding Costura extraction and reducing measured first startup by about 40% on the development machine (#189, thanks ags1234). The new package is also roughly 34% smaller than the previous woven EXE.
 - Builds no longer risk the net48 CS8336 attribute collision introduced by compiler-generated polyfills (PR #218, thanks Ryokoxx).
 
 ### Fixed
+
 - Printing now composes and spools on a dedicated thread, keeping the progress window responsive throughout large jobs (PR #228, thanks Ryokoxx). Print layout choices are frozen when the job begins so keyboard input during preparation cannot change N-up grouping or skip or duplicate pages.
 - Rotating a page no longer deletes the document's unsaved annotations; they now turn with the page (#169, thanks terada-d).
 - Form fields saved on systems whose decimal separator is a comma (German and most European locales) now get valid appearance streams; they previously came out blank or garbled with repeated, re-wrapped text in other viewers and in print, flatten, and export, thanks Thomas.
@@ -614,6 +628,7 @@ KillerPDF 1.7.4 keeps the convenience of one portable download while installing 
 KillerPDF 1.7.2 completes the split-pane viewer refactor and builds on it with seven new themes, Polish localization, book layout, Levels, expanded print controls, per-pane night mode, and a substantial round of rendering, memory, form, and interface fixes.
 
 ### Added
+
 - Added 98SE, Ectoplasm, Decay, Mourning, Sepulchre, Delirium, and Malaise themes.
 - The print dialog has paper size and paper source selectors, and its settings are organized into collapsible PRINTER, LAYOUT, and OUTPUT sections (#186, thanks demo1866 and adeit).
 - Two-Page view has a book layout option: the cover page displays alone, so facing pages pair like a physical book (#193, thanks TeutonJon78).
@@ -625,11 +640,13 @@ KillerPDF 1.7.2 completes the split-pane viewer refactor and builds on it with s
 - Polish (pl-PL) localization, the eleventh interface language, in the language picker as "Polski" (#191, thanks Fresta24).
 
 ### Changed
+
 - The page number shows in a corner badge that slides away when the view settles, replacing the tooltip that followed the cursor (#197, thanks Ryokoxx).
 - The Outlines sidebar opens with top-level bookmarks visible and deeper levels folded, and expand/collapse choices now stick across tab switches and edits instead of re-expanding everything.
 - Keyboard access and context-menu hints were audited for 1.7.2: the file-size action has Shift+F4, and applicable menus now show icons and shortcuts.
 
 ### Fixed
+
 - The re-sharpen pass renders at device resolution instead of twice it, sharply cutting memory use on large documents, and re-renders on DPI changes (#189, PR #194, thanks Ryokoxx).
 - The page bitmap cache is now budgeted in bytes (~160 MB per tab) instead of a fixed page count, cutting the other large share of memory on big documents (#189, thanks ags1234).
 - Saved highlights now use the Multiply blend mode, darkening the paper behind the text instead of washing the text out with an opaque rectangle (#200, thanks playerbhr).
@@ -653,11 +670,13 @@ KillerPDF 1.7.2 completes the split-pane viewer refactor and builds on it with s
 1.7.1 fixes the latest reported crashes, rendering problems, installer registration, file navigation, and editing issues, while adding perspective correction and app-link support.
 
 ### Added
+
 - Transform can now correct trapezoidal perspective distortion in pages photographed at an angle. Turn on perspective correction, drag four corner handles onto the photographed page outline, and Apply converts that quadrilateral into a straight rectangular page at the full transform resolution. The correction composes with rotation, deskew, scaling, and flipping in the same operation (#175, thanks 1mk3r).
 - KillerPDF now registers a `killerpdf://` link handler for the current user, laying the app-side foundation for the planned Chrome extension. A `killerpdf://open?url=...` link can hand a public HTTPS PDF to KillerPDF whether the app is closed or already running; downloads are size-limited and rejected unless their contents begin as a PDF. The registration refreshes itself when the executable moves.
 - Open and Save dialogs now return to the last folder successfully used for that kind of operation, unless the caller deliberately supplies another starting folder. The places rail also brings in the user's pinned Windows Explorer Quick Access folders alongside KillerPDF's own editable pins, while avoiding duplicate entries (#178, thanks sheafitzek).
 
 ### Fixed
+
 - Fit Width and Fit Page are now remembered as the preferred fit for subsequently opened PDFs, so users on smaller screens no longer have to switch from Fit Page every time, thanks Thomas.
 - Owner-restricted encrypted PDFs with malformed linearization tables now pass through KillerPDF's tolerant PDFium cleanup instead of being retried through PdfSharp's fragile read-only parser. This fixes the array-index error that prevented the Fritzbox 4060 manual from opening, thanks Thomas.
 - Reopening a PDF no longer reapplies a raw zoom saved for a different window or monitor size, which could make the document appear enormous or tiny. KillerPDF keeps the saved page and view mode but fits the document to the current window, with Grid returning to a predictable three-column layout. Perspective correction's corner handles now retain their drag capture across child controls and release reliably, and applying the correction immediately redraws the edited page even when the current zoom does not change.
@@ -672,6 +691,7 @@ KillerPDF 1.7.2 completes the split-pane viewer refactor and builds on it with s
 - Clicking a page no longer crashes with "'∞' is not a valid value for property 'Height'" (#181, thanks lachlan-00). The page click rebuilds every annotation and form overlay, and malformed geometry could reach a WPF Width or Height property without being checked. WPF refuses NaN and infinity, so one bad form rectangle or a legacy saved signature with zero canvas dimensions took down the whole viewer during the redraw. Form rectangles and every sized annotation are now checked before they reach WPF; invalid form widgets are skipped, old signature dimensions fall back to the standard canvas size, and the render layer has a final guard for malformed persisted annotations.
 
 ### Changed
+
 - Transform's Rotate, Scale, Flip, Skew, and Perspective sections now collapse like the Stamp dialog, keeping the sidebar compact while still allowing every control to remain in one window. Rotate opens initially and the less frequently used sections stay folded until needed.
 - Refined six German labels and shortcut descriptions for more natural and consistent wording (#150, thanks Mr-Update).
 
@@ -680,6 +700,7 @@ KillerPDF 1.7.2 completes the split-pane viewer refactor and builds on it with s
 KillerPDF 1.7.0 introduces split panes, with two documents side by side in one window. It also replaces every stock Windows file dialog, adds a themed system menu and picture-aware night mode, saves non-Latin scripts correctly, and places annotations accurately on rotated pages.
 
 ### Added
+
 - Split pane: F10 shows two documents side by side in one window. Each pane is a card of its own, and the focused one carries an accent ring so it is obvious which pane the toolbar, sidebar and page list are acting on. Click either pane to move focus. The boundary between them has a handle on each side: grab the left one to size the left pane or the right one to size the right. Neither pane can be squeezed below a readable width. F10 closes the split again, and the rail button's icon follows along: a pane pushed out will open, while one pulled back in will close. Each pane has its own tab strip, but the shared toolbar, sidebar, and page list follow whichever pane has focus. Drag a tab from one pane's strip to the other to move it across. On a maximized or snapped window, F10 splits the space evenly instead of squeezing the second pane to its minimum.
 - Every Open and Save dialog is KillerPDF's own now, instead of the stock Windows one: the same themed window as the rest of the app, with a places rail, a folder tree, list/icon/details views, sortable columns, pinnable folders and recent locations. That covers opening and saving PDFs, merging, extracting pages, flatten, image export, image import, signature and certificate picking, OCR output and the zip export - including picking several files at once where that applies. Shared with the other Killer Tools apps, so the file dialog looks and behaves the same across the family.
 - Install for everyone on this computer. The Install button on the portable badge now opens a confirmation with two choices: add a desktop shortcut (on by default, as before) and install for all users (off by default because it needs an administrator). An all-users install puts KillerPDF in Program Files with a Start menu entry for every account, and removes the per-user copy so there is a single entry in Add/Remove Programs rather than two. Declining the administrator prompt leaves the app running portable exactly as it was. A `/silent` switch performs the machine-wide install with no interface for winget, Chocolatey, and RMM deployment. This matches Killendar and KillerShell. PDF file associations are still registered only for the current account; an all-users install does not change what PDFs open with for anyone else.
@@ -688,6 +709,7 @@ KillerPDF 1.7.0 introduces split panes, with two documents side by side in one w
 - Right-clicking the title bar (or Alt+Space) shows a themed system menu that matches the app instead of the stock white Windows one. Same items, same behavior, in all ten languages.
 
 ### Changed
+
 - Internal: the document view is now a self-contained control rather than part of the main window - the page rendering, zoom, annotations, text editing, crop, forms, links and text selection all moved into it, about 8,700 lines. Every function moved verbatim, verified line by line against the previous version, and no behavior change is intended. This is groundwork for showing two documents side by side in one window.
 - The document area is a rounded, lifted card like the rest of the Killer Tools apps, instead of a squared pane running flush into the window edges: rounded corners, an 8px inset on its outer side, and a real drop shadow that falls across the status bar. The sidebar's five-dot gripper is gone, replaced by the family divider - a thin line that lights up in the accent color when you hover or drag it. Full screen still fills the display edge to edge.
 - Night mode no longer inverts pictures (#135, thanks dmantisk). Photos and figures keep their real colors while the page around them goes dark, matching the behavior requested from Okular. Right-click the moon (or press Shift+N) for "Invert images too" if you want the old full inversion back. This is useful on scanned documents, where the whole page is one image. Night mode only changes what you see on screen: saving, printing and exporting still produce the document's original colors.
@@ -703,6 +725,7 @@ KillerPDF 1.7.0 introduces split panes, with two documents side by side in one w
 - The sidebar's page list fades into the background at its top and bottom edges while there are pages scrolled past them - the same treatment KillerShell's folder tree and the killerpdf.net sidebar use. Each fade ramps in over its own height as a row slides under it, so nothing pops, and neither shows when the list is flush at that end.
 
 ### Fixed
+
 - Japanese and other non-Latin text no longer saves as empty boxes (#168, thanks terada-d). The editor is a Windows text box, which quietly borrows glyphs from any installed font, so what you type always looks right; the save path resolved a single font and wrote a box for every character that font lacked. Two things were wrong. Nearly every CJK font on Windows ships as a collection file (Yu Gothic, MS Gothic, Meiryo, YaHei, JhengHei), and the save path could not read collections at all. Even picking a Japanese font by hand did not help. Nothing checked whether the chosen font could carry the text either. KillerPDF now reads collection fonts, and when your font cannot render something it picks one that can, preferring the same faces Windows itself falls back to. Your own font is always used when it covers the text. This affects Bengali, Korean, Chinese, Thai, Arabic and Indic scripts too, and applies to page numbers and watermarks as well as placed text. Embedded fonts are subset, so a line of Japanese adds tens of KB to the file rather than the whole typeface. If nothing installed can draw a character, KillerPDF now says so when the text is placed and lists the unsupported characters. This rare case can happen when one box contains two non-Latin scripts or the PC has no font for the requested script.
 - Punctuation shortcuts work on keyboard layouts that need Shift for those characters (#153, thanks Mr-Update). Shortcuts were matched by key position, which is a US-layout assumption: on a German keyboard "?" lives on Shift+ss and "=" on Shift+0, so Ctrl+? and Ctrl+= pressed keys the app was not listening for, and the extra Shift broke the match a second time. Zoom and the shortcuts overlay now respond to the key that TYPES the character, whatever position it occupies, so they work on German, French, Nordic and other layouts rather than being fixed one at a time. The shortcuts overlay also prints the spelling that is right for the keyboard in use instead of always showing the US one.
 - Annotations and stamps are no longer burned into the wrong frame on a rotated page (#169, thanks terada-d for a report that diagnosed it down to the line). A page's rotation is deliberately kept outside the working document, so the canvas you draw on is in the rotated frame while the save path writes into the page's own unrotated one - and the save path was never told the angle. Anything placed on a quarter-turned page came out rotated 90 degrees from where you put it, offset, and scaled on swapped axes, which also squeezed text boxes narrow enough to wrap after almost every character. Stamps had the same fault, so page numbers and watermarks landed in the wrong corner and disagreed with their own preview. The rotation now travels with the burn, in the editor and in the background flatten that print uses.
@@ -722,9 +745,11 @@ KillerPDF 1.7.0 introduces split panes, with two documents side by side in one w
 KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects form fields that appeared in the wrong place on non-A4 documents. It also remaps tool hotkeys, adds Remove Password, and includes several menu, keyboard, and interface improvements.
 
 ### Added
+
 - Remove Password in the Save dropdown (#149, thanks dmantisk): saves the open document back over the original with its password protection dropped - available whenever the file needed a password (or carried owner restrictions) to open. KillerPDF already strips encryption at open time because the editing pipeline cannot modify encrypted files in place, so every save has always written an unprotected PDF; this makes that behavior a visible, deliberate action, and regular saves of a previously protected file now say so in the status bar instead of dropping the password silently. In all ten languages.
 
 ### Changed
+
 - Tool hotkey remap - the digits again mirror the toolbar left to right, with Shapes slotted in (breaks some muscle memory; the letter keys are unchanged): V = Select (the Photoshop / Illustrator / Figma convention; its old digit went to Text), 1 = Text, 2 = Highlight, 3 = Line, 4 = Shapes, 5 = Draw, 6 = Image, 7 = Signature, 8 = Crop, 9 = Transform, 0 = Stamp. The toolbar buttons reorder to match (Highlight now before Line, Shapes between Line and Draw), and the Shapes tool has a keyboard shortcut for the first time. The shortcuts overlay (both views), tooltips, and the help page follow.
 - Invert document colors moved from Ctrl+I to the bare N key (night mode), freeing the conventional italic chord: Ctrl+B / Ctrl+I / Ctrl+U now toggle Bold / Italic / Underline while typing in a text box, matching the text bar's B/I/U buttons. Listed in the shortcuts overlay in all ten languages.
 - Esc now steps down instead of straight out. With nothing left to cancel, it first returns to the Select tool, Acrobat-style, and only a second Esc exits the app as before. The Highlight tools' hint on a page with no text layer now points at the deliberate rectangle path: "No text here. Shapes is on 4." The message is translated into all ten languages.
@@ -732,6 +757,7 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 - The page sidebar now starts collapsed when no PDF is open because an empty workspace has no thumbnails to show. It opens when a document loads and collapses again when the last document closes. The empty page-number box and "/ -" that used to sit in the sidebar header are also hidden until a document is open.
 
 ### Fixed
+
 - Interactive form-field overlays sat in the wrong place on any document that is not A4-sized - shifted down and slightly wide, worst near the top of the page, while the page itself (and every other viewer) drew the fields correctly. PdfSharpCore's page.Width getter, which the link layer touches on every render, silently converts the parsed /MediaBox array into its internal rectangle type; the field parser's array read then came up empty and fell back to a hardcoded A4 page size, so only A4 documents lined up. The field parser now reads both representations and walks the page-tree inheritance chain for /MediaBox and /CropBox. Found through the brochure: the shipped copy is A4, so the bug was invisible until a US Letter rebuild put every field about 40 points adrift.
 - The Document Info shortcut label showed mojibake in Spanish, Bengali, and both Chinese interfaces - the same double-encoding repaired for Japanese in 1.6.5 (#136). All four now render their real text.
 - Exported JPEGs no longer come out as black pages, and exported PNGs no longer carry a transparent background (#148, thanks Ryokoxx). PDFium leaves unpainted background pixels fully transparent. The JPEG encoder dropped that alpha channel and kept the zeroed color underneath, so most PDFs rendered solid black through `--to-image --format jpg` and the new Export pages as images dialog. Exports now composite over white by default, which also keeps the needless full-page alpha channel out of flattened PDFs (`--flatten` and Save Flattened). A new `--transparent` flag on `--to-image` keeps the raw alpha for PNG output when transparency is actually wanted.
@@ -740,6 +766,7 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 ## [1.6.5] - 2026-07-22
 
 ### Added
+
 - Shapes tool: rectangle, ellipse, and free-form polygon markers, each with an optional fill. Box keeps the classic drag-a-filled-rectangle gesture the highlighter used to have; ellipse and polygon are closed outlines that move, resize, flatten, and print like any other drawing. Freeform places points click by click - click the first point (its target lights up when you are close) or double-click to close, Esc cancels, Backspace removes the last point. The tool shares the draw bar's color, size, and opacity, with a mini-shape sub-mode picker and a Fill toggle.
 - Export pages as images (#132, thanks KaneLeung): a new entry in the Save dropdown renders pages to PNG or JPEG files at a chosen DPI (24-1200, default 150) with an optional page range, through the same pipeline as the CLI's `--to-image`. Pending annotations and stamps are burned in, in-app rotations are honored, and files land as `<name>-page-001.png` next to the base name you pick.
 - Odd/even page printing (#134, thanks superaustingao): a new selector under Pages offers All pages, Odd pages only, and Even pages only. It filters the chosen page range, and the preview follows along. Print the odds, flip the stack, then print the evens for manual duplex on printers without a duplexer.
@@ -749,6 +776,7 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 - Czech (cs-CZ) localization (#138, thanks jiri-ops): the tenth interface language, a full translation following Czech Windows/Adobe conventions, in the language picker as "Čeština" - with Czech ("ces") joining the OCR language catalog, downloadable on demand like the rest.
 
 ### Fixed
+
 - Page numbers and watermarks are now written into the saved PDF when they are the document's only markup (#147, thanks Mr-Update). Every save path burned the stamp layer only when the document also carried an annotation. As a result, stamping a clean document produced a PDF with nothing on it.
 - Stamps can be removed again (#145, thanks Mr-Update). Unchecking both Page Numbers and Watermark disabled the Apply button, so once a document had stamps there was no way to turn them off - applying with both sections off is exactly how they are cleared, and is now allowed whenever the document already has stamps.
 - Fixed a crash when opening Stamp or Transform, or saving a page with a multi-line text annotation (#142, thanks TrNguyen20; root cause and fix from Ryokoxx in #144). The burn silently used justified alignment, whose draw path dereferenced the empty line-break blocks produced by a newline. Burned text is now explicitly left-aligned, finally matching the editor once a line wraps. The vendored formatter also skips line-break blocks and no longer flings blocks off the page on single-word justified lines. The typeface behind a text box resolves lazily, so a font can still fail at first draw on a machine missing that face. In that case, the draw falls back to the stock font and then skips only the failing annotation. A failed preview burn renders the page without its annotation layer instead of taking down the app.
@@ -760,6 +788,7 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 - The Shapes tool strings and the outline's "(untitled)" placeholder existed only in English and Czech - the other eight languages showed blank tooltips and labels there. All ten languages now carry the full string set, verified key-for-key against English.
 
 ### Changed
+
 - Text selection now flows with the text (#127, thanks Ryokoxx): dragging with the Select tool tracks the actual run of characters in reading order, browser-style - across lines, paragraphs, and (in continuous view) across pages. A plain click still selects annotations, and drags that start on empty page keep the classic box select, so scans and annotation multi-select behave as before. Ctrl+A now shows real per-line selection on the page.
 - Highlight, Strikethrough, and Underline follow the text the same way: drag over words and the markup hugs each line instead of laying down one rectangle. One gesture produces one grouped annotation per page - it selects, moves, deletes, and undoes as a single unit. On pages with no text layer the tools show a status hint instead of silently drawing a box; the highlight eraser keeps its rectangle.
 - Black theme: the on-page selection color was a stray royal blue; it is now a readable dark green matching the theme.
@@ -771,6 +800,7 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 ## [1.6.4] - 2026-07-17
 
 ### Added
+
 - Full command-line interface: `--merge`, `--extract-pages`, `--split`, `--decrypt`, `--to-image`, `--flatten`, `--print`, `--ocr`, `--version`, and `--help` run headlessly with meaningful exit codes, work while the app window is open, and reuse the exact pipelines the GUI runs (merge link rewriting, pre-save scrubs, lossless PDFium decrypt, rotation-safe 150/300 dpi rasterizing, searchable-PDF OCR with on-demand language download). See the Command Line section on the help page.
 - Bookmark editing in the sidebar Outline panel (#133, thanks alivio-israu): add via the row at the top of the tree (named in place), inline rename, child bookmarks, reorder, retarget, and delete - with Ctrl/Shift multi-select, Delete and F2 keys, delete all, and full Ctrl+Z undo. Hidden on read-only files.
 - Redo: Ctrl+Y (or Ctrl+Shift+Z) re-applies undone actions - annotations, text edits, stamps, clears, and document-level operations alike. Any new edit clears the redo chain, and redo history is kept per tab.
@@ -782,6 +812,7 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 - Standards-conformance validation harness (`validation/`): `Compare-VeraPDF.ps1` diffs two veraPDF batch reports (corpus baseline vs a `--batch-resave` output tree) and flags any file whose validation outcome a KillerPDF save changed. Verifies that saving through KillerPDF does not degrade PDF/A conformance.
 
 ### Changed
+
 - Shortcut remap: About moved from F2 to F12, and Document Info moved from F12 to F4 (Ctrl+D also works, matching Acrobat/Foxit/Sumatra's Document Properties). F2 now renames the selected bookmark in the Outline panel, the Windows rename convention. Settings gained F9 (Ctrl+, also works, the VS Code / Windows Terminal convention), and F3 / Shift+F3 step to the next / previous search match from anywhere (F3 opens search when it isn't). Pressing a dialog shortcut while the shortcuts overlay is open dismisses the overlay first. The shortcuts overlay and the help page keyboard map follow.
 - Keyboard shortcut hints audited app-wide: menus now show their shortcut dimmed at the right edge wherever one exists (OCR, close tab, bookmark rename/delete, and more), the help tooltip advertises F1, and missing tooltip hints were added in all nine languages (OCR Ctrl+Shift+O, sidebar collapse Ctrl+B, grid view F8).
 - Continuous view: clicking a page no longer snap-scrolls its top to the viewport. Clicks in the document are for tools and selection only, and the current page follows the viewport as you scroll - the convention the big viewers use. The sidebar, jump box, links, bookmarks, and page keys still jump as before (#128, thanks Ryokoxx).
@@ -789,6 +820,7 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 - The sidebar tab is labeled OUTLINE (singular) in English, matching the other languages.
 
 ### Fixed
+
 - Resaving a PDF no longer reduces its PDF/A conformance. The PDF library (PdfSharpCore, MIT) is now vendored under third_party/ with six patches: no Producer/Creator stamping into an imported document's Info dictionary, no /ModDate rewrite at open, no transparency /Group injected into every page, stream /Length now always matches the spec's byte count (empty streams included), boolean values written as the spec's lowercase true/false keywords, and the debug-only verbose file layout removed. Found by the new veraPDF validation harness across a 2,900-file corpus.
 - Intermittent hard crash (native heap corruption) while scrolling or clicking through a document, most visible on annotation-heavy pages: KillerPDF's direct PDFium calls (link extraction, encryption stripping) could land at the same moment as a background page render inside PDFium, which is single-threaded. Every direct call now holds the same lock the render path uses. Diagnosed from a 1.6.3 crash dump showing two threads inside PDFium at once.
 - Saving a PDF that carries a digital signature kept the old signature value even though any edit breaks its digest (which must cover the entire file), so strict validators rejected the result. Saves now strip dead signature values and the matching /Perms entry; the signature fields themselves are kept.
@@ -798,15 +830,18 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 - Grid view never tracked the current page while scrolling, so the statusbar counter, the page jump box, and the page a new bookmark targets could all point at a page long since scrolled away. Grid now follows the tile nearest the viewport center, like Continuous.
 
 ### Security
+
 - Image codec library SixLabors.ImageSharp updated from 1.0.4 to 2.1.13, clearing all seven published advisories against the old version (denial-of-service and out-of-bounds issues in image parsing). Image import, clipboard paste, and signature images all pass untrusted files through this library.
 
 ## [1.6.3] - 2026-07-12
 
 ### Changed
+
 - Links open directly again: the confirm-before-opening prompt and its Settings row are off for now.
 - When both document scrollbars are visible, the vertical bar now runs the full pane height and owns the corner.
 
 ### Fixed
+
 - Switching from Grid to Continuous view kept the grid's scrollbar overrides, clipping zoomed pages with no horizontal scrollbar. Continuous now restores its own scrollbar setup.
 - Closing with unsaved changes stacked two prompts. Confirming "close without saving" now counts as the quit confirmation, and the prompt defaults to No so a stray Enter can't discard new work.
 - Saving any PDF whose pages had no crop box silently planted a zero-size /CropBox on every page, which Adobe rejects with a "page dimensions out-of-range" error - the real reason merged Google Docs exports failed in Acrobat but opened in Chrome. Page boxes are now read without touching the document, and every save strips degenerate crop boxes, so re-saving a file damaged by 1.6.x heals it (thanks Richard Lam).
@@ -819,16 +854,19 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 ## [1.6.2] - 2026-07-11
 
 ### Added
+
 - Page Up / Page Down navigate to the previous / next page regardless of what has focus. Page reordering stays on the toolbar Move Up / Move Down buttons (#117).
 - Japanese (ja-JP) interface translation, selectable from the language picker (#118, thanks coolvitto).
 
 ### Changed
+
 - Footer/status bar tightened to match the killerpdf.net statusbar: 4px shorter with larger text, and the corner grip dots now stay visible when the window is maximized or snapped.
 - Ctrl+scroll zooming is smooth: each wheel notch zooms by a constant 10% ratio, the view scales instantly while the wheel is moving, and the crisp high-resolution re-render happens once when the wheel rests. Precision touchpads glide proportionally.
 - Up / Down arrows now scroll the view like the mouse wheel, flipping pages at the top or bottom edge. Left / Right and PgUp / PgDn remain hard page jumps.
 - Status-bar and dialog messages that were still shown in English now follow the selected language across all nine locales.
 
 ### Fixed
+
 - Switching view modes now cross-fades instead of cutting instantly, with no intermediate-frame flashes.
 - The in-app self-updater now reads `SHA256SUMS.txt` from the release assets instead of the repo at the release tag, so the hash can no longer drift from the binary and fail the update's checksum.
 - Importing images with broken DPI metadata (common in WhatsApp photos and some scans) produced pages Adobe Reader refuses to display; imported image pages are now kept within Adobe's supported 3-14,400 point range (thanks Richard Lam).
@@ -837,6 +875,7 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 ## [1.6.1] - 2026-07-01
 
 ### Added
+
 - On quit with documents open, KillerPDF asks whether to reopen them next launch, with a "remember my choice" option (#105).
 - Enter and Esc now confirm and cancel dialogs (#111).
 - Right-clicking the Open, Save, and OCR toolbar buttons opens their dropdown menu (#109, thanks Ryokoxx).
@@ -845,9 +884,11 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 - Improved German translation (#114, thanks Mr-Update).
 
 ### Changed
+
 - Mouse wheel scrolling is faster in all view modes and the page sidebar.
 
 ### Fixed
+
 - Continuous view stays sharp when zooming in and on high-DPI displays; visible pages re-render at a higher resolution (#85).
 - Open menu: the remove (X) button on each recent-files entry was clipped off the right edge of the dropdown; it now stays inside the frame.
 - Crash when saving a freshly merged or imported PDF (#112).
@@ -859,6 +900,7 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 ## [1.6.0] - 2026-06-27
 
 ### Added
+
 - Tabbed documents: open several PDFs at once, each restoring its page, zoom, and view mode. Drag tabs to re-order.
 - OCR built into the single exe (Tesseract): OCR a whole page or a dragged region to the clipboard, Make Searchable PDF (an invisible text layer over the scan), and Extract All Text to a .txt or .md file. A language picker downloads extra languages on demand, with an optional high-quality model toggle.
 - Digital signatures with a cloud certificate (Certum SimplySign): reusable signatures and initials, click-to-sign form fields, and a movable Signatures popup that remembers its position.
@@ -882,6 +924,7 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 - Bengali, Turkish, Simplified Chinese, German, and French translations (contributors akib-h #79, mrantikadev #76, KaneLeung #82, Dtrieb & Gevlug #93, Thalis-fr #95).
 
 ### Changed
+
 - Visual refresh: new logo, wordmark, app and PDF-file icons, fonts, and colors throughout.
 - Blood, Greed, and Cyanotic use darker chrome with a lighter document pane; the signature windows are fully themed and reload on theme change.
 - Settings is now a slide-out accordion (Language, Theme, Toolbar, View Mode, Sidebar) that stays open after a pick.
@@ -894,6 +937,7 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 - Internal refactor: the ~15,000-line MainWindow code-behind split into ~40 focused partial-class files, no behavior change.
 
 ### Fixed
+
 - Prints now rasterize at a true 300 DPI instead of the preview's ~140, so output is sharp; the preview itself renders lighter and only the pages being printed are re-rendered at full resolution, keeping memory in check on large files (Issue #83).
 - Printing and Save Flattened no longer crash on documents PdfSharpCore can't reopen; they use the same repair fallback as Save.
 - Opening an encrypted PDF or repairing a damaged one runs on a background thread instead of freezing the window.
@@ -908,6 +952,7 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 ## [1.5.1] - 2026-06-14
 
 ### Fixed
+
 - PDFs that opened fine in browsers and Acrobat/Foxit but failed in KillerPDF with "Unexpected EOF" now open. PdfSharpCore rejected them during parsing; KillerPDF now falls back to re-saving the file losslessly through PDFium (which reads them) and opening that copy (Issue #72).
 - Files opened from UNC / network shares (including the WSL `\\wsl$` filesystem) are now copied to a local temp before opening, avoiding partial-read failures on network filesystems.
 - Grid view now renders every page, and tiles stream in progressively as they render instead of blocking until the whole document is done. Grid was previously capped at the first 26 pages, so longer documents stopped loading partway through.
@@ -916,11 +961,13 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 - Removed a stray horizontal scrollbar (a thin green line) that appeared across the bottom of grid view; grid fits its columns to the window and no longer scrolls sideways.
 
 ### Changed
+
 - Save Flattened PDF now rasterizes across multiple CPU cores. PNG encoding runs in parallel; the PDFium render step is serialized because the library is not thread-safe. Large documents flatten faster and the UI stays responsive (Issue #68).
 
 ## [1.5.0] - 2026-06-14
 
 ### Added
+
 - Localization support (Issue #53 / contributor leox243). Language selector in Settings panel. Ships with English (en-US), Spanish (es), and Traditional Chinese (zh-TW). Theme names, zoom dropdown, fit-mode status, and keyboard shortcut overlay all update with the selected language. Contributor guide at `Strings/TRANSLATING.md`.
 - Continuous scroll view mode. Opens all pages in a single vertical strip with progressive async rendering. Page number and sidebar thumbnail track automatically as you scroll.
 - Two-page view mode. Displays two pages side-by-side (primary + one secondary). Editing tools are available in this mode.
@@ -937,6 +984,7 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 - Built-in print dialog with working print preview. Replaces the Windows print dialog (which showed "This app doesn't support print preview") with a themed dialog that previews each page and exposes printer, orientation, copies, and page-range (for example 1-3,5) settings.
 
 ### Changed
+
 - Continuous scroll is now the default view mode for new installs.
 - View mode order in Settings: Continuous, Single Page, Two-Page, Grid.
 - Settings and keyboard shortcut overlay borders widened to 2px for better visibility.
@@ -951,6 +999,7 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 - Four corner resize handles on placed images and signatures. Drag any corner to resize with the opposite corner held fixed. Handles are larger and render at the same on-screen size in every view mode.
 
 ### Fixed
+
 - Stale debug string appearing in status bar after Fit Width in single-page mode.
 - Text edit box closed when changing the font size, because the size dropdown took keyboard focus and triggered a commit. Focus moving into the size or color bar no longer commits the edit.
 - Crop confirm bar was scaled down with page zoom, making it unreadable at low zoom levels. Selection rectangle improvements.
@@ -964,6 +1013,7 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 ## [1.4.3] - 2026-06-08
 
 ### Fixed
+
 - Encrypted PDFs (owner-restricted RC4) no longer fail with "Unexpected token 'xref'" when rotating pages. PdfSharpCore can silently produce a broken cross-reference entry after saving encrypted files; KillerPDF now pipes the file through PDFium to repair the XRef and retries the open automatically.
 - Page view now fits to page after a rotation so the full rotated page is visible without manual rezoom.
 - Mailto and other link annotations with visible borders (e.g. colored rectangles that looked like strikethroughs) no longer render those borders in saved PDFs. KillerPDF strips `/AP`, `/C`, and `/BS` from link annotations and sets an invisible border on save.
@@ -975,10 +1025,12 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 ## [1.4.2] - 2026-06-06
 
 ### Added
+
 - PDF form filling. Interactive PDF forms now render their fields (text inputs, checkboxes, radio buttons) as live controls. Fill them in directly and save - field values are written back into the PDF.
 - PDF outline (bookmark) support (Issue #63). A new OUTLINES tab in the sidebar displays the document's bookmark tree. Click any entry to jump to that page. The sidebar auto-fits its width to the longest entry on open and can be dragged wider; switching back to PAGES snaps to the pages-mode width.
 
 ### Fixed
+
 - Page rotation no longer reverts after saving. Rotations applied via the sidebar context menu now persist correctly through the save pipeline.
 - Copied text words were out of order on PDFs where glyphs are stored in non-reading order (Issue #66). Text extraction now sorts words by position and uses a dynamic line-grouping threshold so both drag-select and Select All produce correctly ordered output.
 - PDFs with malformed or non-standard XRef tables now open in read-only mode instead of showing "Invalid entry in XRef table" and failing entirely.
@@ -988,6 +1040,7 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 ## [1.4.1] - 2026-05-21
 
 ### Added
+
 - Page number jump box in toolbar. Type a page number and press Enter to navigate directly to that page.
 - Signature auto-selects after placing so you can immediately reposition or resize without switching tools.
 - Zoom to Width / Fit Page now re-applies when the window is resized.
@@ -999,6 +1052,7 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 - Crop tool improvements: corner drag handles to resize the selection after drawing without having to redraw; Enter applies the crop to the current page; Escape cancels; Remove Crop / Remove All buttons in the confirm bar clear an existing CropBox from one page or all pages.
 
 ### Fixed
+
 - Fit to Width and Fit Page zoomed incorrectly on HiDPI (4K) displays.
 - Pages appeared blurry at higher zoom levels on HiDPI displays.
 - Signature position drifted after saving.
@@ -1011,6 +1065,7 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 ## [1.4.0] - 2026-05-16
 
 ### Added
+
 - Rotate page (Issue #52). Right-click any page in the sidebar to rotate it 90° clockwise or counter-clockwise. Works on multi-page selections.
 - Insert Image tool (Issue #50). Click the toolbar button, then click anywhere on the page to place a PNG, JPG, BMP, GIF, or TIFF as a resizable annotation. Drag the green corner handle to resize; burned into the PDF on save.
 - PDF link annotation support (Issue #47). Clicking hyperlinks and internal cross-references in a PDF now navigates to the target page or opens the URL in the default browser. Works on both the primary page and all secondary pages in multi-page grid view.
@@ -1022,6 +1077,7 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 - Fit to Width on open. Files now auto-zoom to fill the viewer width on open instead of opening at 100% and clipping wide pages.
 
 ### Fixed
+
 - Scroll wheel in the main viewer no longer triggers page navigation. Previously, at low zoom levels where the page fit entirely in the viewport, every scroll tick caused a full page re-render.
 - Page selection no longer flashes centered before jerking left. The layout width is now managed exclusively in the Dispatcher callback, eliminating the double layout pass that caused the visual artifact.
 - "Back to TOC" and other internal links on secondary pages now navigate to the correct target instead of advancing to the next sequential page.
@@ -1031,12 +1087,14 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 - Sidebar page list no longer shows empty space after the last page. The list now ends at the final page entry with no trailing dead zone.
 
 ### Changed
+
 - Theme updated to match killertools.net: accent green changed from `#4ade80` to `#1ea54c`, backgrounds shifted to `#333333`/`#3a3a3a`, sidebar darkened to `#222222`, toolbar and title bar at `#222222`. Film grain overlay added to the main content area. Footer text lightened for readability.
 - Sidebar scroll is now handled by an outer ScrollViewer wrapping the page list, allowing the list to size to its content rather than stretching to fill the panel height.
 
 ## [1.3.2] - 2026-05-11
 
 ### Fixed
+
 - Windows Program Compatibility Assistant popup on first launch. Added an app manifest declaring Windows 10/11 compatibility, which suppresses PCA when the app writes to uninstall registry keys.
 - "Set as default PDF viewer" prompt now only appears if KillerPDF is not already the default handler. Previously showed on every install/update regardless.
 - "Set as default PDF viewer" prompt now uses the dark KillerDialog instead of a native Windows message box.
@@ -1044,12 +1102,14 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 ## [1.3.1] - 2026-05-11
 
 ### Fixed
+
 - Print no longer fails with "No application is associated with the specified file for this action" on systems where Edge is the default PDF handler. Printing now uses WPF-native rendering and PrintDialog instead of the shell print verb.
 - Zoom dropdown selected value no longer shows in blue - selection highlight now uses the accent green.
 
 ## [1.3.0] - 2026-05-08
 
 ### Added
+
 - Image signatures. Import a PNG, JPG, or BMP as a reusable signature instead of drawing one. Stored alongside drawn signatures and flattens into the PDF on save.
 - Close File (Ctrl+W). Close the current document without quitting the app. Prompts if there are unsaved changes.
 - Unsaved-changes protection. The title bar marks dirty files with `*` and prompts before closing or opening a new file with unsaved edits.
@@ -1057,6 +1117,7 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 - Zoom preset dropdown with quick presets (50%, 75%, 100%, 125%, 150%, 200%). Scroll-wheel zoom syncs the box, including non-preset levels.
 
 ### Fixed
+
 - Scrolling past the bottom of a page now advances to the next page; scrolling past the top goes back.
 - Re-dropping a PDF onto the window after a file is already open now works correctly.
 - Owner-password-protected PDFs now open correctly (previously only user-password was handled).
@@ -1065,6 +1126,7 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 - Signature delete button showed a rectangle glyph instead of an X.
 
 ### Changed
+
 - All dialog boxes are now fully dark-themed via a custom dialog window. No more native Windows popups.
 - Create Signature dialog now uses a dark custom chrome title bar with a red X close button.
 - Button hover states and page thumbnail hover in the sidebar are now green instead of the default Windows blue.
@@ -1073,12 +1135,14 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 ## [1.2.1] - 2026-05-04
 
 ### Changed
+
 - Code signed with Certum certificate. Windows now shows a verified publisher instead of unknown.
 - Cleaned up footer.
 
 ## [1.2.0] - 2026-04-24
 
 ### Added
+
 - Self-installing EXE. Running the downloaded binary now shows an Install / Run dialog. Install copies the EXE to `%LOCALAPPDATA%\Programs\KillerPDF\` (no UAC required), creates Start Menu and optional Desktop shortcuts, registers as a PDF file handler, and adds an uninstall entry to Add/Remove Programs. Uninstall self-deletes via a deferred batch file. Running a newer version from outside the install path shows an Update prompt instead.
 - Command-line file argument support so file associations work: `KillerPDF.exe "file.pdf"` opens the file directly.
 - Password-protected PDF support. Opening an encrypted PDF now prompts for the password instead of showing a generic error. The decrypted copy is held in a temp file for the session so all rendering and editing works normally.
@@ -1087,18 +1151,21 @@ KillerPDF 1.6.6 is primarily a bug fix release. Most importantly, it corrects fo
 ## [1.1.1] - 2026-04-18
 
 ### Fixed
+
 - Maximize no longer covers the Windows taskbar. Added a `WM_GETMINMAXINFO` hook so the frameless window clamps to the monitor's work area (multi-monitor aware).
 - Two `CS8602` nullability warnings in the font-name cleanup path.
 
 ## [1.1.0] - 2026-04-16
 
 ### Changed
+
 - Retargeted from .NET 8 to .NET Framework 4.8 so end users no longer need to install a separate .NET runtime.
 - Forced 64-bit build via `PlatformTarget=x64`.
 - Added PolySharp polyfills for modern C# language features on net48.
 - Replaced `Math.Clamp` calls with `Math.Min`/`Math.Max` equivalents.
 
 ### Added
+
 - Post-publish MSBuild target that automatically bundles a GPL3-compliant source zip alongside the published EXE.
 - CHANGELOG.md.
 - Added hierarchical AcroForm authoring for qualified field names across text, choice, button, and signature fields. Shared nonterminal parents use partial names and deterministic child links, terminal-versus-parent conflicts fail early, selected imports prune omitted branches, and detached signing resolves fully qualified signature fields.
