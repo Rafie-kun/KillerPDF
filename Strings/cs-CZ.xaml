@@ -1863,6 +1863,7 @@ Změnit jejich velikost na podporovanou? Stránky si zachovají vzhled i proporc
     <sys:String x:Key="Str_Paragraph_Refused">Tento odstavec nelze upravit: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Tento odstavec kombinuje různá písma, velikosti nebo barvy. Nový text používá jeden styl, takže se toto formátování nepřenese.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Písmo náhledu: {0}. Toto písmo bude vloženo do upraveného PDF.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Narrowed">Text je nastaven na {0} % své šířky, aby zachoval řádky odstavce.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Příprava náhledu...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Dokument se změnil. Pokračujte opětovným otevřením úprav odstavce.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Originál</sys:String>

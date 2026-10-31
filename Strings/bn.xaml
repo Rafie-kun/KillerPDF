@@ -1858,6 +1858,7 @@ Windows সেটিংস - ডিফল্ট অ্যাপ খুলবে�
     <sys:String x:Key="Str_Paragraph_Refused">এই অনুচ্ছেদটি সম্পাদনা করা যাবে না: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">এই অনুচ্ছেদে একাধিক ফন্ট, আকার বা রঙ মিশ্রিত আছে। নতুন পাঠ্যে একটিমাত্র শৈলী ব্যবহৃত হয়, তাই এই বিন্যাস বহাল থাকবে না।</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">পূর্বরূপের ফন্ট: {0}। এই ফন্টটি সম্পাদিত PDF-এ সংযুক্ত করা হবে।</sys:String>
+    <sys:String x:Key="Str_Paragraph_Narrowed">অনুচ্ছেদের সারিগুলো ঠিক রাখতে লেখা তার প্রস্থের {0}% এ সেট করা হয়েছে।</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">পূর্বরূপ প্রস্তুত হচ্ছে...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">নথিটি পরিবর্তিত হয়েছে। চালিয়ে যেতে অনুচ্ছেদ সম্পাদনা আবার খুলুন।</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">মূল</sys:String>

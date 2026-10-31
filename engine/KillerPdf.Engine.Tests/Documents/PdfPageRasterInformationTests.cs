@@ -23,6 +23,21 @@ public sealed class PdfPageRasterInformationTests
             PdfPageRasterInformation.ReadBitonalImagePageHints(PdfDocument.Open(source)));
     }
 
+    // A scan's pixels, whatever size the page is, turned up the way the page is shown.
+    [Fact]
+    public void ReadScanSizes_GivesThePageInTheLargestImagesPixels()
+    {
+        PdfImage image = PdfImage.FromBitonal(400, 200, new byte[80000]);
+        PdfImage strip = PdfImage.FromBitonal(40, 10, new byte[400]);
+        byte[] source = new PdfDocumentBuilder()
+            .AddPage(100, 50, new PdfContentStreamBuilder().DrawImage(image, 0, 0, 100, 50))
+            .AddPage(100, 100, new PdfContentStreamBuilder().DrawImage(strip, 0, 0, 10, 2.5).DrawImage(image, 0, 0, 50, 25))
+            .AddPage(100, 100, new PdfContentStreamBuilder())
+            .Build();
+        Assert.Equal(new (int, int)?[] { (400, 200), (800, 800), null },
+            PdfPageRasterInformation.ReadScanSizes(PdfDocument.Open(source)));
+    }
+
     [Fact]
     public void ReadJpegImagePageHints_DistinguishesJpegAndLosslessPages()
     {

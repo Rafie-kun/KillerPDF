@@ -14,7 +14,7 @@ The 1.9.1 engine clears redacted content from every copy that hides it, edits at
 - Added `includeBookmarks` overloads of `AddImportedDocument` and `InsertImportedDocument`, plus `DropTargetBookmarks` and `FailedBookmarksInTarget`, so a damaged outline costs only the document it belongs to.
 - Added `PdfDocumentInformation.UnreadableKeys` and `PdfDocumentMetadata.PreservedInfoKeys`, so a save keeps entries it could not read.
 - Added `ReadLinkAnnotationIndexes` to `PdfLinkReader`, so a caller can reach a link the reader could not parse.
-- Added `PdfParagraphEditor.DefaultBox`, the `PdfParagraphCandidate` members `TextLeft`, `FirstBaseline`, `TextRight`, `FirstLineIndent` and `RowTexts`, a `PdfTextReflow.Wrap` overload with a first-line indent, `PdfExtractionFont.IsType3`, `PdfParagraphRefusalCode.NoText`, and the `PdfParagraphCandidate` members `RightLimit` and `HyphenGuesses`.
+- Added `PdfParagraphEditor.DefaultBox`, the `PdfParagraphCandidate` members `TextLeft`, `FirstBaseline`, `TextRight`, `FirstLineIndent` and `RowTexts`, a `PdfTextReflow.Wrap` overload with a first-line indent, `PdfExtractionFont.IsType3`, `PdfParagraphRefusalCode.NoText`, the `PdfParagraphCandidate` members `RightLimit` and `HyphenGuesses`, `PdfParagraphEditor.PlanFitted` and `WidthRatio`, `PdfParagraphPlan.HorizontalScale`, `PdfParagraphLine.Scale`, `PdfPageRasterInformation.ReadScanSizes`, `PdfRewriteRefusal`, `PdfVersion2Upgrade.Apply` with `allowSignatureInvalidation`, and the macro step setting `invalidateSignatures`.
 
 ### Changed
 

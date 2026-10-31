@@ -24,6 +24,8 @@ namespace KillerPDF.Features
         // Longest-side pixel budget for the OCR render. ~300 DPI on a Letter page, which is the sweet
         // spot for Tesseract: high enough for small body text, not so high it wastes time/memory.
         private const int OcrRenderMax = 2600;
+        // About 300 dpi on A4. A 600 dpi scan comes down to this, which OCR and the eye both read fine.
+        private const int ScanTextRenderMax = 3600;
 
         private readonly IOcrHost _host;
 
@@ -429,6 +431,7 @@ namespace KillerPDF.Features
             IReadOnlyList<bool> scanned = PdfEngineIntegration.ReadScannedPages(src);
             if (!scanned.Contains(true)) return new ScanTextSummary(0, 0, 0);
             IReadOnlyList<bool> bitonal = PdfEngineIntegration.ReadBitonalPages(src);
+            IReadOnlyList<(int Width, int Height)?> scanSizes = PdfEngineIntegration.ReadScanSizes(src);
             using var renderSession = PdfPageRenderSession.OpenEngineFirst(src, OcrRenderMax, OcrRenderMax);
             using var ocr = new OcrService(language: language);
             IReadOnlyList<PdfScanTextFace> faces = PdfEngineIntegration.ScanTextFaces();
@@ -444,7 +447,7 @@ namespace KillerPDF.Features
                 report(i, scanned.Count);
                 if (!scanned[i]) continue;
 
-                PdfRenderedPage page = renderSession.RenderBasePage(i, ct);
+                PdfRenderedPage page = RenderScanPage(renderSession, i, scanSizes[i], ct);
                 int w = page.Width, h = page.Height;
                 byte[] bgra = page.Pixels;
                 if (bgra is null || bgra.Length == 0 || w <= 0 || h <= 0) continue;
@@ -472,7 +475,7 @@ namespace KillerPDF.Features
                     measured.Add((i, analysis, face));
                     continue;
                 }
-                pages.Add(EraseAndEncode(bgra, w, h, i, analysis, face, bitonal[i]));
+                pages.Add(EraseAndEncode(bgra, w, h, i, analysis, face, bitonal[i], scanSizes[i]));
             }
             if (ct.IsCancellationRequested || pages.Count == 0 && measured.Count == 0)
                 return new ScanTextSummary(pages.Count, 0, 0);
@@ -489,21 +492,27 @@ namespace KillerPDF.Features
                 {
                     if (ct.IsCancellationRequested) return new ScanTextSummary(measured.Count, 0, 0);
                     report(pageIndex, scanned.Count);
-                    PdfRenderedPage page = renderSession.RenderBasePage(pageIndex, ct);
-                    pages.Add(EraseAndEncode(page.Pixels, page.Width, page.Height, pageIndex, analysis, face, bitonal[pageIndex]));
+                    PdfRenderedPage page = RenderScanPage(renderSession, pageIndex, scanSizes[pageIndex], ct);
+                    pages.Add(EraseAndEncode(page.Pixels, page.Width, page.Height, pageIndex, analysis, face, bitonal[pageIndex], scanSizes[pageIndex]));
                 }
             }
             PdfScanTextResult written = PdfEngineIntegration.WriteScanText(src, outPath, pages);
             return new ScanTextSummary(pages.Count, written.ReplacedWords, written.SearchableWords);
         }
 
+        private static PdfRenderedPage RenderScanPage(PdfPageRenderSession session, int pageIndex,
+            (int Width, int Height)? scan, CancellationToken ct) =>
+            ScanPixels.RenderSize(scan, OcrRenderMax, ScanTextRenderMax) is { } size
+                ? session.RenderBasePage(pageIndex, size.Width, size.Height, ct)
+                : session.RenderBasePage(pageIndex, ct);
+
         private static PdfScanTextPage EraseAndEncode(byte[] bgra, int width, int height, int pageIndex,
-            PdfScanTextPageAnalysis analysis, PdfScanTextFace face, bool bitonal)
+            PdfScanTextPageAnalysis analysis, PdfScanTextFace face, bool bitonal, (int Width, int Height)? scan)
         {
             PdfScanTextAnalyzer.Erase(bgra, width, height, analysis.Words
                 .Where(word => word.Replaceable && PdfScanTextWriter.CanSet(face, word)));
             PdfScanTextAnalyzer.ReleaseMasks(analysis);
-            return new PdfScanTextPage(pageIndex, analysis, EncodeScanBackground(bgra, width, height, bitonal), face);
+            return new PdfScanTextPage(pageIndex, analysis, EncodeScanBackground(bgra, width, height, bitonal, scan), face);
         }
 
         // The words of one page that are about to become text, each cut from the scan with a
@@ -576,7 +585,7 @@ namespace KillerPDF.Features
         // A black-and-white scan, one bit deep in the source or with next to no middle tones once
         // rendered, stays one bit deep, as JBIG2 when that is smallest; anything else is stored as
         // JPEG, in gray when the page has no color.
-        private static PdfImage EncodeScanBackground(byte[] bgra, int width, int height, bool bitonal)
+        private static PdfImage EncodeScanBackground(byte[] bgra, int width, int height, bool bitonal, (int Width, int Height)? scan)
         {
             long middle = 0;
             bool gray = true;
@@ -593,33 +602,12 @@ namespace KillerPDF.Features
                     samples[i] = bgra[i * 4 + 1] < 128 ? (byte)0 : (byte)255;
                 return PdfImage.FromBitonal(width, height, samples, allowJbig2: true);
             }
-            // With the text now drawn as text, the remaining paper and pictures keep their look at
-            // half the scan resolution, which keeps the file close to the original's size.
-            (byte[] half, int halfWidth, int halfHeight) = Halve(bgra, width, height);
-            return PdfImage.FromJpeg(BitmapHelpers.EncodeJpeg(half, halfWidth, halfHeight,
-                quality: 80, grayscale: gray));
-        }
-
-        private static (byte[] Pixels, int Width, int Height) Halve(byte[] bgra, int width, int height)
-        {
-            int halfWidth = Math.Max(1, width / 2), halfHeight = Math.Max(1, height / 2);
-            byte[] half = new byte[halfWidth * halfHeight * 4];
-            for (int y = 0; y < halfHeight; y++)
-            {
-                int top = Math.Min(height - 1, y * 2), bottom = Math.Min(height - 1, y * 2 + 1);
-                for (int x = 0; x < halfWidth; x++)
-                {
-                    int left = Math.Min(width - 1, x * 2), right = Math.Min(width - 1, x * 2 + 1);
-                    int a = (top * width + left) * 4, b = (top * width + right) * 4;
-                    int c = (bottom * width + left) * 4, d = (bottom * width + right) * 4;
-                    int o = (y * halfWidth + x) * 4;
-                    for (int channel = 0; channel < 3; channel++)
-                        half[o + channel] = (byte)((bgra[a + channel] + bgra[b + channel]
-                            + bgra[c + channel] + bgra[d + channel] + 2) / 4);
-                    half[o + 3] = 255;
-                }
-            }
-            return (half, halfWidth, halfHeight);
+            // Words that stayed scanned are still read from this image, as are stamps and pictures,
+            // so it keeps the scan's own resolution. With the rest of the text erased it is mostly
+            // paper, which costs next to nothing, and pixels past the scan's would add only size.
+            (int storedWidth, int storedHeight) = ScanPixels.StoredSize(width, height, scan);
+            byte[] stored = storedWidth == width ? bgra : ScanPixels.Shrink(bgra, width, height, storedWidth, storedHeight);
+            return PdfImage.FromJpeg(BitmapHelpers.EncodeJpeg(stored, storedWidth, storedHeight, quality: 85, grayscale: gray));
         }
 
         // ============================================================

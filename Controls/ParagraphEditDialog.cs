@@ -287,32 +287,30 @@ internal sealed class ParagraphEditDialog : Window
         _preview.IsEnabled = _apply.IsEnabled = false; _status.Text = L("Str_Paragraph_Preparing");
         try
         {
-            var style = PdfFontStyle.FromPdfName(candidate.FontName);
-            var font = PdfEngineIntegration.LoadTextFont(style.Family, text, style.Bold, style.Italic);
-            if (font is null) { _status.Text = L("Str_Paragraph_Unsupported"); return; }
-            if (!_boxEdited)
-            {
-                // Rounded fields would move the text a little, so the box itself goes to the plan.
-                bounds = PdfParagraphEditor.DefaultBox(candidate, _page.Width, _page.Height, text, font.Value.Font, values[4], values[5]);
-                ShowBox(bounds, values[4], values[5]); PlaceBox();
-            }
-            var result = await Task.Run(() =>
+            bool fit = !_boxEdited;
+            var result = await Task.Run<(PdfParagraphPlan? Plan, string Family, BitmapSource? Image)>(() =>
             {
                 token.ThrowIfCancellationRequested();
-                PdfParagraphPlan plan = PdfParagraphEditor.Plan(_document, _pageIndex, candidate.SourceRegion,
-                    bounds, text, font.Value.Font, values[4], values[5], alignment);
+                if (PdfEngineIntegration.LoadParagraphFont(candidate, text) is not { } font) return (null, "", null);
+                // Fitting works from the exact box, since rounded fields would move the text a little.
+                PdfParagraphPlan plan = fit
+                    ? PdfParagraphEditor.PlanFitted(_document, _pageIndex, candidate, _page.Width, _page.Height, text, font.Font, values[4], values[5], alignment)
+                    : PdfParagraphEditor.Plan(_document, _pageIndex, candidate.SourceRegion, bounds, text, font.Font, values[4], values[5], alignment);
                 token.ThrowIfCancellationRequested();
-                return (Plan: plan, Image: plan.HasOverflow ? null : Render(PdfDocument.Open(plan.GetPreviewDocument()), token));
+                return (plan, font.Family, plan.HasOverflow ? null : Render(PdfDocument.Open(plan.GetPreviewDocument()), token));
             }, token);
             token.ThrowIfCancellationRequested();
             if (_closed) return;
-            if (result.Plan.HasOverflow) { _status.Text = L("Str_Paragraph_Overflow"); return; }
-            _plan = result.Plan; _editedImage = result.Image;
+            if (result.Plan is not { } planned) { _status.Text = L("Str_Paragraph_Unsupported"); return; }
+            if (planned.HasOverflow) { _status.Text = L("Str_Paragraph_Overflow"); return; }
+            if (fit) { ShowBox(planned.TargetBounds, values[4], values[5]); PlaceBox(); }
+            _plan = planned; _editedImage = result.Image;
             _original.IsChecked = false; _image.Source = _editedImage;
             string hyphens = HyphenNote();
             _status.Text = L("Str_Paragraph_Ready") + (candidate.MixedStyles ? "\n" + L("Str_Paragraph_MixedStyles") : "")
+                + (planned.HorizontalScale < 1 ? "\n" + string.Format(L("Str_Paragraph_Narrowed"), Math.Round(planned.HorizontalScale * 100)) : "")
                 + (hyphens.Length == 0 ? "" : "\n" + hyphens);
-            _fontLabel.Text = string.Format(L("Str_Paragraph_Font"), font.Value.Family);
+            _fontLabel.Text = string.Format(L("Str_Paragraph_Font"), result.Family);
             _apply.IsEnabled = true;
         }
         catch (OperationCanceledException) { }

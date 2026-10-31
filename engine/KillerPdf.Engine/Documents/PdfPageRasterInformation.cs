@@ -36,6 +36,33 @@ public static class PdfPageRasterInformation
     }
 
     /// <summary>
+    /// Reads each page's size in pixels at the resolution of its largest image, turned the way the
+    /// page is shown, which for a scan is the resolution it was scanned at. A page with no image,
+    /// or one that cannot be read, returns null.
+    /// </summary>
+    public static IReadOnlyList<(int Width, int Height)?> ReadScanSizes(PdfDocument document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        var reader = new PdfPageContentReader(document);
+        IReadOnlyList<PdfPageInformation> pages = PdfPageInformation.Read(document);
+        var result = new (int Width, int Height)?[pages.Count];
+        for (int index = 0; index < result.Length; index++)
+        {
+            PdfExtractedImage? image;
+            try { image = reader.Read(index).Images.MaxBy(item => (long)item.PixelWidth * item.PixelHeight); }
+            catch (Exception exception) when (PdfReaderDamage.Is(exception)) { continue; }
+            if (image is null) continue;
+            double drawn = Math.Max(image.BoundingBox.Width, image.BoundingBox.Height);
+            if (drawn <= 0 || image.PixelWidth <= 0 || image.PixelHeight <= 0) continue;
+            double perPoint = Math.Max(image.PixelWidth, image.PixelHeight) / drawn;
+            bool quarterTurn = pages[index].Rotation is 90 or 270;
+            result[index] = ((int)Math.Round((quarterTurn ? pages[index].Height : pages[index].Width) * perPoint),
+                (int)Math.Round((quarterTurn ? pages[index].Width : pages[index].Height) * perPoint));
+        }
+        return result;
+    }
+
+    /// <summary>
     /// Reads a direct, unmasked JPEG when it is the page's only painted content and covers the
     /// complete crop box. Returns false for annotations, nested forms, clipping, or extra content.
     /// </summary>

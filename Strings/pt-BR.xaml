@@ -1878,6 +1878,7 @@ Dimensioná-las para um tamanho aceito? As páginas mantêm a aparência e as pr
     <sys:String x:Key="Str_Paragraph_Refused">Este parágrafo não pode ser editado: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Este parágrafo mistura fontes, tamanhos ou cores diferentes. O novo texto usa um único estilo, então essa formatação não será mantida.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Fonte da prévia: {0}. Esta fonte será incorporada ao PDF editado.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Narrowed">O texto foi ajustado para {0}% da largura para manter as linhas do parágrafo.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Preparando prévia...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">O documento foi alterado. Reabra a edição de parágrafo para continuar.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Original</sys:String>

@@ -1867,6 +1867,7 @@ Auf eine unterstützte Größe skalieren? Aussehen und Proportionen der Seiten b
     <sys:String x:Key="Str_Paragraph_Refused">Dieser Absatz kann nicht bearbeitet werden: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Dieser Absatz enthält verschiedene Schriftarten, Schriftgrößen oder Farben. Der neue Text verwendet einen einheitlichen Stil, daher wird diese Formatierung nicht übernommen.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Vorschauschrift: {0}. Diese Schrift wird in die bearbeitete PDF eingebettet.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Narrowed">Der Text ist auf {0} % seiner Breite gesetzt, damit die Zeilen des Absatzes erhalten bleiben.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Vorschau wird vorbereitet...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Das Dokument wurde geändert. Öffnen Sie die Absatzbearbeitung erneut, um fortzufahren.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Original</sys:String>

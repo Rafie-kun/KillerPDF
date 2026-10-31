@@ -151,10 +151,10 @@ public sealed class PdfParagraphEditorTests
         Assert.False(PdfParagraphEditor.Inspect(source, 0, cut).CanEdit);
         Assert.Throws<ArgumentOutOfRangeException>(() => PdfParagraphEditor.Plan(source, 0,
             candidate.SourceRegion, new PdfContentBounds(-1, 10, 40, 40), "A", Font(), 10, 12, PdfParagraphAlignment.Left));
-        Assert.Throws<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0,
+        Assert.ThrowsAny<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0,
             candidate.SourceRegion, candidate.SourceRegion, "Z",
             TrueTypeFont.Load(TrueTypeFontTests.BuildTestFont(format12: false)), 10, 12, PdfParagraphAlignment.Left));
-        Assert.Throws<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0,
+        Assert.ThrowsAny<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0,
             candidate.SourceRegion, candidate.SourceRegion, "\u0645", Font(), 10, 12, PdfParagraphAlignment.Left));
     }
 
@@ -299,7 +299,7 @@ public sealed class PdfParagraphEditorTests
         PdfDocument source = Raw($"BT /F1 10 Tf 1 0 0 1 30 250 Tm (OLD line) Tj ET BT /F1 10 Tf 1 0 0 1 30 238 Tm (OLD next) Tj ET {after}",
             resources: resources, extraObject: LogoForm);
         PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
-        NotSupportedException refusal = Assert.Throws<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0,
+        NotSupportedException refusal = Assert.ThrowsAny<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0,
             candidate.SourceRegion, new PdfContentBounds(30, 200, 200, 262), "AAAA AAAA\nAAAA\nAAAA", Font(), 10, 12,
             PdfParagraphAlignment.Left));
         Assert.Contains("painted after", refusal.Message, StringComparison.Ordinal);
@@ -357,7 +357,7 @@ public sealed class PdfParagraphEditorTests
         PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion, padded, "AAAA", Font(), 10, 12,
             PdfParagraphAlignment.Left);
         Assert.False(plan.HasOverflow, plan.OverflowReason);
-        Assert.Throws<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+        Assert.ThrowsAny<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
             padded with { Bottom = 200 }, "AAAA", Font(), 30, 32, PdfParagraphAlignment.Left));
     }
 
@@ -481,7 +481,7 @@ public sealed class PdfParagraphEditorTests
     {
         PdfDocument source = Raw("q 20 230 100 40 re W n BT /F1 10 Tf 30 250 Td (OLD) Tj ET Q");
         PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
-        Assert.Throws<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+        Assert.ThrowsAny<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
             new PdfContentBounds(30, 100, 200, 200), "AAAA", Font(), 10, 12, PdfParagraphAlignment.Left));
     }
 
@@ -648,6 +648,123 @@ public sealed class PdfParagraphEditorTests
         PdfDocument source = Raw("BT /F3 10 Tf 30 250 Td (aline a) Tj ET", fonts:
             "/F3 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding << /Type /Encoding /Differences [97 /fi] >> >>");
         Assert.Equal("filine fi", Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0)).Text);
+    }
+
+    private const string AboveAHeading = "BT /F1 10 Tf 30 250 Td (aaaa bbbb cccc dddd eeee ffff) Tj 0 -12 Td (gggg hhhh iiii jjjj kkkk llll) Tj ET " +
+        "BT /F1 14 Tf 30 222 Td (Heading below it here) Tj ET";
+
+    // Adding a row would land on what follows, so the glyphs give up a little width instead.
+    [Fact]
+    public void AnEditThatWouldRunIntoWhatFollowsNarrowsInstead()
+    {
+        PdfDocument source = Raw(AboveAHeading);
+        PdfParagraphCandidate candidate = PdfParagraphEditor.FindParagraphs(source, 0).First();
+        string text = candidate.Text + " mmmm";
+        Assert.ThrowsAny<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            PdfParagraphEditor.DefaultBox(candidate, 300, 300, text, Font()), text, Font(), 10, 12, PdfParagraphAlignment.Left));
+        PdfParagraphPlan plan = PdfParagraphEditor.PlanFitted(source, 0, candidate, 300, 300, text, Font(), 10, 12, PdfParagraphAlignment.Left);
+        Assert.False(plan.HasOverflow, plan.OverflowReason);
+        Assert.InRange(plan.HorizontalScale, 0.9, 0.995);
+        Assert.Equal(2, plan.Lines.Count);
+        Assert.All(plan.Lines, line => Assert.True(line.X + line.Width <= plan.TargetBounds.Right + 0.001));
+        PdfPageContent after = new PdfPageContentReader(PdfDocument.Open(plan.GetPreviewDocument())).Read(0);
+        Assert.Contains("llll mmmm", after.Text, StringComparison.Ordinal);
+        Assert.Contains("Heading below it here", after.Text, StringComparison.Ordinal);
+        // The page has to show the narrowing, not only the plan.
+        Assert.True(after.Letters.Where(letter => letter.BoundingBox.Bottom > 228).Max(letter => letter.BoundingBox.Right) <= plan.TargetBounds.Right + 0.5);
+    }
+
+    [Fact]
+    public void RoomBelowLeavesTheTextAtFullWidth()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (aaaa bbbb cccc dddd eeee ffff) Tj 0 -12 Td (gggg hhhh iiii jjjj kkkk llll) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        PdfParagraphPlan plan = PdfParagraphEditor.PlanFitted(source, 0, candidate, 300, 300, candidate.Text + " mm", Font(), 10, 12, PdfParagraphAlignment.Left);
+        Assert.False(plan.HasOverflow, plan.OverflowReason);
+        Assert.Equal(1, plan.HorizontalScale);
+    }
+
+    // Past a point it stops being the same type, so a real rewrite still gets a straight answer.
+    [Fact]
+    public void FarTooMuchTextIsStillRefused()
+    {
+        PdfDocument source = Raw(AboveAHeading);
+        PdfParagraphCandidate candidate = PdfParagraphEditor.FindParagraphs(source, 0).First();
+        string text = candidate.Text + string.Concat(Enumerable.Repeat(" more words", 12));
+        Assert.ThrowsAny<NotSupportedException>(() =>
+            PdfParagraphEditor.PlanFitted(source, 0, candidate, 300, 300, text, Font(), 10, 12, PdfParagraphAlignment.Left));
+    }
+
+    [Fact]
+    public void WidthRatioComparesAFontWithThePage()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (Old line of text here) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        Assert.InRange(PdfParagraphEditor.WidthRatio(candidate, Font()), 0.8, 1.25);
+    }
+
+    // One glyph for one character needs no shaping, only a font that has it.
+    [Theory]
+    [InlineData("Let α and β vary by 2 μm")]
+    [InlineData("Привет, мир")]
+    public void GreekAndCyrillicNeedNoShaping(string text)
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (Old line of text here) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion, new PdfContentBounds(20, 100, 280, 262),
+            text, Font(), 10, 12, PdfParagraphAlignment.Left);
+        Assert.False(plan.HasOverflow, plan.OverflowReason);
+        Assert.Contains(text, new PdfPageContentReader(PdfDocument.Open(plan.GetPreviewDocument())).Read(0).Text, StringComparison.Ordinal);
+    }
+
+    // These join, reorder or stack, and nothing here can do that.
+    [Theory]
+    [InlineData("שלום")]
+    [InlineData("مرحبا")]
+    [InlineData("नमस्ते")]
+    public void ScriptsThatNeedShapingStayRefused(string text)
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (Old line of text here) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        var error = Assert.ThrowsAny<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            new PdfContentBounds(20, 100, 280, 262), text, Font(), 10, 12, PdfParagraphAlignment.Left));
+        Assert.Contains("shaping", error.Message, StringComparison.Ordinal);
+    }
+
+    // LaTeX writes an accent as a letter and a mark, which is one ordinary character once composed.
+    [Fact]
+    public void ALetterAndItsAccentAreComposed()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (Old line of text here) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion, new PdfContentBounds(20, 100, 280, 262),
+            "A café here", Font(), 10, 12, PdfParagraphAlignment.Left);
+        Assert.False(plan.HasOverflow, plan.OverflowReason);
+        Assert.Contains("café", new PdfPageContentReader(PdfDocument.Open(plan.GetPreviewDocument())).Read(0).Text, StringComparison.Ordinal);
+    }
+
+    // The fix is to retype them, which a word about shaping would never suggest.
+    [Theory]
+    [InlineData("Old � line")]
+    [InlineData("Old \u007F line")]
+    [InlineData("Old  line")]
+    public void CharactersThePdfNeverIdentifiedAreNamedAsSuch(string text)
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (Old line of text here) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        var error = Assert.ThrowsAny<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+            new PdfContentBounds(20, 100, 280, 262), text, Font(), 10, 12, PdfParagraphAlignment.Left));
+        Assert.Contains("does not identify", error.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ATabIsASpace()
+    {
+        PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (Old line of text here) Tj ET");
+        PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0));
+        PdfParagraphPlan plan = PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion, new PdfContentBounds(20, 100, 280, 262),
+            "One\ttwo", Font(), 10, 12, PdfParagraphAlignment.Left);
+        Assert.Equal("One two", Assert.Single(plan.Lines).Text);
     }
 
     // Web exports leave zero-width spaces around links. They print nothing and need no shaping.
@@ -1267,7 +1384,7 @@ public sealed class PdfParagraphEditorTests
         PdfDocument source = Raw(content);
         PdfParagraphCandidate candidate = Assert.Single(PdfParagraphEditor.FindParagraphs(source, 0),
             item => item.Text.StartsWith("Old", StringComparison.Ordinal));
-        NotSupportedException refusal = Assert.Throws<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0,
+        NotSupportedException refusal = Assert.ThrowsAny<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0,
             candidate.SourceRegion, new PdfContentBounds(30, 200, 290, 258), "A new line that runs right across the column beside it", Font(), 10, 12,
             PdfParagraphAlignment.Left));
         Assert.Contains(reason, refusal.Message, StringComparison.Ordinal);
@@ -1278,7 +1395,7 @@ public sealed class PdfParagraphEditorTests
     {
         PdfDocument source = Raw("BT /F1 10 Tf 30 250 Td (Old line) Tj ET BT /F1 10 Tf 30 226 Td (The text below it) Tj ET");
         PdfParagraphCandidate candidate = PdfParagraphEditor.FindParagraphs(source, 0).First();
-        Assert.Throws<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
+        Assert.ThrowsAny<NotSupportedException>(() => PdfParagraphEditor.Plan(source, 0, candidate.SourceRegion,
             new PdfContentBounds(30, 100, 60, 258), "AAAA BBBB CCCC DDDD EEEE FFFF", Font(), 10, 12, PdfParagraphAlignment.Left));
     }
 

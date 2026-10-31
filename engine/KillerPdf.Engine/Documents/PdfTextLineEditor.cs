@@ -251,9 +251,9 @@ public static partial class PdfContentRedaction
         if (!insertion.Written)
             throw new InvalidOperationException("The page changed while its text was being rewritten.");
         if (insertion.Covered)
-            throw new NotSupportedException(edit.ParagraphLines is null
-                ? "Content painted after this line would cover the new text."
-                : "Content painted after the paragraph would cover the new box. Make the box smaller or move it clear of that content.");
+            throw edit.ParagraphLines is null
+                ? new NotSupportedException("Content painted after this line would cover the new text.")
+                : new PdfParagraphCollisionException("Content painted after the paragraph would cover the new box. Make the box smaller or move it clear of that content.");
         if (insertion.AfterPieces) PlaceAfterPieces(content, insertion, newBox!.Value, emOnPage, probe.Geometry);
         if (insertion.AfterText is { } rules) content.AddRange(rules);
         if (edit.ParagraphRows is { } sourceRows) content = WithoutUnderlines(content, sourceRows, probe.Geometry);
@@ -997,7 +997,7 @@ public static partial class PdfContentRedaction
             {
                 // Font expansion is typesetting, so the plan measures and this writes at unit aspect.
                 if (writer.ParagraphLines is { } positions && index < positions.Count)
-                    target.Add(Op("Tm", Glyph.D * state.Ctm.D / state.Ctm.A, 0, 0, Glyph.D, (positions[index].X - state.Ctm.E) / state.Ctm.A,
+                    target.Add(Op("Tm", positions[index].Scale * Glyph.D * state.Ctm.D / state.Ctm.A, 0, 0, Glyph.D, (positions[index].X - state.Ctm.E) / state.Ctm.A,
                         (positions[index].Baseline - state.Ctm.F) / state.Ctm.D));
                 else if (index > 0) target.Add(Op("Td", 0, -writer.Leading));
                 if (writer.Lines[index].Items.Count > 0)

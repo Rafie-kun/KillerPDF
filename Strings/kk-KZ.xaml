@@ -1881,6 +1881,7 @@ KillerPDF жөндеуге әрекет жасасын ба? Жөнделген 
     <sys:String x:Key="Str_Paragraph_Refused">Бұл абзацты өңдеу мүмкін емес: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Бұл абзацта әртүрлі қаріптер, өлшемдер немесе түстер араласқан. Жаңа мәтін бір стильді пайдаланады, сондықтан бұл пішімдеу сақталмайды.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Алдын ала қарау қарпі: {0}. Бұл қаріп өңделген PDF файлына ендіріледі.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Narrowed">Абзац жолдарын сақтау үшін мәтін еніне {0}% етіп орнатылды.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Алдын ала қарау дайындалуда...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Құжат өзгерді. Жалғастыру үшін абзацты өңдеуді қайта ашыңыз.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Түпнұсқа</sys:String>

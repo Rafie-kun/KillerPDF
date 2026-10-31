@@ -33,6 +33,7 @@ namespace KillerPDF.Controls
         private bool _formDragIsResize;
         private bool _formDragMoved;
         private string? _selectedFormFieldName;
+        private readonly Dictionary<string, PasswordBox> _formPasswordBoxes = [];
 
         private const double FormResizeGripSize = 14;
         private static readonly DependencyProperty FormFillCursorProperty =
@@ -234,6 +235,32 @@ namespace KillerPDF.Controls
 
         internal bool HasSelectedFormField => _currentTool is EditTool.Select or EditTool.FormField
             && !string.IsNullOrEmpty(_selectedFormFieldName);
+
+        // The box that edits the selected field: its text or password box, or null when the selection is a
+        // check box, button or other field, when the field is read-only, or when it is not on screen. Only
+        // the Select tool edits; the Form Field tool drags its fields.
+        private Control? SelectedFormFieldEditor()
+        {
+            if (_currentTool != EditTool.Select || string.IsNullOrEmpty(_selectedFormFieldName)) return null;
+            if (_formValueBoxes.TryGetValue(_selectedFormFieldName, out TextBox? box))
+                return box.IsVisible && box.IsEnabled && !box.IsReadOnly ? box : null;
+            if (_formPasswordBoxes.TryGetValue(_selectedFormFieldName, out PasswordBox? password))
+                return password.IsVisible && password.IsEnabled ? password : null;
+            return null;
+        }
+
+        internal bool CanTypeIntoSelectedFormField => SelectedFormFieldEditor() is not null;
+
+        // A single click only selects a text field (#307), so the keys that follow reach the window and
+        // run tool shortcuts. Typing a character moves the keyboard into the field with its value
+        // selected, as typing over a spreadsheet cell does, and the character is typed there.
+        internal bool BeginTypedFormFieldEdit()
+        {
+            if (SelectedFormFieldEditor() is not Control editor || !editor.Focus()) return false;
+            if (editor is TextBox textBox) textBox.SelectAll();
+            else if (editor is PasswordBox password) password.SelectAll();
+            return true;
+        }
 
         internal void DeleteSelectedFormField()
         {
@@ -454,6 +481,7 @@ namespace KillerPDF.Controls
                         pb.GotFocus  += (_, _) => { _selectedFormFieldName = passwordKey; pb.SetResourceReference(Control.BorderBrushProperty, "HeaderLineBrush"); };
                         pb.LostFocus += (_, _) => { pb.BorderBrush = restingBorder; RecalculateFormFields(); };
                         pb.PasswordChanged += (_, _) => { _formTextValues[passwordKey] = pb.Password; MarkDirty(true); };
+                        _formPasswordBoxes[passwordKey] = pb;
                         ctrl = pb;
                     }
                     else

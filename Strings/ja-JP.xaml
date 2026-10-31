@@ -1878,6 +1878,7 @@ Windows の設定 - 既定のアプリ を開きます。</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">この段落は編集できません: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">この段落には複数のフォント、サイズ、または色が混在しています。新しいテキストは単一のスタイルを使用するため、この書式は引き継がれません。</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">プレビューのフォント: {0}。このフォントは編集後のPDFに埋め込まれます。</sys:String>
+    <sys:String x:Key="Str_Paragraph_Narrowed">段落の行数を保つため、文字幅を {0}% に調整しています。</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">プレビューを準備中...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">ドキュメントが変更されました。段落編集を開き直して続行してください。</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">元の内容</sys:String>

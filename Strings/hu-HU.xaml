@@ -251,7 +251,7 @@ Az oldal lecserélhető a saját képére, amelyen a megjelölt területek feket
     <sys:String x:Key="Str_Save_ReferenceRepairs">Mentve a hibás hivatkozások javításával. A hiányzó tartalom nem lett helyreállítva.</sys:String>
     <sys:String x:Key="Str_Save_DamagedEncrypted">Ez a PDF sérült és jelszóval védett, ezért a KillerPDF nem tudja megjavítani vagy menteni. Az eredeti fájl nem változott.</sys:String>
     <sys:String x:Key="Str_Save_DamagedSigned">Ez a PDF sérült, és digitális aláírást tartalmaz. A mentés érvénytelenítené az aláírást, ezért a fájl nem változott.</sys:String>
-    <sys:String x:Key="Str_Save_DamagedCertified">Ez a PDF sérült, és a szerzője tanúsította. A mentés megszüntetné a tanúsítást, ezért a fájl nem változott.</sys:String>
+    <sys:String x:Key="Str_Save_DamagedCertified">Ez a PDF sérült, és a szerzője hitelesítette. A mentés érvénytelenítené a hitelesítést, ezért a fájl nem változott.</sys:String>
     <sys:String x:Key="Str_Save_DamagedUsageRights">Ez a PDF sérült, és Reader-használati jogokat tartalmaz. A mentés érvénytelenítené ezeket, ezért a fájl nem változott.</sys:String>
     <sys:String x:Key="Str_OpenedRasterRepair">Megnyitva: {0} (raszterizált javítás - mentse a változások megtartásához) - {1} oldal</sys:String>
     <sys:String x:Key="Str_PageOf">{0}. oldal / {1}</sys:String>
@@ -1865,6 +1865,7 @@ Megnyílik a Windows Beállítások - Alapértelmezett alkalmazások.</sys:Strin
     <sys:String x:Key="Str_Paragraph_Refused">Ez a bekezdés nem szerkeszthető: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Ez a bekezdés többféle betűtípust, betűméretet vagy színt tartalmaz. Az új szöveg egyetlen stílust használ, ezért ez a formázás nem marad meg.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Előnézeti betűtípus: {0}. Ez a betűtípus be lesz ágyazva a szerkesztett PDF-be.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Narrowed">A szöveg a szélességének {0}%-án jelenik meg, hogy megtartsa a bekezdés sorait.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Előnézet előkészítése...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">A dokumentum megváltozott. A folytatáshoz nyissa meg újra a bekezdésszerkesztést.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Eredeti</sys:String>

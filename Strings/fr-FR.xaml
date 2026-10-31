@@ -1878,6 +1878,7 @@ Les redimensionner à une taille prise en charge ? Les pages conservent leur app
     <sys:String x:Key="Str_Paragraph_Refused">Ce paragraphe ne peut pas être modifié : {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Ce paragraphe mélange plusieurs polices, tailles ou couleurs. Le nouveau texte utilise un seul style, cette mise en forme ne sera donc pas conservée.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Police de l’aperçu : {0}. Cette police sera incorporée au PDF modifié.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Narrowed">Le texte est réglé à {0} % de sa largeur pour conserver les lignes du paragraphe.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Préparation de l’aperçu...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Le document a changé. Rouvrez la modification de paragraphe pour continuer.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Original</sys:String>

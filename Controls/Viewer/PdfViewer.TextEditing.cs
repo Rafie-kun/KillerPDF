@@ -322,51 +322,20 @@ namespace KillerPDF.Controls
                     return;
                 }
 
-                // Find words on the same line as the click (Y overlap with tolerance)
-                var clickY = readingPos.Y;
-                var lineWords = canvasWords
-                    .Where(cw => clickY >= cw.Rect.Top - 3 && clickY <= cw.Rect.Bottom + 3)
-                    .OrderBy(cw => cw.Rect.Left)  // strictly left-to-right
+                // The words of the line the click lands on: the same row, the contiguous run around the click,
+                // and only words near the nearest word's size, so a drop numeral beside it is left out.
+                var lineWords = TextLineGathering.Gather(
+                        [.. canvasWords.Select(cw => new TextLineGathering.Candidate(
+                            cw.Word.Text, cw.Rect, cw.Word.Letters.Count > 0 ? cw.Word.Letters[0].PointSize : 0))],
+                        readingPos)
+                    .Select(index => canvasWords[index])
                     .ToList();
-
-                if (lineWords.Count == 0)
-                {
-                    // Try nearest line within 20px
-                    var nearest = canvasWords
-                        .OrderBy(cw => Math.Abs((cw.Rect.Top + cw.Rect.Bottom) / 2 - clickY))
-                        .First();
-                    double nearMidY = (nearest.Rect.Top + nearest.Rect.Bottom) / 2;
-                    lineWords = [..canvasWords
-                        .Where(cw => Math.Abs((cw.Rect.Top + cw.Rect.Bottom) / 2 - nearMidY) < 5)
-                        .OrderBy(cw => cw.Rect.Left)];
-                }
 
                 if (lineWords.Count == 0)
                 {
                     SetStatus(Loc("Str_St_NoTextLine"));
                     return;
                 }
-
-                // Narrow to the contiguous run of words around the click. Words at the same Y in a
-                // second column are separated by a large horizontal gap, so stop there instead of
-                // merging both columns into one edit (the "weird text" / page-spanning edit).
-                if (lineWords.Count > 1)
-                {
-                    int ci = 0; double bestDx = double.MaxValue;
-                    for (int i = 0; i < lineWords.Count; i++)
-                    {
-                        var r = lineWords[i].Rect;
-                        double dx = readingPos.X < r.Left ? r.Left - readingPos.X
-                                  : readingPos.X > r.Right ? readingPos.X - r.Right : 0;
-                        if (dx < bestDx) { bestDx = dx; ci = i; }
-                    }
-                    double gapMax = Math.Max(lineWords[ci].Rect.Height * 1.5, 24);   // word spacing is small; a column gap is large
-                    int lo = ci, hi = ci;
-                    while (lo > 0 && lineWords[lo].Rect.Left - lineWords[lo - 1].Rect.Right <= gapMax) lo--;
-                    while (hi < lineWords.Count - 1 && lineWords[hi + 1].Rect.Left - lineWords[hi].Rect.Right <= gapMax) hi++;
-                    lineWords = lineWords.GetRange(lo, hi - lo + 1);
-                }
-
                 // Compute the line's bounding box in the reading frame
                 double cLeft = lineWords.Min(w => w.Rect.Left);
                 double cTop = lineWords.Min(w => w.Rect.Top);

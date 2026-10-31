@@ -115,7 +115,7 @@ namespace KillerPDF.Services
         private static readonly Dictionary<string, CmapCoverage?> Cache = new(StringComparer.OrdinalIgnoreCase);
         private static readonly Lock Gate = new();
 
-        private static bool Covers(string family, string text)
+        internal static bool Covers(string family, string text)
         {
             var cov = CoverageFor(family);
             if (cov is null) return false;   // not installed / unreadable: cannot promise anything

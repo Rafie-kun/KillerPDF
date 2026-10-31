@@ -70,6 +70,9 @@ public sealed record PdfParagraphCandidate(int PageIndex, PdfContentBounds Sourc
 
 internal readonly record struct PdfParagraphRowSpan(double Left, double Right, double Baseline, double Size);
 
+// The edit runs into something on the page, which narrower text may clear.
+internal sealed class PdfParagraphCollisionException(string message) : NotSupportedException(message);
+
 /// <summary>The eligibility of the complete source lines inside a selected area.</summary>
 public sealed record PdfParagraphInspection(bool CanEdit, string Reason, PdfParagraphCandidate? Candidate)
 {
@@ -100,7 +103,7 @@ public sealed record PdfParagraphCandidateInspection(IReadOnlyList<PdfParagraphC
     IReadOnlyList<PdfParagraphInspection> Refusals);
 
 /// <summary>A line laid out in crop-relative page points.</summary>
-public sealed record PdfParagraphLine(string Text, double X, double Baseline, double Width);
+public sealed record PdfParagraphLine(string Text, double X, double Baseline, double Width, double Scale = 1);
 
 /// <summary>An immutable source-bound layout and its exact PDF preview.</summary>
 public sealed class PdfParagraphPlan
@@ -123,6 +126,8 @@ public sealed class PdfParagraphPlan
     public PdfParagraphAlignment Alignment { get; }
     /// <summary>Gets the planned line positions.</summary>
     public IReadOnlyList<PdfParagraphLine> Lines { get; }
+    /// <summary>Gets how far the glyphs are narrowed to fit, where 1 is not at all.</summary>
+    public double HorizontalScale => Lines.Count == 0 ? 1 : Lines[0].Scale;
     /// <summary>Gets whether the replacement does not fit its box.</summary>
     public bool HasOverflow => OverflowReason.Length != 0;
     /// <summary>Gets the reason the replacement cannot fit.</summary>
@@ -167,6 +172,8 @@ public static class PdfParagraphEditor
     private const double LineAscent = 0.8, LineDescent = 0.2;
     // The least a typeset word space comes to, and what a box leaves before the next column.
     private const double SpaceEm = 0.25;
+    // Past this it stops reading as the same type, so the edit gets a refusal and not squeezed text.
+    private const int NarrowestPercent = 90;
 
     private static readonly HashSet<string> InlineElements = new(StringComparer.Ordinal)
         { "Span", "Link", "Em", "Strong", "Quote", "Code", "Reference", "Sub" };
@@ -601,8 +608,22 @@ public static class PdfParagraphEditor
         }
     }
 
+    // This slice has no shaping engine, so what it cannot do is text that joins, reorders or stacks.
+    // Everything else, Greek, Cyrillic, CJK and symbols among it, is one glyph for each character.
+    private static bool NeedsShaping(Rune rune) =>
+        Rune.GetUnicodeCategory(rune) is UnicodeCategory.NonSpacingMark or UnicodeCategory.SpacingCombiningMark or UnicodeCategory.EnclosingMark
+        || rune.Value is >= 0x0590 and <= 0x109F or >= 0x1100 and <= 0x11FF or >= 0x1700 and <= 0x1CFF or >= 0xA800 and <= 0xABFF
+            or >= 0xFB1D and <= 0xFDFF or >= 0xFE70 and <= 0xFEFF or 0x200E or 0x200F or >= 0x202A and <= 0x202E or >= 0x2066 and <= 0x2069
+            or >= 0x10000 and <= 0x1D3FF or >= 0x1D800 and <= 0x1EFFF;
+
+    private static string Composed(string text)
+    {
+        try { return text.Normalize(NormalizationForm.FormC); }
+        catch (ArgumentException) { return text; }
+    }
+
     // Zero-width spaces and joiners print nothing, and web exports leave them around links.
-    private static string PlainLetters(string text) => string.Concat(text.Where(letter => letter is not ('​' or '‌' or '‍' or '⁠' or '﻿')))
+    private static string PlainLetters(string text) => Composed(string.Concat(text.Where(letter => letter is not ('​' or '‌' or '‍' or '⁠' or '﻿'))))
         .Replace("ﬀ", "ff", StringComparison.Ordinal)
         .Replace("ﬁ", "fi", StringComparison.Ordinal).Replace("ﬂ", "fl", StringComparison.Ordinal)
         .Replace("ﬃ", "ffi", StringComparison.Ordinal).Replace("ﬄ", "ffl", StringComparison.Ordinal)
@@ -745,7 +766,11 @@ public static class PdfParagraphEditor
     /// <param name="fontSize">The replacement size, or null for the source size.</param>
     /// <param name="leading">The distance between baselines, or null for the source's.</param>
     public static PdfContentBounds DefaultBox(PdfParagraphCandidate candidate, double pageWidth, double pageHeight,
-        string? text = null, TrueTypeFont? font = null, double? fontSize = null, double? leading = null)
+        string? text = null, TrueTypeFont? font = null, double? fontSize = null, double? leading = null) =>
+        DefaultBox(candidate, pageWidth, pageHeight, text, font, fontSize, leading, 1);
+
+    private static PdfContentBounds DefaultBox(PdfParagraphCandidate candidate, double pageWidth, double pageHeight,
+        string? text, TrueTypeFont? font, double? fontSize, double? leading, double scale)
     {
         ArgumentNullException.ThrowIfNull(candidate);
         double size = fontSize ?? candidate.FontSize;
@@ -761,15 +786,10 @@ public static class PdfParagraphEditor
             // Measured at the source size, so a larger size wraps within the column instead of widening it.
             for (int index = 0; index < candidate.RowTexts.Count; index++)
                 right = Math.Max(right, left + (index == 0 ? candidate.FirstLineIndent : 0)
-                    + PdfTextReflow.MeasureLine(candidate.RowTexts[index], font, candidate.FontSize));
+                    + PdfTextReflow.MeasureLine(candidate.RowTexts[index], font, candidate.FontSize) * scale);
             right = Math.Min(right + 0.01, limit);
             string wrapped = Normalized(text ?? candidate.Text);
-            int LinesWithin(double edge)
-            {
-                double indent = FittedIndent(wrapped, font, size, edge - left, candidate.FirstLineIndent);
-                return (SourceRows(candidate, wrapped, font, size, edge - left, indent)
-                    ?? PdfTextReflow.Wrap(wrapped, font, size, edge - left, indent)).Count;
-            }
+            int LinesWithin(double edge) => RowCount(candidate, wrapped, font, size, (edge - left) / scale, candidate.FirstLineIndent / scale);
             lines = LinesWithin(right);
             // A rejoined hyphenated word can push the source's own text one row further. A little
             // more width costs less than a new row over whatever sits below.
@@ -781,8 +801,8 @@ public static class PdfParagraphEditor
                     right = wider;
                     lines = candidate.RowTexts.Count;
                 }
-            kept = SourceRows(candidate, wrapped, font, size, right - left,
-                FittedIndent(wrapped, font, size, right - left, candidate.FirstLineIndent)) is not null;
+            kept = SourceRows(candidate, wrapped, font, size, (right - left) / scale,
+                FittedIndent(wrapped, font, size, (right - left) / scale, candidate.FirstLineIndent / scale)) is not null;
         }
         double top = Math.Min(pageHeight, candidate.FirstBaseline + size * LineAscent);
         return new PdfContentBounds(left, Math.Max(0, top - size - Drop(candidate, kept, lines - 1, leading ?? candidate.Leading)),
@@ -794,8 +814,14 @@ public static class PdfParagraphEditor
     private static double Drop(PdfParagraphCandidate source, bool kept, int index, double leading) =>
         kept && leading == source.Leading ? source.RowSpans[0].Baseline - source.RowSpans[index].Baseline : index * leading;
 
+    private static int RowCount(PdfParagraphCandidate candidate, string text, TrueTypeFont font, double size, double width, double firstIndent)
+    {
+        double indent = FittedIndent(text, font, size, width, firstIndent);
+        return (SourceRows(candidate, text, font, size, width, indent) ?? PdfTextReflow.Wrap(text, font, size, width, indent)).Count;
+    }
+
     private static string Normalized(string text) =>
-        PlainLetters(text.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n'));
+        PlainLetters(text.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n').Replace('\t', ' '));
 
     // The first line is shorter by the indent. A box too narrow for the indent has no first line to
     // shorten, and a first word that fits the box but not that line would be split, so the indent gives way.
@@ -818,10 +844,50 @@ public static class PdfParagraphEditor
             ? rows : null;
     }
 
+    /// <summary>Returns how wide a font sets the paragraph against how wide the page has it, so 1
+    /// means the same width and a larger value is wider.</summary>
+    public static double WidthRatio(PdfParagraphCandidate candidate, TrueTypeFont font)
+    {
+        ArgumentNullException.ThrowIfNull(candidate);
+        ArgumentNullException.ThrowIfNull(font);
+        double page = candidate.RowSpans.Sum(row => row.Right - row.Left);
+        double measured = candidate.RowTexts.Sum(row => PdfTextReflow.MeasureLine(row, font, candidate.FontSize));
+        return page > 0 ? measured / page : 1;
+    }
+
+    /// <summary>Plans an edit in the paragraph's default box. When that would land on what follows,
+    /// the glyphs narrow a little so the text keeps the rows the paragraph has, and the plan's
+    /// <see cref="PdfParagraphPlan.HorizontalScale"/> says by how much.</summary>
+    public static PdfParagraphPlan PlanFitted(PdfDocument document, int pageIndex, PdfParagraphCandidate candidate,
+        double pageWidth, double pageHeight, string text, TrueTypeFont font, double fontSize, double leading,
+        PdfParagraphAlignment alignment)
+    {
+        ArgumentNullException.ThrowIfNull(candidate);
+        PdfContentBounds box = DefaultBox(candidate, pageWidth, pageHeight, text, font, fontSize, leading);
+        try { return Plan(document, pageIndex, candidate.SourceRegion, box, text, font, fontSize, leading, alignment, 1); }
+        catch (PdfParagraphCollisionException)
+        {
+            string normalized = Normalized(text);
+            for (int percent = 99; percent >= NarrowestPercent; percent--)
+            {
+                double scale = percent / 100.0;
+                box = DefaultBox(candidate, pageWidth, pageHeight, text, font, fontSize, leading, scale);
+                if (RowCount(candidate, normalized, font, fontSize, box.Width / scale, candidate.FirstLineIndent / scale) <= candidate.RowTexts.Count)
+                    return Plan(document, pageIndex, candidate.SourceRegion, box, text, font, fontSize, leading, alignment, scale);
+            }
+            throw;
+        }
+    }
+
     /// <summary>Creates a source-bound layout and an exact, unapplied preview when it fits.</summary>
     public static PdfParagraphPlan Plan(PdfDocument document, int pageIndex, PdfContentBounds sourceRegion,
         PdfContentBounds targetBounds, string text, TrueTypeFont font, double fontSize, double leading,
-        PdfParagraphAlignment alignment)
+        PdfParagraphAlignment alignment) =>
+        Plan(document, pageIndex, sourceRegion, targetBounds, text, font, fontSize, leading, alignment, 1);
+
+    private static PdfParagraphPlan Plan(PdfDocument document, int pageIndex, PdfContentBounds sourceRegion,
+        PdfContentBounds targetBounds, string text, TrueTypeFont font, double fontSize, double leading,
+        PdfParagraphAlignment alignment, double scale)
     {
         ArgumentNullException.ThrowIfNull(document);
         ArgumentNullException.ThrowIfNull(text);
@@ -841,11 +907,9 @@ public static class PdfParagraphEditor
         foreach (Rune rune in normalized.EnumerateRunes())
         {
             if (rune.Value == '\n') continue;
-            // This slice has no shaping engine. Combining marks, bidi text, and contextual scripts need one.
-            bool ordinaryPunctuation = rune.Value is 0x2018 or 0x2019 or 0x201C or 0x201D
-                or 0x2022 or 0x2026 or 0x20AC or 0x2122 or >= 0x2010 and <= 0x2015 or 0x2212;
-            if ((rune.Value > 0x024F && !ordinaryPunctuation) || Rune.GetUnicodeCategory(rune) is UnicodeCategory.Control
-                or UnicodeCategory.NonSpacingMark or UnicodeCategory.SpacingCombiningMark or UnicodeCategory.EnclosingMark)
+            if (rune.Value == 0xFFFD || Rune.GetUnicodeCategory(rune) is UnicodeCategory.Control or UnicodeCategory.PrivateUse)
+                throw new NotSupportedException("This paragraph has characters the PDF does not identify. Retype them or remove them.");
+            if (NeedsShaping(rune))
                 throw new NotSupportedException("This text needs shaping that paragraph editing does not yet support.");
             if (rune.Value != ' ' && font.GetGlyphId(rune.Value) == 0)
                 throw new NotSupportedException($"{font.PostScriptName} has no glyph for {rune}.");
@@ -853,15 +917,17 @@ public static class PdfParagraphEditor
         // Reflow and authoring must use the same space glyph. Missing spaces must not silently become .notdef.
         if (normalized.Contains(' ') && font.GetGlyphId(' ') == 0)
             throw new NotSupportedException("The replacement font has no space glyph.");
+        // Lines are laid out at full width in a wider box, then the glyphs narrow to fit the real one.
+        double room = targetBounds.Width / scale;
         double indent = alignment == PdfParagraphAlignment.Left
-            ? FittedIndent(normalized, font, fontSize, targetBounds.Width, source.FirstLineIndent) : 0;
-        IReadOnlyList<PdfReflowLine>? kept = SourceRows(source, normalized, font, fontSize, targetBounds.Width, indent);
+            ? FittedIndent(normalized, font, fontSize, room, source.FirstLineIndent / scale) : 0;
+        IReadOnlyList<PdfReflowLine>? kept = SourceRows(source, normalized, font, fontSize, room, indent);
         IReadOnlyList<PdfReflowLine> wrapped = normalized.Length == 0 ? []
-            : kept ?? PdfTextReflow.Wrap(normalized, font, fontSize, targetBounds.Width, indent);
+            : kept ?? PdfTextReflow.Wrap(normalized, font, fontSize, room, indent);
         var lines = wrapped.Select((line, index) => new PdfParagraphLine(line.Text,
-            targetBounds.Left + (alignment == PdfParagraphAlignment.Center ? (targetBounds.Width - line.Width) / 2
-                : alignment == PdfParagraphAlignment.Right ? targetBounds.Width - line.Width : index == 0 ? indent : 0),
-            targetBounds.Top - fontSize * LineAscent - Drop(source, kept is not null, index, leading), line.Width)).ToArray();
+            targetBounds.Left + (alignment == PdfParagraphAlignment.Center ? (targetBounds.Width - line.Width * scale) / 2
+                : alignment == PdfParagraphAlignment.Right ? targetBounds.Width - line.Width * scale : index == 0 ? indent * scale : 0),
+            targetBounds.Top - fontSize * LineAscent - Drop(source, kept is not null, index, leading), line.Width * scale, scale)).ToArray();
         string overflow = lines.Any(line => line.X + line.Width > targetBounds.Right + 0.0001
             || line.Baseline - fontSize * LineDescent < targetBounds.Bottom - 0.0001)
             ? "The text overflows the paragraph box. Resize the box or adjust the font size or line spacing." : string.Empty;
@@ -873,7 +939,7 @@ public static class PdfParagraphEditor
             var content = new PdfContentStreamBuilder().BeginText().SetFont(font, fontSize);
             foreach (PdfParagraphLine line in lines)
                 if (line.Text.Length != 0)
-                    content.SetTextMatrix(1, 0, 0, 1, line.X, line.Baseline).ShowUnicodeText(line.Text);
+                    content.SetTextMatrix(line.Scale, 0, 0, 1, line.X, line.Baseline).ShowUnicodeText(line.Text);
             content.EndText();
             PdfDocument layout = PdfDocument.Open(new PdfDocumentBuilder().AddPage(page.Width, page.Height, content).Build());
             PdfContentBounds laid = PdfContentBounds.Union(new PdfPageContentReader(layout).Read(0).Letters.Select(letter => letter.BoundingBox));
@@ -881,7 +947,7 @@ public static class PdfParagraphEditor
             if (laid.Left < 0 || laid.Bottom < 0 || laid.Right > page.Width || laid.Top > page.Height)
                 overflow = "The glyphs extend outside the page. Move the box or adjust the text.";
             else if (source.Clip is { } clip && !PdfContentRedaction.ClipHolds(clip, laid))
-                throw new NotSupportedException("The new text extends past the clipped area of the source text. Move the box or adjust the text.");
+                throw new PdfParagraphCollisionException("The new text extends past the clipped area of the source text. Move the box or adjust the text.");
         }
         byte[]? preview = null;
         if (overflow.Length == 0)
@@ -892,7 +958,7 @@ public static class PdfParagraphEditor
                 .Where(letter => !string.IsNullOrWhiteSpace(letter.Value) && !CenterInside(letter.BoundingBox, source.SourceRegion))];
             if (lines.Any(line => line.Text.Length != 0 && under.Any(letter => CenterInside(letter.BoundingBox, new PdfContentBounds(
                 line.X, line.Baseline - fontSize * LineDescent, line.X + line.Width, line.Baseline + fontSize * 0.7)))))
-                throw new NotSupportedException("The new text would land on other text on the page. Move the box or adjust the text.");
+                throw new PdfParagraphCollisionException("The new text would land on other text on the page. Move the box or adjust the text.");
             var edit = new PdfTextLineEdit(pageIndex, source.SourceRegion, string.Join("\n", lines.Select(line => line.Text)))
             {
                 Substitute = font, UseSubstitute = true, FontSize = fontSize,

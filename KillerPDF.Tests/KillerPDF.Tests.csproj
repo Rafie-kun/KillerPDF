@@ -38,6 +38,8 @@
     <Compile Include="..\Services\SingleInstanceChannel.cs" Link="Services\SingleInstanceChannel.cs" />
     <Compile Include="..\Services\ComparisonGeometry.cs" Link="Services\ComparisonGeometry.cs" />
     <Compile Include="..\Services\FormTextLimit.cs" Link="Services\FormTextLimit.cs" />
+    <Compile Include="..\Services\SourceFontKind.cs" Link="Services\SourceFontKind.cs" />
+    <Compile Include="..\Services\ScanPixels.cs" Link="Services\ScanPixels.cs" />
     <Compile Include="..\Services\TranslationFileReader.cs" Link="Services\TranslationFileReader.cs" />
     <Compile Include="..\Services\ProcessTempFiles.cs" Link="Services\ProcessTempFiles.cs" />
     <Compile Include="..\Services\TwainScan.cs" Link="Services\TwainScan.cs" />
@@ -129,6 +131,8 @@
     <Compile Include="..\Services\MeasurementUnits.cs" Link="Services\MeasurementUnits.cs" />
     <Compile Include="..\Services\MeasurementGeometry.cs" Link="Services\MeasurementGeometry.cs" />
     <Compile Include="..\Services\EditableTextShortcutPolicy.cs" Link="Services\EditableTextShortcutPolicy.cs" />
+    <Compile Include="..\Services\FormFieldTypeAhead.cs" Link="Services\FormFieldTypeAhead.cs" />
+    <Compile Include="..\Services\TextLineGathering.cs" Link="Services\TextLineGathering.cs" />
     <Compile Include="..\Services\ShortcutTogglePolicy.cs" Link="Services\ShortcutTogglePolicy.cs" />
     <Compile Include="..\Services\UpdateRestartStore.cs" Link="Services\UpdateRestartStore.cs" />
     <Compile Include="..\Services\PayloadIntegrityVerifier.cs" Link="Services\PayloadIntegrityVerifier.cs" />

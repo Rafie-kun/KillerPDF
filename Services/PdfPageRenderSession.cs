@@ -169,6 +169,20 @@ internal sealed class PdfPageRenderSession : IDisposable
         return rendered;
     }
 
+    /// <summary>The base page at an exact pixel size, so an image drawn at that size lands pixel for pixel.</summary>
+    internal PdfRenderedPage RenderBasePage(int pageIndex, int width, int height,
+        CancellationToken cancellationToken = default)
+    {
+        PdfRenderedPage rendered = RenderOwnedPage(Renderer, pageIndex,
+            new EngineRenderOptions(width, height, false, false, false)
+            {
+                MaximumParallelism = RenderParallelism(width, height),
+                Jpeg2000PaintParallelism = Math.Clamp(Environment.ProcessorCount / 2, 1, 4)
+            }, cancellationToken);
+        rendered.RequireComplete(pageIndex);
+        return rendered;
+    }
+
     // Printing and image export pass requireComplete: false and name the incomplete pages
     // afterwards through IncompletePageLog; every other caller refuses them.
     internal PdfRenderedPage RenderPage(int pageIndex, bool transparentBackground = false,

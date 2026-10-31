@@ -49,6 +49,8 @@ namespace KillerPDF.Controls
         internal void DeleteSelectedExt() => DeleteSelected();
         internal bool HasSelectedFormFieldExt => HasSelectedFormField;
         internal void DeleteSelectedFormFieldExt() => DeleteSelectedFormField();
+        internal bool CanTypeIntoSelectedFormFieldExt => CanTypeIntoSelectedFormField;
+        internal bool BeginTypedFormFieldEditExt() => BeginTypedFormFieldEdit();
         internal void RefreshFormFieldsExt(int pageIndex)
         {
             if (_renderDims.TryGetValue(pageIndex, out var dimensions))

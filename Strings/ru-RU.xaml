@@ -1881,6 +1881,7 @@ KillerPDF не будет создавать две установленные �
     <sys:String x:Key="Str_Paragraph_Refused">Этот абзац нельзя редактировать: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">В этом абзаце смешаны разные шрифты, размеры или цвета. Новый текст использует один стиль, поэтому это форматирование не сохранится.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Шрифт предпросмотра: {0}. Этот шрифт будет встроен в отредактированный PDF.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Narrowed">Текст задан на {0} % ширины, чтобы сохранить строки абзаца.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Подготовка предпросмотра...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Документ изменился. Снова откройте редактирование абзаца, чтобы продолжить.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Оригинал</sys:String>

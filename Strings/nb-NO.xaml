@@ -1878,6 +1878,7 @@ Vil du skalere dem til en støttet størrelse? Sidene beholder utseende og propo
     <sys:String x:Key="Str_Paragraph_Refused">Dette avsnittet kan ikke redigeres: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Dette avsnittet blander skrifttyper, størrelser eller farger. Den nye teksten bruker én stil, så denne formateringen blir ikke med videre.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Skrift i forhåndsvisningen: {0}. Denne skriften bygges inn i den redigerte PDF-filen.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Narrowed">Teksten er satt til {0} % av bredden for å beholde radene i avsnittet.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Forbereder forhåndsvisning...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Dokumentet er endret. Åpne avsnittsredigeringen på nytt for å fortsette.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Original</sys:String>

@@ -28,7 +28,7 @@ public sealed class PdfParagraphCoverCheckTests
 
     private static void AssertRefused(string later)
     {
-        var error = Assert.Throws<NotSupportedException>(() => Plan(later));
+        var error = Assert.ThrowsAny<NotSupportedException>(() => Plan(later));
         Assert.Contains("would cover the new box", error.Message, StringComparison.Ordinal);
     }
 

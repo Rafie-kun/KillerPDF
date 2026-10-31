@@ -199,7 +199,7 @@ public sealed class PdfContentRedactionTests
     [Fact]
     public void AStructureTreeTooDeepToCleanIsRefused()
     {
-        var error = Assert.Throws<NotSupportedException>(() => PdfContentRedaction.Apply(
+        var error = Assert.ThrowsAny<NotSupportedException>(() => PdfContentRedaction.Apply(
             PdfDocument.Open(DeepStructure(300)), [new PdfRedactionRegion(0, new PdfContentBounds(90, 90, 300, 120))]));
 
         Assert.Equal("The document structure is too deeply nested to redact safely.", error.Message);
@@ -1057,7 +1057,7 @@ public sealed class PdfContentRedactionTests
             new PdfContentBounds(30, 200, 200, 262), "AAAA AAAA\nAAAA\nAAAA",
             KillerPdf.Engine.Fonts.PdfStandardFontSubstitutes.OcrTrainingFonts()[0], 10, 12, PdfParagraphAlignment.Left));
 
-        if (refused) Assert.Contains("painted after", Assert.IsType<NotSupportedException>(error).Message);
+        if (refused) Assert.Contains("painted after", Assert.IsAssignableFrom<NotSupportedException>(error).Message);
         else Assert.Null(error);
     }
 

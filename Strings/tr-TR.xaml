@@ -1858,6 +1858,7 @@ Desteklenen bir boyuta ölçeklensin mi? Sayfaların görünümü ve oranları k
     <sys:String x:Key="Str_Paragraph_Refused">Bu paragraf düzenlenemez: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Bu paragraf farklı yazı tiplerini, boyutlarını veya renklerini bir arada kullanıyor. Yeni metin tek bir stil kullanır, bu nedenle bu biçimlendirme korunmaz.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Önizleme yazı tipi: {0}. Bu yazı tipi düzenlenen PDF'ye gömülecektir.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Narrowed">Paragrafın satırlarını korumak için metin genişliğinin %{0} değerine ayarlandı.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Önizleme hazırlanıyor...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Belge değişti. Devam etmek için paragraf düzenlemeyi yeniden açın.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Özgün</sys:String>

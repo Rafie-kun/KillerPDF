@@ -1858,6 +1858,7 @@ Abre Configuración de Windows - Aplicaciones predeterminadas.</sys:String>
     <sys:String x:Key="Str_Paragraph_Refused">Este párrafo no se puede editar: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Este párrafo combina fuentes, tamaños o colores distintos. El texto nuevo usa un solo estilo, por lo que ese formato no se conservará.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Fuente de la vista previa: {0}. Esta fuente se incrustará en el PDF editado.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Narrowed">El texto se ajusta al {0} % de su ancho para conservar las filas del párrafo.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Preparando vista previa...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">El documento ha cambiado. Vuelve a abrir la edición de párrafos para continuar.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Original</sys:String>

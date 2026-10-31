@@ -342,7 +342,9 @@ public sealed class RenderBoundaryTests
         Assert.Equal(2, Count(rasterize, "cancellationToken: ct"));
         Assert.Contains("RenderBasePage(pages[i], ct)", ocr, StringComparison.Ordinal);
         Assert.Contains("RenderBasePage(pageIdx, ct)", ocr, StringComparison.Ordinal);
-        Assert.Equal(3, Count(ocr, "RenderBasePage(i, ct)"));
+        Assert.Equal(2, Count(ocr, "RenderBasePage(i, ct)"));
+        Assert.Contains("session.RenderBasePage(pageIndex, ct)", ocr, StringComparison.Ordinal);
+        Assert.Contains("session.RenderBasePage(pageIndex, size.Width, size.Height, ct)", ocr, StringComparison.Ordinal);
         Assert.Contains("lease.Render(i, renderW, renderW * 2, token)", viewer);
         Assert.Contains("lease.Render(i, secondaryMax, secondaryMax, token)", viewer);
         Assert.Contains("lease.Render(target, scaledMax, scaledMax, token)", viewer);

@@ -424,10 +424,9 @@ internal static partial class PdfEngineIntegration
         }
 
         // A rename makes the new name the key, and each rewrite of a file copies its whole payload into
-        // the file again, so a rename goes straight to its new name. Only when a file takes the name
-        // another still has, as two files swapping names do, does every renamed file move to a
-        // temporary name first, and each row's key is followed through both moves.
-        var finalKeys = new Dictionary<string, string>(StringComparer.Ordinal);
+        // the file again, so a row is rewritten once, with its new name, description and type together.
+        // Only when a file takes the name another still has, as two files swapping names do, does every
+        // renamed file move to a temporary name first, and each row's key is followed through the move.
         var temporaryKeys = new Dictionary<string, string>(StringComparer.Ordinal);
         bool needsTemporaryNames = remaining.Any(row => Renamed(row.Edit) && remaining.Any(other =>
             other.Key != row.Key
@@ -440,33 +439,23 @@ internal static partial class PdfEngineIntegration
                     .RenameAttachmentByKey(row.Key, temporary).Build();
                 temporaryKeys[row.Key] = temporary;
             }
-        foreach (var row in remaining.Where(row => Renamed(row.Edit)))
-        {
-            result = new PdfIncrementalPageEditor(PdfDocument.Open(result))
-                .RenameAttachmentByKey(needsTemporaryNames ? temporaryKeys[row.Key] : row.Key, row.Edit.FileName).Build();
-            finalKeys[row.Key] = row.Edit.FileName;
-        }
-
         var originals = current.ToDictionary(item => item.NameTreeKey!, StringComparer.Ordinal);
         foreach (var row in remaining)
         {
             PdfAttachmentInfo original = originals[row.Key];
             AttachmentEditorItem edit = row.Edit;
-            string key = finalKeys.TryGetValue(row.Key, out string? renamedKey) ? renamedKey : row.Key;
-            if (!string.Equals(edit.Description, original.Description, StringComparison.Ordinal))
-            {
-                if (!string.IsNullOrEmpty(edit.Description) && string.IsNullOrWhiteSpace(edit.Description))
-                    throw new ArgumentException("An attachment description cannot be whitespace.");
-                result = new PdfIncrementalPageEditor(PdfDocument.Open(result))
-                    .SetAttachmentDescriptionByKey(key,
-                        string.IsNullOrEmpty(edit.Description) ? null : edit.Description).Build();
-            }
-            if (!string.Equals(edit.MimeType, original.MimeType, StringComparison.Ordinal)
-                || edit.Relationship != original.Relationship)
-            {
-                result = new PdfIncrementalPageEditor(PdfDocument.Open(result))
-                    .SetAttachmentClassificationByKey(key, edit.MimeType, edit.Relationship).Build();
-            }
+            bool renamed = Renamed(edit);
+            bool described = !string.Equals(edit.Description, original.Description, StringComparison.Ordinal);
+            bool retyped = !string.Equals(edit.MimeType, original.MimeType, StringComparison.Ordinal)
+                || edit.Relationship != original.Relationship;
+            if (!renamed && !described && !retyped) continue;
+            if (described && !string.IsNullOrEmpty(edit.Description) && string.IsNullOrWhiteSpace(edit.Description))
+                throw new ArgumentException("An attachment description cannot be whitespace.");
+            result = new PdfIncrementalPageEditor(PdfDocument.Open(result))
+                .EditAttachmentByKey(needsTemporaryNames && renamed ? temporaryKeys[row.Key] : row.Key,
+                    renamed ? edit.FileName : null,
+                    retyped ? edit.MimeType : null, retyped ? edit.Relationship : null,
+                    described, string.IsNullOrEmpty(edit.Description) ? null : edit.Description).Build();
         }
         ReplaceWithBuiltResult(path, result);
     }
@@ -1995,6 +1984,13 @@ internal static partial class PdfEngineIntegration
         return PdfScanTextAnalyzer.ReadScannedPages(PdfDocument.Open(File.ReadAllBytes(path)));
     }
 
+    /// <summary>Each page's size in pixels at the resolution it was scanned at, where it has an image.</summary>
+    internal static IReadOnlyList<(int Width, int Height)?> ReadScanSizes(string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        return PdfPageRasterInformation.ReadScanSizes(PdfDocument.Open(File.ReadAllBytes(path)));
+    }
+
     /// <summary>Which pages are drawn only from one-bit black-and-white images.</summary>
     internal static IReadOnlyList<bool> ReadBitonalPages(string path)
     {
@@ -2421,6 +2417,26 @@ internal static partial class PdfEngineIntegration
         {
             return null;
         }
+    }
+
+    /// <summary>The face for a paragraph edit: its own font when that is installed, otherwise the
+    /// font of the same kind that sets closest to the width the page has it at, so the text keeps
+    /// its rows. Null when no face loads.</summary>
+    internal static (TrueTypeFont Font, string Family)? LoadParagraphFont(PdfParagraphCandidate candidate, string text)
+    {
+        DetectedPdfFontStyle style = PdfFontStyle.FromPdfName(candidate.FontName);
+        if (FontCoverage.Covers(style.Family, text)) return LoadTextFont(style.Family, text, style.Bold, style.Italic);
+        (TrueTypeFont Font, string Family)? closest = null;
+        double gap = double.MaxValue;
+        foreach (string family in SourceFontKind.Families(candidate.FontName))
+        {
+            if (!FontCoverage.Covers(family, text) || LoadTextFont(family, text, style.Bold, style.Italic) is not { } face) continue;
+            // Wider is the costly direction, since each row it spills is a row the paragraph may not have.
+            double ratio = PdfParagraphEditor.WidthRatio(candidate, face.Font);
+            double off = ratio > 1 ? (ratio - 1) * 3 : 1 - ratio;
+            if (off < gap) { gap = off; closest = face; }
+        }
+        return closest ?? LoadTextFont(style.Family, text, style.Bold, style.Italic);
     }
 
     /// <summary>The kinds of hidden information removed after a redaction.</summary>

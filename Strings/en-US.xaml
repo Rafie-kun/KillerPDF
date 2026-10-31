@@ -1889,6 +1889,7 @@ Scale them to a supported size? The pages keep their look and proportions.</sys:
     <sys:String x:Key="Str_Paragraph_Refused">This paragraph cannot be edited: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">This paragraph mixes fonts, sizes or colors. The new text uses one style, so that styling will not carry over.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Preview font: {0}. This font will be embedded in the edited PDF.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Narrowed">The text is set at {0}% of its width so it keeps the paragraph's rows.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Preparing preview...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">The document changed. Reopen paragraph editing to continue.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Original</sys:String>

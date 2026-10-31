@@ -1878,6 +1878,7 @@ Thu phóng chúng về kích thước được hỗ trợ? Các trang vẫn gi�
     <sys:String x:Key="Str_Paragraph_Refused">Không thể chỉnh sửa đoạn văn này: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Đoạn văn này dùng nhiều phông chữ, cỡ chữ hoặc màu sắc khác nhau. Văn bản mới chỉ dùng một kiểu, nên định dạng này sẽ không được giữ lại.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Phông chữ xem trước: {0}. Phông chữ này sẽ được nhúng vào PDF đã chỉnh sửa.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Narrowed">Văn bản được đặt ở {0}% chiều rộng để giữ nguyên các dòng của đoạn.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Đang chuẩn bị bản xem trước...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Tài liệu đã thay đổi. Hãy mở lại công cụ chỉnh sửa đoạn văn để tiếp tục.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Bản gốc</sys:String>

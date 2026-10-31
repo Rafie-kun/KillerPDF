@@ -1878,6 +1878,7 @@ Vuoi ridimensionare le pagine a una dimensione supportata? Le pagine manterranno
     <sys:String x:Key="Str_Paragraph_Refused">Questo paragrafo non può essere modificato: {0}</sys:String>
     <sys:String x:Key="Str_Paragraph_MixedStyles">Questo paragrafo combina caratteri, dimensioni o colori diversi. Il nuovo testo usa un solo stile, quindi questa formattazione non verrà mantenuta.</sys:String>
     <sys:String x:Key="Str_Paragraph_Font">Carattere dell’anteprima: {0}. Questo carattere verrà incorporato nel PDF modificato.</sys:String>
+    <sys:String x:Key="Str_Paragraph_Narrowed">Il testo è impostato al {0}% della sua larghezza per mantenere le righe del paragrafo.</sys:String>
     <sys:String x:Key="Str_Paragraph_Preparing">Preparazione dell’anteprima...</sys:String>
     <sys:String x:Key="Str_Paragraph_Changed">Il documento è cambiato. Riapri la modifica del paragrafo per continuare.</sys:String>
     <sys:String x:Key="Str_Paragraph_Original">Originale</sys:String>
