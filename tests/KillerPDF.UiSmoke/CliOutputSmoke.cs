@@ -87,7 +87,51 @@ internal static class CliOutputSmoke
         return 0;
     }
 
+    internal static int RunOrientation(string appPath, string folder)
+    {
+        Assembly engine = Assembly.Load("KillerPdf.Engine");
+        Type builderType = engine.GetType("KillerPdf.Engine.Authoring.PdfDocumentBuilder", true)!;
+        ConstructorInfo constructor = builderType.GetConstructors().Single();
+        dynamic builder = constructor.Invoke(constructor.GetParameters().Select(parameter => parameter.DefaultValue).ToArray());
+        dynamic content = Activator.CreateInstance(engine.GetType("KillerPdf.Engine.Authoring.PdfContentStreamBuilder", true)!)!;
+        dynamic font = Enum.Parse(engine.GetType("KillerPdf.Engine.Authoring.PdfStandardFont", true)!, "Helvetica");
+        content.BeginText().SetFont(font, 14d).SetTextMatrix(0d, 1d, -1d, 0d, 150d, 40d)
+            .ShowLatin1Text("Upright text that reads along the page").EndText();
+        object encryption = Activator.CreateInstance(engine.GetType("KillerPdf.Engine.Security.PdfPasswordEncryptionOptions", true)!)!;
+        encryption.GetType().GetProperty("UserPassword")!.SetValue(encryption, "reader");
+        encryption.GetType().GetProperty("OwnerPassword")!.SetValue(encryption, "owner");
+        byte[] original = builder.AddPage(300d, 400d, content).AddPage(300d, 400d, content)
+            .SetPageRotation(1, 270).SetPasswordEncryption((dynamic)encryption).Build();
+        string source = Path.Combine(folder, "encrypted-orientation.pdf");
+        string output = Path.Combine(folder, "upright.pdf");
+        File.WriteAllBytes(source, original);
+        byte[] sentinel = Encoding.ASCII.GetBytes("existing output must survive");
+        File.WriteAllBytes(output, sentinel);
+        string exe = Path.ChangeExtension(appPath, ".exe");
+        if (Command(exe, "--fix-orientation", source, output, "--pages", "1", "--password", "wrong") == 0
+            || !sentinel.AsSpan().SequenceEqual(File.ReadAllBytes(output)))
+            throw new InvalidOperationException("Incorrect orientation password damaged an existing output or reported success.");
+        foreach (string password in new[] { "owner", "reader" })
+        {
+            if (Command(exe, "--fix-orientation", source, output, "--pages", "1", "--password", password) != 0)
+                throw new InvalidOperationException("Authenticated orientation failed for " + password + ".");
+            Type documentType = engine.GetType("KillerPdf.Engine.Documents.PdfDocument", true)!;
+            dynamic document = documentType.GetMethod("Open", [typeof(ReadOnlyMemory<byte>), typeof(string)])!
+                .Invoke(null, [new ReadOnlyMemory<byte>(File.ReadAllBytes(output)), password])!;
+            dynamic pages = engine.GetType("KillerPdf.Engine.Documents.PdfPageInformation", true)!
+                .GetMethod("Read")!.Invoke(null, [(object)document])!;
+            if (!document.IsEncrypted || pages[0].Rotation != 90 || pages[1].Rotation != 270
+                || !original.AsSpan().SequenceEqual(File.ReadAllBytes(source)))
+                throw new InvalidOperationException("Orientation lost encryption, changed an unselected page or damaged its input.");
+        }
+        Console.WriteLine("PASS authenticated orientation retains encryption, unselected rotations and input/output safety.");
+        return 0;
+    }
+
     internal static int Command(string exe, params string[] arguments)
+        => CommandCapture(exe, arguments).ExitCode;
+
+    internal static (int ExitCode, string Output) CommandCapture(string exe, params string[] arguments)
     {
         var start = new ProcessStartInfo(exe) { UseShellExecute = false, CreateNoWindow = true,
             RedirectStandardOutput = true, RedirectStandardError = true };
@@ -96,6 +140,6 @@ internal static class CliOutputSmoke
         Task<string> output = process.StandardOutput.ReadToEndAsync(), error = process.StandardError.ReadToEndAsync();
         if (!process.WaitForExit(60000)) { process.Kill(true); throw new TimeoutException("CLI output check timed out."); }
         Console.WriteLine("CONTROL " + arguments[0] + " exit=" + process.ExitCode + ": " + output.Result + error.Result);
-        return process.ExitCode;
+        return (process.ExitCode, output.Result + error.Result);
     }
 }

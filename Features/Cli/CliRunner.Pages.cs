@@ -85,7 +85,7 @@ namespace KillerPDF.Features
             CliWriteEditedCopy(source, output, path =>
             {
                 foreach (var group in turns.GroupBy(pair => pair.Value))
-                    PdfEngineIntegration.RotatePages(path, [.. group.Select(pair => pair.Key)], group.Key);
+                    PdfEngineIntegration.RotatePages(path, [.. group.Select(pair => pair.Key)], group.Key, password);
             });
             string skipped = unread > 0 ? $" ({unread} pages could not be read and were left as they were)" : "";
             con.WriteLine(turns.Count == 0

@@ -2223,14 +2223,16 @@ internal static partial class PdfEngineIntegration
 
     /// <summary>Turns selected pages clockwise by a relative multiple of 90 degrees.</summary>
     internal static void RotatePages(
-        string path, IReadOnlyCollection<int> pageIndices, int degreesClockwise)
+        string path, IReadOnlyCollection<int> pageIndices, int degreesClockwise, string? password = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         ArgumentNullException.ThrowIfNull(pageIndices);
         int turns = ((degreesClockwise % 360) + 360) % 360 / 90;
         if (turns == 0 || pageIndices.Count == 0) return;
 
-        PdfDocument document = PdfDocument.Open(File.ReadAllBytes(path));
+        PdfDocument document = password is null
+            ? PdfDocument.Open(File.ReadAllBytes(path))
+            : PdfDocument.Open(File.ReadAllBytes(path), password);
         var editor = new PdfIncrementalPageEditor(document);
         foreach (int pageIndex in pageIndices.Distinct().OrderBy(index => index))
             for (int turn = 0; turn < turns; turn++) editor.RotateClockwise(pageIndex);
