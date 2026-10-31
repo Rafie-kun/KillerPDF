@@ -109,7 +109,7 @@ internal static class TableExportSmoke
             {
                 MethodInfo setting = appType.GetMethod("SetSetting", Members)!;
                 setting.Invoke(null, ["RememberChoiceLocked", "1"]);
-                setting.Invoke(null, ["RememberOpenFiles", "1"]);
+                setting.Invoke(null, ["RememberOpenFiles", windowSessionCase.StartsWith("--verify-page-navigation-sidebar-", StringComparison.Ordinal) ? "0" : "1"]);
                 setting.Invoke(null, ["CheckForUpdatesOnStartup", "0"]);
                 setting.Invoke(null, ["CloseToTray", "0"]);
             }
@@ -248,6 +248,8 @@ internal static class TableExportSmoke
                 return CliReplacementSmoke.Run(appPath, folder);
             if (windowSessionCase == "--verify-page-navigation-physical-output")
                 return PhysicalOutputSmoke.Run(appPath, folder);
+            if (windowSessionCase.StartsWith("--verify-page-navigation-sidebar-", StringComparison.Ordinal))
+                return SidebarPersistenceSmoke.Run(owner, folder, windowSessionCase["--verify-page-navigation-sidebar-".Length..]);
             if (windowSessionCase == "--verify-page-navigation-image-overwrite-consent")
                 return ImageExportWorkflowSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-image-pending-forms")

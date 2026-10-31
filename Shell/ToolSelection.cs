@@ -185,6 +185,7 @@ namespace KillerPDF.Shell
             // automatic collapse (see _sidebarAutoCollapsed).
             if (!_sidebarAutoToggling) _sidebarAutoCollapsed = false;
             _sidebarCollapsed = !_sidebarCollapsed;
+            RememberSidebarCollapsed();
             if (_sidebarCollapsed)
             {
                 // Save current width before collapsing so expand restores it.
@@ -359,6 +360,7 @@ namespace KillerPDF.Shell
                 SidebarContentPanel.Visibility = Visibility.Visible;
                 _sidebarCol.MinWidth = SbPx(SidebarMinOpen);           // clamp future resizes so they can't clip
                 RememberSidebarWidth(w);
+                RememberSidebarCollapsed();
             }));
         }
 
@@ -367,6 +369,7 @@ namespace KillerPDF.Shell
         private void CollapseSidebarToStrip()
         {
             _sidebarCollapsed = true;
+            RememberSidebarCollapsed();
             _sidebarToggleBtn.ToolTip = ShortcutTip("Str_TT_ExpandSidebar", "F9");
             _sidebarBorder.Visibility = Visibility.Collapsed;
             SidebarContentPanel.Visibility = Visibility.Visible;   // reset so the next border-show has content
@@ -386,6 +389,13 @@ namespace KillerPDF.Shell
         // distinction a tab click was popping a deliberately closed sidebar back open.
         private bool _sidebarAutoCollapsed;   // the current collapse was made HERE, not by the user
         private bool _sidebarAutoToggling;    // this method is driving SidebarToggle_Click
+
+        private void RememberSidebarCollapsed()
+        {
+            if (_sidebarAutoToggling) return;
+            _sidebarAutoCollapsed = false;
+            App.SetSetting("SidebarCollapsed", _sidebarCollapsed ? "1" : "0");
+        }
 
         private void SyncSidebarToDocState(bool hasDoc, bool startup)
         {

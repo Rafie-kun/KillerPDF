@@ -491,6 +491,12 @@ namespace KillerPDF.Shell
             {
                 RestoreWindowSettings();
                 ApplySidebarSide();   // place the sidebar on the saved side (default left)
+                if (App.GetSetting("SidebarCollapsed") == "1")
+                {
+                    _sidebarAutoToggling = true;
+                    try { CollapseSidebarToStrip(); }
+                    finally { _sidebarAutoToggling = false; }
+                }
                 BuildToolbarMenu();   // right-click appearance picker on the toolbar
                 // Unconditional: the XAML default is small icons / no text, but the family default
                 // is Large/Under, so a first run needs the apply pass too.
