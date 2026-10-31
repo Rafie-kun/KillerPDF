@@ -268,6 +268,12 @@ internal static class TableExportSmoke
                 return ImageExportWorkflowSmoke.RunForms(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-ocr-pending-snapshot")
                 return ImageExportWorkflowSmoke.RunForms(owner, folder, ocr: true);
+            if (windowSessionCase == "--verify-page-navigation-ocr-native-searchable")
+                return OcrOutputSmoke.Run(owner, folder, convert: false);
+            if (windowSessionCase == "--verify-page-navigation-ocr-native-convert")
+                return OcrOutputSmoke.Run(owner, folder, convert: true);
+            if (windowSessionCase == "--verify-page-navigation-ocr-native-cancel")
+                return OcrOutputSmoke.Run(owner, folder, convert: false, cancel: true);
             if (windowSessionCase == "--verify-page-navigation-other-pane-save")
                 return OtherPaneSaveSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-dialog-buttons-theme")

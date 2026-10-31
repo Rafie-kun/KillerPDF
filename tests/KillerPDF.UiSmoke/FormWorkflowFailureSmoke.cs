@@ -162,7 +162,15 @@ internal static class FormWorkflowFailureSmoke
         Wait(() => Descendants<TextBox>(owner).Any(box => Equals(box.ToolTip, "Answer 1") && box.Text == ""), "redo creation remains empty");
         if (Pending.Any(key => ((IDictionary)Get(viewer, key)).Contains(name)))
             throw new InvalidOperationException("Redo rebound retired state to the recreated field.");
-        Console.WriteLine("PASS delete/recreate retires sensitive state and preserves value/formatting through undo/redo.");
+        Save(owner);
+        string reopened = Path.Combine(folder, "reopened-deletion.pdf");
+        File.Copy(source, reopened);
+        owner.GetType().GetMethod("OpenFromExternal", Members)!.Invoke(owner, [reopened]);
+        Wait(() => Descendants<TextBox>(owner).Any(box => Equals(box.ToolTip, "Answer 1") && box.Text == ""),
+            "saved recreated field reopens empty");
+        if (Descendants<TextBox>(owner).Any(box => box.Text == sensitive))
+            throw new InvalidOperationException("Save and reopen restored deleted sensitive text.");
+        Console.WriteLine("PASS delete/recreate retires sensitive state, preserves undo/redo and saves/reopens an empty recreated field.");
         return 0;
     }
     private static object Get(object target, string name) => target.GetType().GetProperty(name, Members)?.GetValue(target)
