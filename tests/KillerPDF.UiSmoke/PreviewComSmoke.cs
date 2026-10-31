@@ -211,7 +211,6 @@ internal static class PreviewComSmoke
                             finally { Marshal.FinalReleaseComObject(instance); }
                         }
                     }
-                    if (explorer) PreviewExplorerSmoke.Verify(folder);
                     completion.TrySetResult(true);
                 }
                 catch (Exception error) { completion.TrySetException(error); }
@@ -219,18 +218,44 @@ internal static class PreviewComSmoke
             client.SetApartmentState(ApartmentState.STA);
             client.IsBackground = true;
             client.Start();
+            Wait(() => completion.Task.IsCompleted, "native preview checks with a responsive host window");
+            completion.Task.GetAwaiter().GetResult();
+            client.Join();
             if (explorer)
             {
+                using var cancel = new CancellationTokenSource();
+                bool cancelOnLaunch = Environment.GetEnvironmentVariable("KILLERPDF_TEST_EXPLORER_CANCEL_ON_LAUNCH") == "1";
+                bool cancelControl = cancelOnLaunch || Environment.GetEnvironmentVariable("KILLERPDF_TEST_EXPLORER_CANCEL_AFTER_READY") == "1";
                 var watch = System.Diagnostics.Stopwatch.StartNew();
-                while (!completion.Task.IsCompleted)
+                Task check = Task.Run(() =>
                 {
+                    if (Environment.GetEnvironmentVariable("KILLERPDF_TEST_EXPLORER_RECOVER") is { Length: > 0 } recovery)
+                        PreviewExplorerSmoke.Recover(recovery);
+                    PreviewExplorerSmoke.Verify(folder, cancel.Token, cancelOnLaunch ? () =>
+                    {
+                        cancel.Cancel();
+                        cancel.Token.ThrowIfCancellationRequested();
+                    } : null);
+                });
+                while (!check.IsCompleted)
+                {
+                    if (watch.Elapsed > TimeSpan.FromSeconds(60)
+                        || cancelControl && File.Exists(Path.Combine(folder, "pane-initial.json"))) cancel.Cancel();
                     Pump();
-                    if (watch.Elapsed > TimeSpan.FromSeconds(60)) throw new TimeoutException("Native and Explorer preview checks timed out.");
                     Thread.Sleep(10);
                 }
+                // A timed-out client must finish its own pane/window restoration before shared
+                // registration cleanup. The owned VM process supervisor bounds stalled COM calls.
+                try { check.GetAwaiter().GetResult(); }
+                catch (OperationCanceledException) when (cancelControl && cancel.IsCancellationRequested)
+                {
+                    if (!File.Exists(Path.Combine(folder, "pane-restoration.txt")))
+                        throw new InvalidOperationException("Cancelled Explorer client did not restore its pane and close its window.");
+                    Console.WriteLine("PASS cancelled Explorer client finishes its own restoration before shared cleanup.");
+                }
+                if (cancelControl && !cancel.IsCancellationRequested)
+                    throw new InvalidOperationException("The cancellation control did not cancel the Explorer client.");
             }
-            else Wait(() => completion.Task.IsCompleted, "native preview checks with a responsive host window");
-            completion.Task.GetAwaiter().GetResult();
         }
         finally
         {
