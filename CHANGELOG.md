@@ -20,6 +20,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Data merge refuses to overwrite its input template, even with the command line overwrite option.
 - Failed text replacement leaves the document and overlays unchanged and reports the error instead of claiming success.
 - Find counts separate occurrences within a word, and Replace Current changes only the selected occurrence.
+- Find and Replace handles ligatures and invisible characters consistently without dropping unmatched letters.
 - Command line text replacement reports partial failures and counts only completed replacements.
 - Command line orientation fixes use the supplied password when saving and preserve the document's encryption.
 - Store installations keep their bundled runtime when choosing an update package.

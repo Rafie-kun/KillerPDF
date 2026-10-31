@@ -31,26 +31,33 @@ internal static class CliReplacementSmoke
         return 0;
     }
 
-    internal static byte[] Fixture(string content)
+    internal static byte[] Fixture(string content, string? toUnicode = null)
     {
-        string[] objects =
+        List<string> objects =
         [
             "<< /Type /Catalog /Pages 2 0 R >>",
             "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 400] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >> /Contents 4 0 R >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 400] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica "
+                + (toUnicode is null ? "" : "/ToUnicode 5 0 R ") + ">> >> >> /Contents 4 0 R >>",
             $"<< /Length {content.Length} >>\nstream\n{content}\nendstream"
         ];
+        if (toUnicode is not null)
+        {
+            string map = "/CIDInit /ProcSet findresource begin\n12 dict begin\nbegincmap\n/CMapName /Adobe-Identity-UCS def\n/CMapType 2 def\n"
+                + $"1 begincodespacerange\n<00> <FF>\nendcodespacerange\n1 beginbfchar\n{toUnicode}\nendbfchar\nendcmap\nend\nend\n";
+            objects.Add($"<< /Length {map.Length} >>\nstream\n{map}\nendstream");
+        }
         var pdf = new StringBuilder("%PDF-1.7\n");
         var offsets = new List<int>();
-        for (int index = 0; index < objects.Length; index++)
+        for (int index = 0; index < objects.Count; index++)
         {
             offsets.Add(pdf.Length);
             pdf.Append($"{index + 1} 0 obj\n{objects[index]}\nendobj\n");
         }
         int xref = pdf.Length;
-        pdf.Append($"xref\n0 {objects.Length + 1}\n0000000000 65535 f \n");
+        pdf.Append($"xref\n0 {objects.Count + 1}\n0000000000 65535 f \n");
         foreach (int offset in offsets) pdf.Append($"{offset:0000000000} 00000 n \n");
-        pdf.Append($"trailer\n<< /Size {objects.Length + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
+        pdf.Append($"trailer\n<< /Size {objects.Count + 1} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
         return Encoding.ASCII.GetBytes(pdf.ToString());
     }
 }

@@ -87,7 +87,7 @@ namespace KillerPDF.Controls
                         if (TextTurn.Normalize(turn) != 0)
                         {
                             // Turned text is left alone; it is counted below when it would have matched.
-                            if (TextReplacePlanner.FindAll(word.Text, find, matchCase, wholeWord).Count > 0) skippedTurned++;
+                            if (TextReplacePlanner.FindSpans(word.Text, find, matchCase, wholeWord).Count > 0) skippedTurned++;
                             continue;
                         }
                         level.Add(new ReplaceWord(word.Text, rect, wordStart));
@@ -117,10 +117,10 @@ namespace KillerPDF.Controls
                     {
                         foreach (TextAnnotation text in annotations.OfType<TextAnnotation>())
                         {
-                            var starts = TextReplacePlanner.FindAll(text.Content, find, matchCase, wholeWord);
+                            var starts = TextReplacePlanner.FindSpans(text.Content, find, matchCase, wholeWord);
                             if (starts.Count == 0) continue;
                             annotationEdits.Add((pageIndex, text,
-                                TextReplacePlanner.ReplaceAt(text.Content, starts, find.Length, replace)));
+                                TextReplacePlanner.ReplaceSpans(text.Content, starts, replace)));
                             occurrences += starts.Count;
                             lines++;
                         }

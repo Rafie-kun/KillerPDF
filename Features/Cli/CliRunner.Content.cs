@@ -275,7 +275,7 @@ namespace KillerPDF.Features
                             ToCanvas(word.Letters[0].EndBaseLine.X, word.Letters[0].EndBaseLine.Y));
                         if (TextTurn.Normalize(turn) != 0)
                         {
-                            skippedTurned += TextReplacePlanner.FindAll(word.Text, find, matchCase, wholeWord).Count;
+                            skippedTurned += TextReplacePlanner.FindSpans(word.Text, find, matchCase, wholeWord).Count;
                             continue;
                         }
                         level.Add(new ReplaceWord(word.Text, rect));

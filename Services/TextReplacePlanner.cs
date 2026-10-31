@@ -54,6 +54,44 @@ internal static class TextReplacePlanner
         return result.Append(text, copied, text.Length - copied).ToString();
     }
 
+    internal readonly record struct MatchSpan(int Start, int Length, int FoldedStart, int FoldedLength);
+
+    internal static IReadOnlyList<MatchSpan> FindSpans(string text, string find, bool matchCase, bool wholeWord)
+    {
+        string folded = KillerPdf.Engine.Documents.PdfSearchText.Fold(text, out int[] origin);
+        string needle = KillerPdf.Engine.Documents.PdfSearchText.Fold(find);
+        return [.. FindAll(folded, needle, matchCase, wholeWord).Select(start =>
+            new MatchSpan(origin[start], origin[start + needle.Length - 1] + 1 - origin[start], start, needle.Length))];
+    }
+
+    internal static string ReplaceSpans(string text, IReadOnlyList<MatchSpan> matches, string replacement)
+    {
+        if (matches.Count == 0) return text;
+        string folded = KillerPdf.Engine.Documents.PdfSearchText.Fold(text, out int[] origin);
+        var result = new StringBuilder(text.Length);
+        int copied = 0;
+        for (int index = 0; index < matches.Count;)
+        {
+            int first = index, start = matches[index].Start, end = start + matches[index].Length;
+            while (++index < matches.Count && matches[index].Start < end)
+                end = Math.Max(end, matches[index].Start + matches[index].Length);
+            result.Append(text, copied, start - copied);
+            // Expand only glyphs touched by the edit. Unmatched letters in a ligature survive,
+            // and untouched stored text outside this cluster keeps its original representation.
+            int normalized = Array.FindIndex(origin, value => value == start);
+            int normalizedEnd = Array.FindIndex(origin, value => value >= end);
+            for (int matchIndex = first; matchIndex < index; matchIndex++)
+            {
+                MatchSpan match = matches[matchIndex];
+                result.Append(folded, normalized, match.FoldedStart - normalized).Append(replacement);
+                normalized = match.FoldedStart + match.FoldedLength;
+            }
+            result.Append(folded, normalized, normalizedEnd - normalized);
+            copied = end;
+        }
+        return result.Append(text, copied, text.Length - copied).ToString();
+    }
+
     /// <summary>
     /// Groups words into lines: words whose vertical centers sit within half a line height of
     /// each other share a line, and a horizontal gap wider than a column gutter starts a new one.
@@ -140,16 +178,16 @@ internal static class TextReplacePlanner
             }
             string lineText = text.ToString();
 
-            var chosen = new List<int>();
+            var chosen = new List<MatchSpan>();
             var matchBounds = new List<Rect>();
-            foreach (int start in FindAll(lineText, find, matchCase, wholeWord))
+            foreach (MatchSpan match in FindSpans(lineText, find, matchCase, wholeWord))
             {
-                if (onlyStart is int selected && source[start] != selected) continue;
+                if (onlyStart is int selected && (source[match.Start] != selected || chosen.Count != 0)) continue;
                 Rect bounds = Rect.Empty;
-                foreach (int index in owner.Skip(start).Take(find.Length).Where(i => i >= 0).Distinct())
+                foreach (int index in owner.Skip(match.Start).Take(match.Length).Where(i => i >= 0).Distinct())
                     bounds.Union(words[index].Bounds);
                 if (bounds.IsEmpty || (includeMatch is not null && !includeMatch(bounds))) continue;
-                chosen.Add(start);
+                chosen.Add(match);
                 matchBounds.Add(bounds);
             }
             if (chosen.Count == 0) continue;
@@ -157,7 +195,7 @@ internal static class TextReplacePlanner
             Rect lineBounds = Rect.Empty;
             foreach (int index in line) lineBounds.Union(words[index].Bounds);
             plans.Add(new ReplaceLine(line, lineText,
-                ReplaceAt(lineText, chosen, find.Length, replace), lineBounds, matchBounds));
+                ReplaceSpans(lineText, chosen, replace), lineBounds, matchBounds));
         }
         return plans;
     }

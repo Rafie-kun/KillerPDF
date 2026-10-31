@@ -88,4 +88,17 @@ public sealed class TextReplacePlannerTests
         Assert.Empty(TextReplacePlanner.Plan(words, "beta", "gamma", matchCase: false, wholeWord: false));
         Assert.Empty(TextReplacePlanner.Plan(words, "", "gamma", matchCase: false, wholeWord: false));
     }
+
+    [Theory]
+    [InlineData("O\uFB00ner", "Offner", "Done")]
+    [InlineData("A\u200BB", "AB", "Done")]
+    [InlineData("A\u00ADB", "AB", "Done")]
+    [InlineData("a\uFB01b", "f", "aDoneib")]
+    [InlineData("a\uFB01b", "i", "afDoneb")]
+    [InlineData("\uFB00", "f", "DoneDone")]
+    public void Plan_UsesVisibleTextAndPreservesUnmatchedLigatureLetters(string text, string query, string expected)
+    {
+        ReplaceLine plan = Assert.Single(TextReplacePlanner.Plan([Word(text, 10, 10)], query, "Done", false, false));
+        Assert.Equal(expected, plan.NewText);
+    }
 }

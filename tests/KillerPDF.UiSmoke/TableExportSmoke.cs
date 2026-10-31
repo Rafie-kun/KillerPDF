@@ -234,6 +234,8 @@ internal static class TableExportSmoke
                 return ReplacementFailureSmoke.RunFallback(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-replace-occurrence")
                 return ReplacementOccurrenceSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-replace-normalized-occurrence")
+                return ReplacementOccurrenceSmoke.Run(owner, folder, normalized: true);
             if (windowSessionCase == "--verify-page-navigation-cli-image-publication")
                 return CliOutputSmoke.Run(appPath, folder, merge: false);
             if (windowSessionCase == "--verify-page-navigation-cli-merge-input")
