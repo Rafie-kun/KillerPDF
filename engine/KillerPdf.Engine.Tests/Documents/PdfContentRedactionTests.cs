@@ -1372,6 +1372,35 @@ public sealed class PdfContentRedactionTests
         Assert.DoesNotContain("VISIBLETEXT", kept, StringComparison.Ordinal);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void UnreadableAppearanceReportsItsPageWithoutLosingReadableAnnotationText(bool recovery)
+    {
+        string readable = "BT /F1 12 Tf 2 2 Td (READABLE) Tj ET";
+        byte[] bytes = CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>", "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 300] /Resources << /Font << /F1 4 0 R >> >> /Annots [5 0 R 6 0 R] >>",
+            Helvetica,
+            "<< /Type /Annot /Subtype /Stamp /Rect [10 10 100 50] /AP << /N 7 0 R >> >>",
+            "<< /Type /Annot /Subtype /Stamp /Rect [10 100 100 150] /MK << /CA (CAPTION) >> /AP << /N 8 0 R >> >>",
+            Stream(readable, "/Type /XObject /Subtype /Form /BBox [0 0 100 40]"),
+            Stream("BT /F1 12 Tf (SECRET) Tj ET", "/Type /XObject /Subtype /Form /BBox [0 0 100 40] /Filter /Unknown")
+        ]);
+        PdfDocument document = recovery ? PdfDocument.OpenWithCompatibilityRecovery(bytes) : PdfDocument.Open(bytes);
+        foreach (string query in new[] { "READABLE", "CAPTION" })
+        {
+            PdfRedactionReview review = PdfRedactionSearch.FindInAnnotations(document,
+                new PdfRedactionSearchOptions { Query = query });
+            Assert.Single(review.Matches);
+            Assert.Equal(new[] { 0 }, review.UnreadableAnnotationPages);
+        }
+        PdfRedactionReview noMatch = PdfRedactionSearch.FindInAnnotations(document,
+            new PdfRedactionSearchOptions { Query = "SECRET" });
+        Assert.Empty(noMatch.Matches);
+        Assert.Equal(new[] { 0 }, noMatch.UnreadableAnnotationPages);
+    }
+
     // A button caption, a signature's printed name and a stamp are drawn from the annotation, with no
     // value or contents to search, so a search of those alone reports nothing while the words stay shown.
     // A nested form with no resources of its own draws with the page's, as a viewer shows it.

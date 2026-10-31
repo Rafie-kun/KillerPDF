@@ -449,7 +449,7 @@ public static class PdfRedactionSearch
         for (int pageIndex = 0; pageIndex < pages.Count; pageIndex++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            foreach (PdfAnnotationShownText shown in PdfAnnotationShownTextReader.ReadPage(document, reader, tree, pageIndex, cancellationToken))
+            foreach (PdfAnnotationShownText shown in PdfAnnotationShownTextReader.ReadPage(document, reader, tree, pageIndex, cancellationToken, unreadablePages))
             {
                 string id = $"{(shown.IsWidget ? "field" : "annotation")}:{pageIndex}:{shown.AnnotationIndex}";
                 if (results.Any(match => match.Id == id)) continue;

@@ -13,11 +13,11 @@ internal sealed record PdfAnnotationShownText(int AnnotationIndex, bool IsWidget
 internal static class PdfAnnotationShownTextReader
 {
     /// <summary>
-    /// Reads every annotation on one page that shows text. An annotation that cannot be read is skipped,
-    /// since the value and contents searches report the page when its data is the part that is damaged.
+    /// Reads annotation text while reporting pages whose appearances could not be fully searched.
+    /// Readable captions and other annotations remain available when an appearance fails.
     /// </summary>
     public static IReadOnlyList<PdfAnnotationShownText> ReadPage(PdfDocument document, PdfPageContentReader reader,
-        PdfPageTree tree, int pageIndex, CancellationToken cancellationToken)
+        PdfPageTree tree, int pageIndex, CancellationToken cancellationToken, ISet<int> unreadablePages)
     {
         var result = new List<PdfAnnotationShownText>();
         PdfDictionary page = tree.Pages[pageIndex].Dictionary;
@@ -38,8 +38,26 @@ internal static class PdfAnnotationShownTextReader
                             && Resolve(document, caption) is PdfString text)
                             texts.Add(PdfUnicodeEncoding.DecodeTextString(text.Bytes.Span, "A widget caption"));
                 }
-                if (Appearance(document, annotation) is { } appearance)
-                    texts.Add(string.Join(' ', reader.ReadAppearance(pageIndex, appearance, cancellationToken).Words.Select(word => word.Text)));
+                try
+                {
+                    if (Appearance(document, annotation) is { } appearance)
+                    {
+                        // Recovery may treat an unknown filter as a no-op. That cannot establish
+                        // that all appearance text was searched, even when its bytes resemble text.
+                        if (document.UsesCompatibilityRecovery)
+                            _ = PdfStreamDecoder.Decode(appearance, document.Resolve);
+                        PdfPageContent content = reader.ReadAppearance(pageIndex, appearance, cancellationToken);
+                        texts.Add(string.Join(' ', content.Words.Select(word => word.Text)));
+                        if (content.Diagnostics.Any(note => note is PdfPageContentReader.TruncatedStreamDiagnostic
+                            or PdfPageContentReader.UndecodableStreamDiagnostic or "Cyclic Form XObject expansion limit reached."))
+                            unreadablePages.Add(pageIndex);
+                    }
+                }
+                catch (Exception error) when (error is FormatException or InvalidOperationException or NotSupportedException
+                    or ArgumentException or OverflowException or KeyNotFoundException or PdfFilterException)
+                {
+                    unreadablePages.Add(pageIndex);
+                }
                 texts.RemoveAll(string.IsNullOrWhiteSpace);
                 if (texts.Count == 0) continue;
                 bool widget = annotation.TryGetValue(Name("Subtype"), out PdfObject? subtypeValue)
@@ -50,6 +68,7 @@ internal static class PdfAnnotationShownTextReader
             catch (Exception error) when (error is FormatException or InvalidOperationException or NotSupportedException
                 or ArgumentException or OverflowException or KeyNotFoundException or PdfFilterException)
             {
+                unreadablePages.Add(pageIndex);
             }
         }
         return result;
