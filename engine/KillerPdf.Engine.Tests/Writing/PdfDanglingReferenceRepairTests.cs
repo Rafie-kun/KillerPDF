@@ -92,17 +92,95 @@ public sealed class PdfDanglingReferenceRepairTests
         Assert.Equal(2, first.ReferenceRepairs.Count);
     }
 
+    // Recovery finds an object the cross-reference table does not list, and the viewer shows what it
+    // holds. The rewrite gives that content a number of its own instead of erasing it or refusing.
     [Fact]
-    public void MeaningfulCompatibilityRecoveredBytesAreNeverErased()
+    public void MeaningfulCompatibilityRecoveredBytesAreKeptUnderANewObjectNumber()
     {
         PdfDocument source = Create(recovery: true);
         Assert.IsType<PdfString>(source.Resolve(new PdfIndirectReference(99, 0)));
 
-        InvalidOperationException error = Assert.Throws<InvalidOperationException>(() =>
-            PdfDocumentWriter.WriteWithReport(source,
-                new PdfDocumentWriteOptions { ReplaceDanglingReferences = true }));
+        PdfDocumentWriteResult result = PdfDocumentWriter.WriteWithReport(source,
+            new PdfDocumentWriteOptions { ReplaceDanglingReferences = true });
 
-        Assert.Contains("recovered content", error.Message, StringComparison.Ordinal);
+        PdfDocument output = PdfDocument.Open(result.Data);
+        PdfDictionary catalog = Assert.IsType<PdfDictionary>(output.Resolve(
+            Assert.IsType<PdfIndirectReference>(output.Trailer[N("Root")])));
+        PdfIndirectReference optional = Assert.IsType<PdfIndirectReference>(catalog[N("Optional")]);
+        Assert.Equal("recovered content", Encoding.Latin1.GetString(
+            Assert.IsType<PdfString>(output.Resolve(optional)).Bytes.Span));
+        Assert.Equal("Keep", new PdfPageContentReader(output).Read(0).Text);
+        Assert.DoesNotContain(result.ReferenceRepairs, repair => repair.Path == "/Optional");
+    }
+
+    // A reference with the wrong generation reads as the live object in recovery, and the rewrite
+    // points it at that object instead of copying it.
+    [Fact]
+    public void AStaleGenerationThatRecoveryReadsAsTheLiveObjectIsPointedAtIt()
+    {
+        PdfDocument source = Create(optionalReference: "6 1 R", recovery: true);
+        Assert.IsType<PdfDictionary>(source.Resolve(new PdfIndirectReference(6, 1)));
+
+        PdfDocumentWriteResult result = PdfDocumentWriter.WriteWithReport(source,
+            new PdfDocumentWriteOptions { ReplaceDanglingReferences = true });
+
+        PdfDocument output = PdfDocument.Open(result.Data);
+        PdfDictionary catalog = Assert.IsType<PdfDictionary>(output.Resolve(
+            Assert.IsType<PdfIndirectReference>(output.Trailer[N("Root")])));
+        PdfIndirectReference optional = Assert.IsType<PdfIndirectReference>(catalog[N("Optional")]);
+        Assert.Equal(6, optional.ObjectNumber);
+        Assert.Equal("Helvetica", Assert.IsType<PdfName>(
+            Assert.IsType<PdfDictionary>(output.Resolve(optional))[N("BaseFont")]).ValueAsLatin1());
+    }
+
+    // The catalog the viewer opens may be one the table never listed, and the output opens from it.
+    [Fact]
+    public void ACatalogTheTableDoesNotListStaysTheRoot()
+    {
+        const string content = "BT /F1 12 Tf 10 50 Td (Keep) Tj ET";
+        string[] objects = [
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>",
+            $"<< /Length {content.Length} >>\nstream\n{content}\nendstream",
+            "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"];
+        var pdf = new StringBuilder("%PDF-1.7\n");
+        var offsets = new List<int>();
+        for (int index = 0; index < objects.Length; index++)
+        {
+            offsets.Add(Encoding.ASCII.GetByteCount(pdf.ToString()));
+            pdf.Append($"{index + 1} 0 obj\n{objects[index]}\nendobj\n");
+        }
+        int xref = Encoding.ASCII.GetByteCount(pdf.ToString());
+        pdf.Append("xref\n0 1\n0000000000 65535 f \n2 4\n");
+        for (int index = 1; index < offsets.Count; index++) pdf.Append($"{offsets[index]:0000000000} 00000 n \n");
+        pdf.Append($"trailer << /Size 6 /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n");
+        PdfDocument source = PdfDocument.OpenWithCompatibilityRecovery(Encoding.ASCII.GetBytes(pdf.ToString()));
+        Assert.Equal("Keep", new PdfPageContentReader(source).Read(0).Text);
+
+        PdfDocument output = PdfDocument.Open(PdfDocumentWriter.WriteWithReport(source,
+            new PdfDocumentWriteOptions { ReplaceDanglingReferences = true }).Data);
+
+        Assert.Equal("Keep", new PdfPageContentReader(output).Read(0).Text);
+    }
+
+    // Recovered content can point at more recovered content, or back at itself.
+    [Fact]
+    public void RecoveredContentThatReferencesItselfIsKeptOnce()
+    {
+        PdfDocument source = Create(recovery: true, optionalReference: "97 0 R",
+            recoveredBody: "<< /Self 97 0 R /Other 99 0 R >>");
+
+        PdfDocumentWriteResult result = PdfDocumentWriter.WriteWithReport(source,
+            new PdfDocumentWriteOptions { ReplaceDanglingReferences = true });
+
+        PdfDocument output = PdfDocument.Open(result.Data);
+        PdfDictionary catalog = Assert.IsType<PdfDictionary>(output.Resolve(
+            Assert.IsType<PdfIndirectReference>(output.Trailer[N("Root")])));
+        PdfIndirectReference optional = Assert.IsType<PdfIndirectReference>(catalog[N("Optional")]);
+        PdfDictionary recovered = Assert.IsType<PdfDictionary>(output.Resolve(optional));
+        Assert.Equal(optional.ObjectNumber, Assert.IsType<PdfIndirectReference>(recovered[N("Self")]).ObjectNumber);
+        Assert.IsType<PdfString>(output.Resolve(Assert.IsType<PdfIndirectReference>(recovered[N("Other")])));
     }
 
     [Fact]
@@ -377,15 +455,15 @@ public sealed class PdfDanglingReferenceRepairTests
 
     private static PdfDocument Create(bool metadata = false, bool recovery = false, bool indirectRoot = false,
         string optionalReference = "99 0 R", int fontGeneration = 0, string? extraBody = null,
-        bool duplicateFonts = false, string extraTrailer = "")
+        bool duplicateFonts = false, string extraTrailer = "", string? recoveredBody = null)
     {
-        byte[] data = CreateData(metadata, recovery, indirectRoot, optionalReference, fontGeneration, extraBody, duplicateFonts, extraTrailer);
+        byte[] data = CreateData(metadata, recovery, indirectRoot, optionalReference, fontGeneration, extraBody, duplicateFonts, extraTrailer, recoveredBody);
         return recovery ? PdfDocument.OpenWithCompatibilityRecovery(data) : PdfDocument.Open(data);
     }
 
     private static byte[] CreateData(bool metadata = false, bool recovery = false, bool indirectRoot = false,
         string optionalReference = "99 0 R", int fontGeneration = 0, string? extraBody = null,
-        bool duplicateFonts = false, string extraTrailer = "")
+        bool duplicateFonts = false, string extraTrailer = "", string? recoveredBody = null)
     {
         const string content = "BT /F1 12 Tf 10 50 Td (Keep) Tj ET";
         string[] objects = [
@@ -408,6 +486,7 @@ public sealed class PdfDanglingReferenceRepairTests
             pdf.Append($"{index + 1} {(index == 5 ? fontGeneration : 0)} obj\n{objects[index]}\nendobj\n");
         }
         if (recovery) pdf.Append("99 0 obj\n(recovered content)\nendobj\n");
+        if (recovery && recoveredBody is not null) pdf.Append($"97 0 obj\n{recoveredBody}\nendobj\n");
         int xref = Encoding.ASCII.GetByteCount(pdf.ToString());
         pdf.Append($"xref\n0 {objects.Length + 1}\n0000000000 65535 f \n");
         for (int index = 0; index < offsets.Count; index++)

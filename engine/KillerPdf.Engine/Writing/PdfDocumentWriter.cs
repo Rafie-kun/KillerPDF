@@ -112,15 +112,16 @@ public static class PdfDocumentWriter
                 "A full rewrite requires trailer /Root to resolve to a catalog dictionary.");
         bool hasCertification =
             PdfSignatureReader.ReadCertificationPermission(document).HasValue;
-        bool hasSignedFields =
-            PdfSignatureReader.Read(document).Any(signature => signature.IsSigned);
+        // A repairing rewrite drops a field the form lists twice, so it reads that field once.
+        bool hasSignedFields = PdfSignatureReader.Read(document, options.ReplaceDanglingReferences)
+            .Any(signature => signature.IsSigned);
         bool hasUsageRights = HasUsageRights(document, rootCatalog);
         // Removing encryption writes the copy a protected form opens from, not a stand-in for it, so
         // usage rights do not stop that write. A save from the copy still meets them.
         string? rewriteRefusal = hasCertification || hasSignedFields
-            ? "A full rewrite invalidates existing signatures. Set AllowSignatureInvalidation explicitly to proceed."
+            ? PdfRewriteRefusal.SignedMessage
             : hasUsageRights && !options.RemoveEncryption
-                ? "A full rewrite invalidates existing signatures and Reader usage rights, so this PDF was not rewritten."
+                ? PdfRewriteRefusal.UsageRightsMessage
                 : null;
         Dictionary<int, PdfObject>? signatureReplacements = null;
         if (options.AllowSignatureInvalidation && (hasCertification || hasSignedFields || hasUsageRights))
@@ -137,8 +138,16 @@ public static class PdfDocumentWriter
         if (options.ReplaceDanglingReferences && !options.AllowSignatureInvalidation
             && rewriteRefusal is not null)
             throw new InvalidOperationException(rewriteRefusal);
+        if (options.ReplaceDanglingReferences)
+            foreach ((int number, PdfObject replacement) in PdfRepeatedFieldRepair.FindReplacements(document))
+            {
+                signatureReplacements ??= [];
+                signatureReplacements.TryAdd(number, replacement);
+            }
         RewriteContext? context = options.ReplaceDanglingReferences
             ? new RewriteContext(document, signatureReplacements, dropUnreadable) : null;
+        if (context is not null && context.Trailer.TryGetValue(RootName, out PdfObject outputRoot))
+            root = outputRoot;
         PdfDictionary sourceTrailer = context?.Trailer ?? document.CrossReferences.MergedTrailer;
         if (options.MetadataPolicy == PdfMetadataPolicy.Preserve
             && sourceTrailer.TryGetValue(InfoName, out PdfObject info))
@@ -1232,6 +1241,13 @@ public static class PdfDocumentWriter
             // before any reference is normalized. One that cannot be read leaves the output as a
             // recorded repair, and what names it is repaired like any other reference to nothing.
             var unreadable = new HashSet<int>();
+            // Content that recovery finds behind a reference the table does not honor keeps a number of its own.
+            var recovered = new Dictionary<(int Number, int Generation), PdfIndirectReference>();
+            int highestNumber = document.CrossReferences.Keys.DefaultIfEmpty(0).Max();
+            if (document.CrossReferences.MergedTrailer.TryGetValue(SizeName, out PdfObject sizeValue)
+                && sizeValue is PdfInteger declaredSize && declaredSize.Value is > 0 and <= int.MaxValue)
+                highestNumber = Math.Max(highestNumber, (int)declaredSize.Value - 1);
+            int recoveryDepth = 0;
             var readable = new List<(int ObjectNumber, int Generation, PdfObject Original)>();
             foreach (PdfCrossReferenceEntry entry in document.CrossReferences.Values
                 .Where(entry => entry.Type is PdfCrossReferenceEntryType.InUse or PdfCrossReferenceEntryType.Compressed)
@@ -1269,13 +1285,16 @@ public static class PdfDocumentWriter
             {
                 if (entry.Key.Equals(RootName) || entry.Key.Equals(EncryptName) || entry.Key.Equals(IdName))
                 {
-                    trailer.Add(entry);
+                    // A catalog the table does not list is the one the viewer opens, so it is kept too.
+                    bool unlisted = entry.Key.Equals(RootName) && IsNullReference(entry.Value, out _);
+                    trailer.Add(unlisted && KeepRecovered(entry.Value) is { } keptRoot ? new(entry.Key, keptRoot) : entry);
                     continue;
                 }
                 string path = Encoding.Latin1.GetString(PdfObjectWriter.Write(entry.Key));
                 if (IsNullReference(entry.Value, out PdfReferenceRepairReason reason))
                 {
-                    Record(entry.Value, null, null, path, reason, PdfReferenceRepairAction.RemoveDictionaryEntry);
+                    if (KeepRecovered(entry.Value) is { } kept) trailer.Add(new(entry.Key, kept));
+                    else Record(entry.Value, null, null, path, reason, PdfReferenceRepairAction.RemoveDictionaryEntry);
                     continue;
                 }
                 trailer.Add(new(entry.Key, Normalize(entry.Value, null, null, path, 0)));
@@ -1288,6 +1307,7 @@ public static class PdfDocumentWriter
                     throw new NotSupportedException("The reference normalization graph is too deeply nested.");
                 if (IsNullReference(value, out PdfReferenceRepairReason reason))
                 {
+                    if (KeepRecovered(value) is { } kept) return kept;
                     Record(value, owner, generation, path, reason, PdfReferenceRepairAction.ReplaceWithNull);
                     return PdfNull.Instance;
                 }
@@ -1312,7 +1332,8 @@ public static class PdfDocumentWriter
                     string child = path + Encoding.Latin1.GetString(PdfObjectWriter.Write(entry.Key));
                     if (IsNullReference(entry.Value, out reason))
                     {
-                        Record(entry.Value, owner, generation, child, reason, PdfReferenceRepairAction.RemoveDictionaryEntry);
+                        if (KeepRecovered(entry.Value) is { } kept) entries.Add(new(entry.Key, kept));
+                        else Record(entry.Value, owner, generation, child, reason, PdfReferenceRepairAction.RemoveDictionaryEntry);
                         changed = true;
                     }
                     else
@@ -1370,10 +1391,38 @@ public static class PdfDocumentWriter
                     }
                     else reason = PdfReferenceRepairReason.Free;
                 }
-                if (document.UsesCompatibilityRecovery && document.Resolve(reference) is not PdfNull)
-                    throw new InvalidOperationException(
-                        "A dangling reference resolves to recovered content and cannot be replaced safely.");
                 return true;
+            }
+
+            // What the viewer shows behind a reference the table does not honor, or null when it shows
+            // nothing. The object the table lists under another generation is that object. Content the
+            // table does not list at all is written under a number past every listed one, so a rewrite
+            // keeps what recovery found rather than erasing it.
+            PdfIndirectReference? KeepRecovered(PdfObject value)
+            {
+                if (value is not PdfIndirectReference reference || !document.UsesCompatibilityRecovery
+                    || unreadable.Contains(reference.ObjectNumber)) return null;
+                var key = (reference.ObjectNumber, reference.Generation);
+                if (recovered.TryGetValue(key, out PdfIndirectReference? known)) return known;
+                PdfObject content = document.Resolve(reference);
+                if (content is PdfNull) return null;
+                if (document.CrossReferences.TryGetValue(reference.ObjectNumber, out PdfCrossReferenceEntry entry)
+                    && entry.Type is PdfCrossReferenceEntryType.InUse or PdfCrossReferenceEntryType.Compressed
+                    && ReferenceEquals(content, document.Resolve(reference.ObjectNumber)))
+                    return recovered[key] = new PdfIndirectReference(reference.ObjectNumber,
+                        entry.Type == PdfCrossReferenceEntryType.InUse ? entry.Field2 : 0);
+                if (recoveryDepth >= 256)
+                    throw new NotSupportedException("The reference normalization graph is too deeply nested.");
+                int number = checked(++highestNumber);
+                var keptReference = recovered[key] = new PdfIndirectReference(number, 0);
+                recoveryDepth++;
+                PdfObject normalized = ContainsNullReference(content, 0)
+                    ? Normalize(content, number, 0, "", 0) : content;
+                recoveryDepth--;
+                if (!ReferenceEquals(content, normalized)) _containers[content] = normalized;
+                _source.Add((number, 0), normalized);
+                Objects.Add(new WritableObject(number, 0, normalized));
+                return keptReference;
             }
 
             void Record(PdfObject value, int? owner, int? generation, string path,

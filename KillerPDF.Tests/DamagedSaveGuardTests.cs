@@ -91,19 +91,25 @@ public sealed class DamagedSaveGuardTests : IDisposable
         Assert.Single(PdfPageInformation.Read(PdfDocument.Open(File.ReadAllBytes(path))));
     }
 
-    // The writer and the page importer walk the same field tree, so a field listed twice stops
-    // both. That stays an ordinary error, which sends a page edit to its zero-rotation copy.
+    // A field listed twice in /Fields is damage, and the viewer shows it once. The save keeps the
+    // field and what it holds, listed once, and the file reopens with its form intact.
     [Fact]
-    public void AnUnsignedFileBothRewritesRejectKeepsItsFallback()
+    public void ADamagedUnsignedFileWithAFieldListedTwiceSavesAndKeepsTheFieldAndItsValue()
     {
-        string path = Write("form.pdf", DamageStartXref(UnsignedFormPdf("[6 0 R 6 0 R]")));
+        byte[] damaged = DamageStartXref(RawPdf("/AcroForm << /Fields [6 0 R 6 0 R] >>", "/Annots [6 0 R]", "null",
+            "<< /Type /Annot /Subtype /Widget /FT /Tx /T (a) /V (kept) /Rect [0 0 50 20] /P 3 0 R >>"));
+        string path = Write("twice.pdf", damaged);
+
+        PdfEngineIntegration.RepairHarmlessSaveArtifacts(path);
+
+        PdfDocument saved = PdfDocument.Open(File.ReadAllBytes(path));
+        Assert.Single(PdfPageInformation.Read(saved));
+        Assert.Equal("kept", PdfFormCalculation.ReadValues(saved)["a"]);
+        Assert.Equal("a", Assert.Single(PdfFormWidgetReader.ReadPage(saved, 0)).FieldName);
+        PdfEngineIntegration.ClearInvalidatedSignatures(path);
+        PdfEngineIntegration.StripLinkAppearances(path);
         string copy = Path.Combine(_directory, "copy.pdf");
-
-        Exception? error = Record.Exception(() => PdfEngineIntegration.RepairHarmlessSaveArtifacts(path));
-
-        Assert.NotNull(error);
-        Assert.IsNotType<DamagedSaveRefusedException>(error);
-        Assert.True(PdfEngineIntegration.TryCreateZeroRotationCopy(path, copy));
+        Assert.True(PdfEngineIntegration.TryCreateZeroRotationCopy(Write("twice-again.pdf", damaged), copy));
         Assert.Single(PdfPageInformation.Read(PdfDocument.Open(File.ReadAllBytes(copy))));
     }
 

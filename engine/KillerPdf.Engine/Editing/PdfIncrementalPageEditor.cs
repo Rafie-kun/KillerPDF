@@ -1475,17 +1475,39 @@ public sealed class PdfIncrementalPageEditor
     /// <summary>Renames the embedded file stored under one name-tree key. The new name becomes its key.</summary>
     public PdfIncrementalPageEditor RenameAttachmentByKey(string key, string newFileName)
     {
+        ArgumentNullException.ThrowIfNull(newFileName);
+        return EditAttachmentByKey(key, newFileName);
+    }
+
+    /// <summary>
+    /// Changes a rename, the description and the type or relationship of the embedded file stored under
+    /// one name-tree key in a single rewrite. Every rewrite copies the payload into the output again, so
+    /// a row with several changed fields is edited here and not one field at a time. A null name, type or
+    /// relationship keeps the file's own value, and the description changes only when
+    /// <paramref name="setDescription"/> is true, where a null description clears it.
+    /// </summary>
+    public PdfIncrementalPageEditor EditAttachmentByKey(
+        string key, string? newFileName = null, string? mimeType = null,
+        PdfAssociatedFileRelationship? relationship = null,
+        bool setDescription = false, string? description = null)
+    {
         PdfAttachmentInfo attachment = ReadAttachmentAtKey(key);
-        if (PdfAttachmentReader.Read(_document).Any(item =>
-                !string.Equals(item.NameTreeKey, key, StringComparison.Ordinal)
-                && string.Equals(item.FileName, newFileName, StringComparison.OrdinalIgnoreCase)))
-            throw new ArgumentException(
-                $"The document already has an attachment named '{newFileName}'.",
-                nameof(newFileName));
-        return RewriteAttachment(attachment, newFileName, attachment.Data,
-            attachment.MimeType, attachment.Description, attachment.Relationship,
-            attachment.ModificationDate, renames: true,
-            newKey: UniqueKeyForRename(newFileName, key));
+        bool renames = newFileName is not null;
+        string? newKey = null;
+        if (newFileName is not null)
+        {
+            if (PdfAttachmentReader.Read(_document).Any(item =>
+                    !string.Equals(item.NameTreeKey, key, StringComparison.Ordinal)
+                    && string.Equals(item.FileName, newFileName, StringComparison.OrdinalIgnoreCase)))
+                throw new ArgumentException(
+                    $"The document already has an attachment named '{newFileName}'.",
+                    nameof(newFileName));
+            newKey = UniqueKeyForRename(newFileName, key);
+        }
+        return RewriteAttachment(attachment, newFileName ?? attachment.FileName, attachment.Data,
+            mimeType ?? attachment.MimeType, setDescription ? description : attachment.Description,
+            relationship ?? attachment.Relationship, attachment.ModificationDate,
+            renames, newKey, changesType: mimeType is not null || relationship is not null);
     }
 
     // A rename stores the file under its new name. When another file already holds that name as a key,
@@ -1541,13 +1563,8 @@ public sealed class PdfIncrementalPageEditor
     }
 
     /// <summary>Changes the description of the embedded file stored under one name-tree key.</summary>
-    public PdfIncrementalPageEditor SetAttachmentDescriptionByKey(string key, string? description)
-    {
-        PdfAttachmentInfo attachment = ReadAttachmentAtKey(key);
-        return RewriteAttachment(attachment, attachment.FileName, attachment.Data,
-            attachment.MimeType, description, attachment.Relationship,
-            attachment.ModificationDate, renames: false);
-    }
+    public PdfIncrementalPageEditor SetAttachmentDescriptionByKey(string key, string? description) =>
+        EditAttachmentByKey(key, setDescription: true, description: description);
 
     /// <summary>Changes embedded-file type and relationship metadata while preserving its payload.</summary>
     public PdfIncrementalPageEditor SetAttachmentClassification(
@@ -1564,11 +1581,8 @@ public sealed class PdfIncrementalPageEditor
     public PdfIncrementalPageEditor SetAttachmentClassificationByKey(
         string key, string mimeType, PdfAssociatedFileRelationship relationship)
     {
-        PdfAttachmentInfo attachment = ReadAttachmentAtKey(key);
-        ValidateAttachment(attachment.FileName, mimeType, relationship, checksName: false, checksType: true);
-        return RewriteAttachment(attachment, attachment.FileName, attachment.Data,
-            mimeType, attachment.Description, relationship,
-            attachment.ModificationDate, renames: false, changesType: true);
+        ArgumentNullException.ThrowIfNull(mimeType);
+        return EditAttachmentByKey(key, mimeType: mimeType, relationship: relationship);
     }
 
     /// <summary>Adds a bookmark targeting a page in the edited document.</summary>
@@ -6563,8 +6577,18 @@ public sealed class PdfIncrementalPageEditor
                 if (!sourceTree.Catalog.TryGetValue(
                     AssociatedFilesName, out PdfObject? sourceAssociated)) continue;
                 PdfDocument source = group[0].ImportedDocument!;
-                AddAssociatedFiles(source, ResolveArray(source, sourceAssociated,
-                    "The source catalog /AF value"), importers[group[0]], rejectNull: false);
+                // The source /AF only lists file specifications that pages, annotations and the
+                // embedded-files tree name too, so a value or an entry nothing can read is left out.
+                PdfArray sourceFiles;
+                try
+                {
+                    sourceFiles = ResolveArray(source, sourceAssociated, "The source catalog /AF value");
+                }
+                catch (InvalidOperationException)
+                {
+                    continue;
+                }
+                AddAssociatedFiles(source, sourceFiles, importers[group[0]], rejectNull: false);
             }
             if (associated.Count > 0)
                 catalogReplacements[AssociatedFilesName] = new PdfArray(associated);
@@ -6575,19 +6599,26 @@ public sealed class PdfIncrementalPageEditor
             {
                 foreach (PdfObject value in values)
                 {
-                    PdfObject resolved = ResolveCatalogValue(
-                        document, value, "A catalog /AF entry");
-                    if (resolved is PdfNull)
+                    try
                     {
-                        if (rejectNull)
+                        PdfObject resolved = ResolveCatalogValue(
+                            document, value, "A catalog /AF entry");
+                        if (resolved is PdfNull)
+                        {
+                            if (rejectNull)
+                                throw new InvalidOperationException(
+                                    "The destination catalog /AF array contains a null file specification.");
+                            continue;
+                        }
+                        if (resolved is not PdfDictionary)
                             throw new InvalidOperationException(
-                                "The destination catalog /AF array contains a null file specification.");
+                                "A catalog /AF entry is not a file-specification dictionary.");
+                        ValidateFileSpecification(document, value, "A catalog /AF entry");
+                    }
+                    catch (InvalidOperationException) when (!rejectNull)
+                    {
                         continue;
                     }
-                    if (resolved is not PdfDictionary)
-                        throw new InvalidOperationException(
-                            "A catalog /AF entry is not a file-specification dictionary.");
-                    ValidateFileSpecification(document, value, "A catalog /AF entry");
                     associated.Add(importer?.Import(value) ?? value);
                 }
             }
@@ -9102,12 +9133,13 @@ public sealed class PdfIncrementalPageEditor
             update.SetDocumentInformation(null);
         // The name trees are not copied here. The name-tree merges below rebuild every category from
         // the source, and they read the current /Names back as destination objects, which imported
-        // references are not.
+        // references are not. The /AF index is rebuilt entry by entry with the embedded files.
         foreach (var entry in tree.Catalog.Where(entry =>
                      !entry.Key.Equals(TypeName)
                      && !entry.Key.Equals(PagesName)
                      && !entry.Key.Equals(NamesName)
-                     && !entry.Key.Equals(PermissionsName)))
+                     && !entry.Key.Equals(PermissionsName)
+                     && !entry.Key.Equals(AssociatedFilesName)))
             catalogReplacements[entry.Key] = importer.Import(
                 ValidateCatalogProperty(entry.Key, entry.Value));
 
@@ -10526,9 +10558,10 @@ public sealed class PdfIncrementalPageEditor
         PdfDocument document, PdfObject value, string description, bool checksMimeType = true)
     {
         PdfDictionary dictionary = ResolveDictionary(document, value, description);
+        // Producers write /FileSpec as often as /Filespec, and no reader tells them apart.
         if (dictionary.TryGetValue(TypeName, out PdfObject? type)
             && (Resolve(type) is not PdfName typeName
-                || typeName.ValueAsLatin1() != "Filespec"))
+                || !typeName.ValueAsLatin1().Equals("Filespec", StringComparison.OrdinalIgnoreCase)))
             throw new InvalidOperationException(
                 $"{description} has an invalid /Type value.");
         bool hasName = false;
@@ -15798,8 +15831,11 @@ public sealed class PdfIncrementalPageEditor
                             $"{description} /AP /{key} /{entry.Key.ValueAsLatin1()} appearance",
                             annotationSubtype == "TrapNet" && key == "N",
                             annotationSubtype == "PrinterMark");
+                // The Off appearance of a check box or radio button is optional, and a viewer draws
+                // nothing for it, so only another missing state is damage.
                 if (key == "N" && appearanceState is not null
-                    && !states.ContainsKey(appearanceState))
+                    && !states.ContainsKey(appearanceState)
+                    && !(annotationSubtype == "Widget" && appearanceState.ValueAsLatin1() == "Off"))
                     throw new InvalidOperationException(
                         $"{description} /AS state has no matching normal appearance.");
             }

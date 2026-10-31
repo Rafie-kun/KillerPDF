@@ -162,8 +162,12 @@ For selective removal, verify both the removed feature and the content that
 should remain. Recheck accessibility and conformance when those are requirements.
 
 Signed files require a separate decision: full rewrites invalidate signatures,
-and `AllowSignatureInvalidation` defaults to false. Incremental preservation
-alone does not establish compliance with certification or field-lock permissions.
+and `AllowSignatureInvalidation` defaults to false. Reader usage rights are
+signatures over the document and are refused the same way. A host that cannot ask
+should restate the refusal with `PdfRewriteRefusal.Restate` so it names the flag or
+setting the host offers, and `PdfVersion2Upgrade.Apply` takes the same decision as
+`allowSignatureInvalidation`. Incremental preservation alone does not establish
+compliance with certification or field-lock permissions.
 
 Planning and application are synchronous and expose no cancellation token.
 For corpus or service workloads, place expensive documents behind a bounded

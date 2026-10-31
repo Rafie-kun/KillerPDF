@@ -111,6 +111,12 @@ and `SupportedOperations` list what each instance can run, and `CanExecute` test
 one operation. The dispatcher offers `Execute`, `RunReport`, and `ResumeReport`
 with the same outcome rules as `PdfMacroRunner`.
 
+The optimize and remove-attachments steps rewrite the whole file, so they refuse a
+signed document or one with Reader usage rights and the step fails without output.
+A macro run cannot ask, so the step carries the answer: set `invalidateSignatures`
+to `true` on the step, or build it with `PdfAttachmentMacro.RemoveStep(invalidateSignatures: true)`,
+to give those up. The failure message names the setting.
+
 ## Interpret outcomes and cancellation
 
 Inputs run sequentially. The runner copies each source before its first step

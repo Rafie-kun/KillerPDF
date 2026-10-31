@@ -378,11 +378,14 @@ namespace KillerPDF.Features
             "                                           [--max-size <n[KB|MB]>] grow parts up to a size budget",
             "                                           [--name <template>] {name} {index} {first} {last} {title}",
             "                                           [--overwrite] replace existing parts, never the source",
-            "  killerpdf optimize <in.pdf> <out.pdf> [--strip <list>] [--images <dpi>] [--jpeg-quality <n>] [--report]",
+            "  killerpdf optimize <in.pdf> <out.pdf> [--strip <list>] [--images <dpi>] [--jpeg-quality <n>]",
+            "                                           [--invalidate-signatures] [--report]",
             "                                           reduce file size; --images resamples images drawn",
             "                                           above 1.5 times that resolution; strip takes any of metadata,",
             "                                           attachments, javascript, comments, thumbnails,",
-            "                                           bookmarks, forms, xfa, openaction, layers",
+            "                                           bookmarks, forms, xfa, openaction, layers;",
+            "                                           a signed file or one with Reader usage rights is refused",
+            "                                           unless --invalidate-signatures gives those up",
             "  killerpdf number-pages <in.pdf> <out.pdf> [--template <text>] [--pages <range>]",
             "                                           [--edge header|footer] [--align left|center|right]",
             "                                           [--number-format decimal|upper-roman|lower-roman|",
@@ -854,7 +857,7 @@ namespace KillerPDF.Features
             if (pos.Count != 2)
             {
                 con.WriteLine("Usage: KillerPDF.exe --optimize <in.pdf> <out.pdf> "
-                    + "[--strip <list>] [--images <dpi>] [--jpeg-quality <n>] [--report]");
+                    + "[--strip <list>] [--images <dpi>] [--jpeg-quality <n>] [--invalidate-signatures] [--report]");
                 return 2;
             }
             string inPath = Path.GetFullPath(pos[0]), outPath = Path.GetFullPath(pos[1]);
@@ -942,12 +945,24 @@ namespace KillerPDF.Features
                     }
                 }
             }
-            settings = settings with { RepairHarmlessArtifacts = true, ReplaceDanglingReferences = true };
+            // The rewrite drops signatures and Reader usage rights, and nothing here can ask, so it takes the flag.
+            settings = settings with
+            {
+                RepairHarmlessArtifacts = true,
+                ReplaceDanglingReferences = true,
+                AllowSignatureInvalidation = options.ContainsKey("--invalidate-signatures")
+            };
 
             PdfOptimizationResult result;
             try
             {
                 result = PdfOptimizer.CreatePlan(document, settings).Apply();
+            }
+            catch (InvalidOperationException ex) when (PdfRewriteRefusal.Matches(ex))
+            {
+                con.WriteLine("Could not optimize the document: "
+                    + PdfRewriteRefusal.Restate(ex, "Add --invalidate-signatures to go ahead.").Message);
+                return 1;
             }
             catch (Exception ex) when (ex is InvalidOperationException
                 or NotSupportedException or ArgumentException or FormatException)

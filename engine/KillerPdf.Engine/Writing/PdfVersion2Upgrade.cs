@@ -21,8 +21,12 @@ public static class PdfVersion2Upgrade
     private static readonly PdfName FormName = new("Form"u8);
     private static readonly PdfName PostScriptName = new("PS"u8);
 
-    /// <summary>Returns the document rewritten as PDF 2.0.</summary>
-    public static byte[] Apply(PdfDocument document)
+    /// <summary>
+    /// Returns the document rewritten as PDF 2.0. The rewrite invalidates signatures and Reader usage
+    /// rights, so a document carrying either is refused unless <paramref name="allowSignatureInvalidation"/>
+    /// says to give them up.
+    /// </summary>
+    public static byte[] Apply(PdfDocument document, bool allowSignatureInvalidation = false)
     {
         ArgumentNullException.ThrowIfNull(document);
         var update = new PdfIncrementalUpdateBuilder(document);
@@ -101,8 +105,18 @@ public static class PdfVersion2Upgrade
         }
         PdfDocument revised = changed ? PdfDocument.Open(update.Build()) : document;
         // A full rewrite drops the earlier revision, so the removed fields do not survive in it.
-        return PdfDocumentWriter.Write(revised,
-            new PdfDocumentWriteOptions { TargetVersion = PdfVersion.Pdf20 });
+        try
+        {
+            return PdfDocumentWriter.Write(revised, new PdfDocumentWriteOptions
+            {
+                TargetVersion = PdfVersion.Pdf20,
+                AllowSignatureInvalidation = allowSignatureInvalidation
+            });
+        }
+        catch (InvalidOperationException error) when (PdfRewriteRefusal.Matches(error))
+        {
+            throw PdfRewriteRefusal.Restate(error, "Pass allowSignatureInvalidation: true to upgrade it anyway.");
+        }
     }
 
     // Removes what ISO 32000-2 deprecates and conforming readers ignore: resource /ProcSet

@@ -12,9 +12,18 @@ public static class PdfAttachmentMacro
     public static PdfMacroStep AuditStep() =>
         new(PdfMacroOperation.AuditAttachments);
 
-    /// <summary>Creates a step that removes document-level and page-placed attachments.</summary>
-    public static PdfMacroStep RemoveStep() =>
-        new(PdfMacroOperation.RemoveAttachments);
+    /// <summary>
+    /// Creates a step that removes document-level and page-placed attachments. The removal rewrites the
+    /// file, so a signed document or one with Reader usage rights is refused unless
+    /// <paramref name="invalidateSignatures"/> says to give those up.
+    /// </summary>
+    public static PdfMacroStep RemoveStep(bool invalidateSignatures = false) =>
+        invalidateSignatures
+            ? new(PdfMacroOperation.RemoveAttachments, new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                [PdfMacroRewriteConsent.Setting] = "true"
+            })
+            : new(PdfMacroOperation.RemoveAttachments);
 
     /// <summary>Creates a step that renames one document attachment.</summary>
     public static PdfMacroStep RenameStep(string fileName, string newFileName)
@@ -70,7 +79,8 @@ public static class PdfAttachmentMacro
         return step.Operation switch
         {
             PdfMacroOperation.AuditAttachments => Audit(source),
-            PdfMacroOperation.RemoveAttachments => Remove(source, cancellationToken),
+            PdfMacroOperation.RemoveAttachments => Remove(
+                source, PdfMacroRewriteConsent.Read(step), cancellationToken),
             PdfMacroOperation.EditAttachments => Edit(step, source, cancellationToken),
             _ => throw new ArgumentException(
                 "The macro step is not an attachment operation.", nameof(step))
@@ -96,16 +106,24 @@ public static class PdfAttachmentMacro
     }
 
     private static ReadOnlyMemory<byte> Remove(
-        ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
+        ReadOnlyMemory<byte> source, bool invalidateSignatures, CancellationToken cancellationToken)
     {
         PdfDocument document = PdfDocument.Open(source);
         cancellationToken.ThrowIfCancellationRequested();
-        return PdfOptimizer.CreatePlan(document, new PdfOptimizationOptions
+        try
         {
-            RemoveAttachments = true,
-            PackObjects = false,
-            CompressStructure = false
-        }).Apply().Data;
+            return PdfOptimizer.CreatePlan(document, new PdfOptimizationOptions
+            {
+                RemoveAttachments = true,
+                PackObjects = false,
+                CompressStructure = false,
+                AllowSignatureInvalidation = invalidateSignatures
+            }).Apply().Data;
+        }
+        catch (InvalidOperationException error)
+        {
+            throw PdfMacroRewriteConsent.Name(error);
+        }
     }
 
     private static ReadOnlyMemory<byte> Edit(
@@ -164,7 +182,8 @@ public static class PdfAttachmentMacro
                     "The attachment edit settings are invalid.", nameof(step));
             return;
         }
-        if (step.Settings is { Count: > 0 })
+        // Removal is the one attachment step with a setting: it may give up signatures and usage rights.
+        if (step.Operation != PdfMacroOperation.RemoveAttachments && step.Settings is { Count: > 0 })
             throw new ArgumentException(
                 "Attachment macro steps do not accept settings.", nameof(step));
     }

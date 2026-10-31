@@ -188,12 +188,18 @@ public sealed class PdfMacroDispatcher
     private static PdfMacroOperationResult Optimize(PdfMacroStep step,
         ReadOnlyMemory<byte> source)
     {
-        if (step.Settings is { Count: > 0 })
-            throw new NotSupportedException(
-                "The built-in Optimize operation does not accept settings yet.");
+        bool invalidateSignatures = PdfMacroRewriteConsent.Read(step);
         PdfDocument document = PdfDocument.Open(source);
-        PdfOptimizationResult result = PdfOptimizer.CreatePlan(document,
-            PdfOptimizationOptions.ForDocument(document)).Apply();
+        PdfOptimizationResult result;
+        try
+        {
+            result = PdfOptimizer.CreatePlan(document, PdfOptimizationOptions.ForDocument(document)
+                with { AllowSignatureInvalidation = invalidateSignatures }).Apply();
+        }
+        catch (InvalidOperationException error)
+        {
+            throw PdfMacroRewriteConsent.Name(error);
+        }
         return new PdfMacroOperationResult(result.Data,
             new Dictionary<string, string>(StringComparer.Ordinal)
             {

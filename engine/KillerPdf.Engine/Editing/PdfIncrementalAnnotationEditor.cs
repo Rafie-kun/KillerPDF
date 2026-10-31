@@ -2795,9 +2795,14 @@ public sealed class PdfIncrementalAnnotationEditor
                 foreach (string key in new[] { "R", "D" })
                     if (appearances.TryGetValue(Name(key), out PdfObject? optionalAppearance))
                         ValidateAppearance(optionalAppearance, $"/{key}");
+                // The Off appearance of a check box or radio button is optional, and a viewer draws
+                // nothing for it, so only another missing state is damage.
                 if (appearanceState is not null
                     && Resolve(normalValue) is PdfDictionary normalStates
-                    && !normalStates.ContainsKey(appearanceState))
+                    && !normalStates.ContainsKey(appearanceState)
+                    && !(appearanceState.ValueAsLatin1() == "Off"
+                        && Resolve(subtype) is PdfName widgetSubtype
+                        && widgetSubtype.ValueAsLatin1() == "Widget"))
                     throw new InvalidOperationException(
                         $"Page {page.Index + 1} annotation /AS value has no matching normal appearance state.");
             }

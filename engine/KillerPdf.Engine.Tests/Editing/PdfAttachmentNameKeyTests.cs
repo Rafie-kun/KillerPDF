@@ -118,6 +118,37 @@ public sealed class PdfAttachmentNameKeyTests
         Assert.Equal("reviewed", attachment.Description);
     }
 
+    // Each rewrite copies the payload into the output again, so a rename, a description and a type go
+    // through one rewrite, and a field the call leaves out keeps the file's own value.
+    [Fact]
+    public void RenameDescriptionAndTypeOfOneAttachmentTakeASingleRewrite()
+    {
+        byte[] source = Portfolio("", "(a.txt) 10 0 R",
+            (10, Spec("(a.txt)", 20)), (20, Embedded("text#2Fplain", "abc")));
+
+        byte[] edited = new PdfIncrementalPageEditor(PdfDocument.Open(source))
+            .EditAttachmentByKey("a.txt", "b.txt", "application/pdf", PdfAssociatedFileRelationship.Source,
+                setDescription: true, description: "reviewed").Build();
+
+        Assert.Equal(PdfDocument.Open(source).CrossReferences.Sections.Count + 1,
+            PdfDocument.Open(edited).CrossReferences.Sections.Count);
+        PdfAttachmentInfo attachment = Assert.Single(PdfAttachmentReader.Read(PdfDocument.Open(edited)));
+        Assert.Equal("b.txt", attachment.NameTreeKey);
+        Assert.Equal("b.txt", attachment.FileName);
+        Assert.Equal("reviewed", attachment.Description);
+        Assert.Equal("application/pdf", attachment.MimeType);
+        Assert.Equal(PdfAssociatedFileRelationship.Source, attachment.Relationship);
+        Assert.Equal("abc"u8.ToArray(), attachment.Data.ToArray());
+
+        byte[] untouched = new PdfIncrementalPageEditor(PdfDocument.Open(edited))
+            .EditAttachmentByKey("b.txt", setDescription: true, description: null).Build();
+        PdfAttachmentInfo cleared = Assert.Single(PdfAttachmentReader.Read(PdfDocument.Open(untouched)));
+        Assert.Null(cleared.Description);
+        Assert.Equal("b.txt", cleared.FileName);
+        Assert.Equal("application/pdf", cleared.MimeType);
+        Assert.Equal(PdfAssociatedFileRelationship.Source, cleared.Relationship);
+    }
+
     [Fact]
     public void ANewValueThatIsNotValidIsStillRefused()
     {

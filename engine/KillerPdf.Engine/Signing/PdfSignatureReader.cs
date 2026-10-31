@@ -46,7 +46,13 @@ public static class PdfSignatureReader
     private static readonly PdfName ValueName = Name("V");
 
     /// <summary>Discovers and structurally inspects every signature field in a document.</summary>
-    public static IReadOnlyList<PdfSignatureInfo> Read(PdfDocument document)
+    public static IReadOnlyList<PdfSignatureInfo> Read(PdfDocument document) => Read(document, false);
+
+    /// <summary>
+    /// Discovers every signature field, and with <paramref name="allowRepeatedFields"/> reads a field
+    /// the form lists more than once a single time, as a repairing rewrite does before it drops the repeat.
+    /// </summary>
+    internal static IReadOnlyList<PdfSignatureInfo> Read(PdfDocument document, bool allowRepeatedFields)
     {
         ArgumentNullException.ThrowIfNull(document);
         PdfDictionary catalog = ResolveDictionary(document,
@@ -82,8 +88,13 @@ public static class PdfSignatureReader
                 if (!active.Add(identity))
                     throw new InvalidOperationException("The AcroForm field tree contains a cycle.");
                 if (!visited.Add(identity))
-                    throw new InvalidOperationException(
-                        "The AcroForm field tree references the same field more than once.");
+                {
+                    if (!allowRepeatedFields)
+                        throw new InvalidOperationException(
+                            "The AcroForm field tree references the same field more than once.");
+                    active.Remove(identity);
+                    return;
+                }
             }
             PdfDictionary field = resolvedField.Value as PdfDictionary
                 ?? throw new InvalidOperationException(
