@@ -169,6 +169,20 @@ namespace KillerPDF.Tests
                 Assert.ThrowsAny<Exception>(() => SearchService.FindExactMatches(path, "Conventional")));
         }
 
+        [Theory]
+        [InlineData("well-", 1)]
+        [InlineData("well-known", 2)]
+        [InlineData("wellknown", 2)]
+        public void FindExactMatches_KeepsLiteralAndJoinedWrappedHyphens(string query, int areas)
+        {
+            WithPdf(["BT /F1 12 Tf 72 700 Td (well-) Tj 0 -20 Td (known) Tj ET"], path =>
+            {
+                var matches = SearchService.FindExactMatches(path, query);
+                Assert.True(matches.TryGetValue(0, out var bounds), "Visible wrapped text must remain searchable.");
+                Assert.Equal(areas, bounds!.Count);
+            });
+        }
+
         [Fact]
         public void SkippedPagesText_ListsPagesFromOneAndCapsALongList()
         {

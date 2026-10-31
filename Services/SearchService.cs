@@ -406,34 +406,32 @@ namespace KillerPDF.Services
         internal static List<(double Left, double Bottom, double Right, double Top)> FindExactMatchesOnPage(
             KillerPdf.Engine.Documents.PdfPageContent page, string query, bool matchCase = false, bool wholeWord = false)
         {
-            var result = new List<(double, double, double, double)>();
             string needle = KillerPdf.Engine.Documents.PdfSearchText.Fold(query).Trim();
-            if (needle.Length == 0) return result;
-            var words = page.GetWords().ToList();
-
-            // Page text with one space between words, and each character mapped to its word and letter.
-            // A ligature spells out to several characters that all map to its one glyph.
-            var text = new System.Text.StringBuilder();
-            var map = new List<(int Word, int Letter)>();
-            bool joined = false;
-            for (int w = 0; w < words.Count; w++)
+            if (needle.Length == 0) return [];
+            var result = new List<(double, double, double, double)>();
+            foreach (SearchHit hit in FindHitsOnPage(page, 0, needle, matchCase, wholeWord))
             {
-                if (w > 0 && !joined) { text.Append(' '); map.Add((-1, -1)); }
-                // A word hyphenated across a line break reads whole, its hyphen and the space gone.
-                joined = w + 1 < words.Count && KillerPdf.Engine.Documents.PdfSearchText.BreaksAcrossLines(words[w], words[w + 1]);
-                var letters = words[w].Letters;
-                for (int l = 0; l < letters.Count - (joined ? 1 : 0); l++)
-                    foreach (char c in KillerPdf.Engine.Documents.PdfSearchText.Fold(letters[l].Value)) { text.Append(c); map.Add((w, l)); }
-            }
-
-            foreach (int start in TextReplacePlanner.FindAll(text.ToString(), needle, matchCase, wholeWord))
-            {
-                foreach (var word in map.Skip(start).Take(needle.Length).Where(m => m.Word >= 0).GroupBy(m => m.Word))
+                int wordStart = 0;
+                foreach (var word in page.Words)
                 {
-                    var boxes = word.Select(m => m.Letter).Distinct()
-                        .Select(letter => words[word.Key].Letters[letter].BoundingBox).ToList();
-                    result.Add((boxes.Min(b => b.Left), boxes.Min(b => b.Bottom),
-                        boxes.Max(b => b.Right), boxes.Max(b => b.Top)));
+                    int wordEnd = wordStart + word.Text.Length;
+                    if (wordEnd > hit.Start && wordStart < hit.Start + hit.Length)
+                    {
+                        var boxes = new List<KillerPdf.Engine.Documents.PdfContentBounds>();
+                        int offset = wordStart;
+                        foreach (var letter in word.Letters)
+                        {
+                            int end = offset + letter.Value.Length;
+                            if (end > hit.Start && offset < hit.Start + hit.Length) boxes.Add(letter.BoundingBox);
+                            offset = end;
+                        }
+                        var bounds = boxes.Count > 0 && offset == wordEnd
+                            ? new KillerPdf.Engine.Documents.PdfContentBounds(boxes.Min(box => box.Left),
+                                boxes.Min(box => box.Bottom), boxes.Max(box => box.Right), boxes.Max(box => box.Top))
+                            : word.BoundingBox;
+                        result.Add((bounds.Left, bounds.Bottom, bounds.Right, bounds.Top));
+                    }
+                    wordStart = wordEnd + 1;
                 }
             }
             return result;
