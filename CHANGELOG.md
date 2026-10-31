@@ -10,6 +10,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Fixed
 
+- Redacting a shared image preserves the transparency and colors of untouched pages that use a different mask or color settings.
 - Search and redaction find a word set with a ligature, so a name like Offner in a typeset paper is redacted instead of staying on the page while verification passed. A soft hyphen, zero-width character or unidentified code inside a word no longer hides it either, and redaction finds a word hyphenated across a line break.
 - Redaction finds text an annotation shows with no value or contents behind it, such as a button caption, the name on a signature or the wording of a stamp. It used to say nothing matched while the words stayed on the page.
 - A page turned into an image is covered even when its content leaves a graphics state open, which could leave the redacted pixels in the image. A removed comment no longer stays in the file because a kept reply points at it, and redacting a whole page also takes what lies past its crop box.

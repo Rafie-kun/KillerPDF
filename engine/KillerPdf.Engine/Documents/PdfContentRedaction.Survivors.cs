@@ -51,7 +51,7 @@ public static partial class PdfContentRedaction
         private readonly Dictionary<PdfStream, string?> _identities = new(ReferenceEqualityComparer.Instance);
         private readonly Dictionary<PdfStream, byte[]> _contentHashes = new(ReferenceEqualityComparer.Instance);
         private readonly Dictionary<PdfDictionary, string> _fingerprints = new(ReferenceEqualityComparer.Instance);
-        private readonly Dictionary<string, PdfIndirectReference> _copies = new(StringComparer.Ordinal);
+        private readonly Dictionary<PdfStream, Dictionary<string, PdfIndirectReference>> _copies = new(ReferenceEqualityComparer.Instance);
         private readonly HashSet<(PdfStream, PdfDictionary)> _formsWithNothingRetired = [];
 
         internal bool Sealed { get; private set; }
@@ -166,9 +166,13 @@ public static partial class PdfContentRedaction
         internal void MarkHoldsNothingRetired(PdfStream form, PdfDictionary resources) =>
             _formsWithNothingRetired.Add((form, resources));
 
-        internal PdfIndirectReference PrivateCopy(string key, Func<PdfIndirectReference> create)
+        internal PdfIndirectReference PrivateCopy(PdfStream source, string key, Func<PdfIndirectReference> create)
         {
-            if (!_copies.TryGetValue(key, out PdfIndirectReference? copy)) _copies[key] = copy = create();
+            // Matching sample bytes identify hidden content, but a replacement also carries the
+            // source's mask, color space and decode settings. Reuse it only for that source.
+            if (!_copies.TryGetValue(source, out Dictionary<string, PdfIndirectReference>? copies))
+                _copies[source] = copies = new(StringComparer.Ordinal);
+            if (!copies.TryGetValue(key, out PdfIndirectReference? copy)) copies[key] = copy = create();
             return copy;
         }
 

@@ -26,6 +26,7 @@ The 1.9.1 engine clears redacted content from every copy that hides it, edits at
 
 ### Fixed
 
+- Redaction keeps replacement images separate when their source masks or color settings differ, preserving untouched pages.
 - Redaction clears covered pixels, glyphs and paths from other draws of a form or image and from byte-identical copies, including Divide Spreads output, and verifies the written file for them. Annotation structure descriptions leave with the annotation, and a structure tree too deep to clean is refused.
 - Content streams accept a number with a stray minus inside it, as other readers do. The file structure stays strict.
 - Recovery keeps the trailer's `/Root`, `/Info`, `/ID` and `/Encrypt` when the `trailer` keyword is damaged, and a recovered encrypted file reports `IsEncrypted`.

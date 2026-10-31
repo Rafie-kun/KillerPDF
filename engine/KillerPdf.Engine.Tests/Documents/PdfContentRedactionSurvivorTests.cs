@@ -14,6 +14,36 @@ public sealed class PdfContentRedactionSurvivorTests
     private static readonly (byte, byte, byte) Secret = (0x53, 0x45, 0x43);
 
     [Fact]
+    public void HiddenCopiesWithDifferentSoftMasksKeepTheirVisiblePixels()
+    {
+        byte[] rgb = HalfImage(20, 10, Blue, Secret);
+        string Page(int content, int image) => $"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 100] /Resources << /XObject << /I {image} 0 R >> >> /Contents {content} 0 R >>";
+        PdfDocument source = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R 4 0 R 5 0 R] /Count 3 >>",
+            Page(6, 9), Page(7, 9), Page(8, 10),
+            Stream("q 200 0 0 100 0 0 cm /I Do Q"),
+            Stream("q 0 0 100 100 re W n 200 0 0 100 0 0 cm /I Do Q"),
+            Stream("q 0 0 100 100 re W n 200 0 0 100 0 0 cm /I Do Q"),
+            ImageObject(rgb, 20, 10, "/ColorSpace /DeviceRGB /SMask 11 0 R"),
+            ImageObject(rgb, 20, 10, "/ColorSpace /DeviceRGB /SMask 12 0 R"),
+            ImageObject(Enumerable.Repeat((byte)255, 200).ToArray(), 20, 10, "/ColorSpace /DeviceGray"),
+            ImageObject(Enumerable.Repeat((byte)128, 200).ToArray(), 20, 10, "/ColorSpace /DeviceGray")
+        ]));
+        var region = new PdfRedactionRegion(0, new PdfContentBounds(100, 0, 200, 100));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(source, [region]);
+
+        Assert.True(result.Verification.Succeeded);
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.Equal(0, CountOriginalPixels(output, Secret));
+        AssertRendersTheSame(source, output, 0, except: region.Bounds);
+        AssertRendersTheSame(source, output, 1);
+        AssertRendersTheSame(source, output, 2);
+        PdfContentRedaction.VerifyRetainedContent(source, [region], output);
+    }
+
+    [Fact]
     public void ASpriteDrawHidesNoCoveredPixelsAndStillLooksTheSame()
     {
         byte[] image = HalfImage(40, 20, Blue, Secret);

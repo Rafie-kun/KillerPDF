@@ -2247,7 +2247,7 @@ public static partial class PdfContentRedaction
                 if (update is null) return true;
                 CollectImageStreams(document, value, RetiredSourceStreams);
                 PdfImageRedaction.Plan plan = PdfImageRedaction.HiddenPlan(state.Ctm, samples, areas, state.Clip, out _);
-                PdfIndirectReference copy = retired!.PrivateCopy(PdfImageRedaction.Identity(document, image) + plan.Key, () =>
+                PdfIndirectReference copy = retired!.PrivateCopy(image, plan.Key, () =>
                 {
                     PdfImageRedaction.Paint(samples, plan);
                     PdfIndirectReference? mask = samples.Mask is PdfImageRedaction.Samples alpha
