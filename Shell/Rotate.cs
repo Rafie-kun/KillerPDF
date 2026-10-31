@@ -50,7 +50,7 @@ namespace KillerPDF.Shell
             {
                 var src = RenderPageBitmap(selectedPage, 1100, BurnPageAnnotationsToTemp(selectedPage));
                 if (src is null) { SetStatus(Loc("Str_Tf_NoRender")); return; }
-                var (pwpt, phpt) = previewSession.VisualPageSize(selectedPage, _pageRotations);
+                var (pwpt, phpt) = previewSession.PhysicalPageSize(selectedPage, _pageRotations);
                 previews.Add(new TransformWindow.PagePreview(src, pwpt, phpt, selectedPage + 1,
                     previewSession.PageImagePixels(selectedPage, _pageRotations)));
             }
@@ -134,9 +134,9 @@ namespace KillerPDF.Shell
                     string? burned = BurnPageAnnotationsToTemp(pageIdx);
                     sourceDocument = _doc;
                     if (burned != null) bakedAnnotationPages.Add(pageIdx);
-                    var (epw, eph) = engineSession.VisualPageSize(pageIdx, _pageRotations);
+                    var (epw, eph) = engineSession.PhysicalPageSize(pageIdx, _pageRotations);
                     int renderBudget = outputDpi > 0
-                        ? Math.Max(1, (int)Math.Ceiling(Math.Max(epw, eph) * outputDpi / 72.0))
+                        ? Math.Max(1, checked((int)Math.Ceiling(Math.Max(epw, eph) * outputDpi / 72.0)))
                         : 2200;
                     var src = RenderPageBitmap(pageIdx, renderBudget, burned) ?? throw new InvalidOperationException(Loc("Str_Tf_NoRender"));
                     var perspective = PerspectiveWarp.IsIdentity(perspectiveCorners)

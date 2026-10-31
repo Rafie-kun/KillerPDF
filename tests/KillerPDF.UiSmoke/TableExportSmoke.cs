@@ -258,6 +258,8 @@ internal static class TableExportSmoke
                 return CliReplacementSmoke.Run(appPath, folder);
             if (windowSessionCase == "--verify-page-navigation-physical-output")
                 return PhysicalOutputSmoke.Run(appPath, folder);
+            if (windowSessionCase == "--verify-page-navigation-physical-transform")
+                return PhysicalTransformSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-preview-failure")
                 return PreviewFailureSmoke.Run(owner, appPath, folder);
             if (windowSessionCase.StartsWith("--verify-page-navigation-sidebar-", StringComparison.Ordinal))
