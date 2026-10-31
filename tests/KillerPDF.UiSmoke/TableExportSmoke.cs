@@ -240,6 +240,10 @@ internal static class TableExportSmoke
                 return CliOutputSmoke.RunPlates(appPath, folder);
             if (windowSessionCase == "--verify-page-navigation-image-overwrite-consent")
                 return ImageExportWorkflowSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-image-pending-forms")
+                return ImageExportWorkflowSmoke.RunForms(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-ocr-pending-snapshot")
+                return ImageExportWorkflowSmoke.RunForms(owner, folder, ocr: true);
             if (windowSessionCase == "--verify-page-navigation-other-pane-save")
                 return OtherPaneSaveSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-dialog-buttons-theme")

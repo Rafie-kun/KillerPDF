@@ -171,13 +171,13 @@ internal static class FormWorkflowFailureSmoke
     private static object? Call(object target, string name, params object[] arguments) =>
         target.GetType().GetMethod(name, Members)!.Invoke(target, arguments);
 
-    private static byte[] Fixture(string fieldName = "answer")
+    internal static byte[] Fixture(string fieldName = "answer", bool password = false)
     {
         string[] objects = [
             "<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields [4 0 R 5 0 R 6 0 R 7 0 R 8 0 R] /DA (/Helv 12 Tf 0 g) /DR << /Font << /Helv 12 0 R >> >> >> >>",
             "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
             "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 300] /Annots [4 0 R 5 0 R 6 0 R 7 0 R 9 0 R 10 0 R] >>",
-            $"<< /Type /Annot /Subtype /Widget /FT /Tx /T ({fieldName}) /V (Original) /Rect [20 240 260 265] /P 3 0 R >>",
+            $"<< /Type /Annot /Subtype /Widget /FT /Tx /T ({fieldName}) /Ff {(password ? 8192 : 0)} /V (Original) /Rect [20 240 260 265] /P 3 0 R >>",
             "<< /Type /Annot /Subtype /Widget /FT /Ch /T (choice) /Opt [(A) (B)] /V (A) /Rect [20 200 160 225] /P 3 0 R >>",
             "<< /Type /Annot /Subtype /Widget /FT /Ch /T (multi) /Ff 2097152 /Opt [(A) (B)] /V [(A)] /Rect [20 140 160 190] /P 3 0 R >>",
             "<< /Type /Annot /Subtype /Widget /FT /Btn /T (check) /V /Off /AS /Off /AP << /N << /Off 11 0 R /Yes 11 0 R >> >> /Rect [20 100 40 120] /P 3 0 R >>",

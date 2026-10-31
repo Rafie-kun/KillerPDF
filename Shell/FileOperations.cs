@@ -1953,45 +1953,17 @@ namespace KillerPDF.Shell
                     Loc("Str_ExportImg_Suffix"), MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
                 return;
 
-            // Burn pending annotations + stamps into a temp render source (UI thread).
             string sourcePath;
-            bool hasAnnotations = _annotations.Values.Any(list => list.Count > 0);
-            if (hasAnnotations || HasActiveStamps)
+            try { sourcePath = WriteSavedCopyToTemp(forRasterization: true, throwaway: true); }
+            catch (Exception ex) when (ex is not OutOfMemoryException)
             {
-                var tempClean  = App.MakeTempFile("clean");
-                var tempBurned = App.MakeTempFile("burned");
-                try
-                {
-                    _doc.Save(tempClean);
-                    System.IO.File.Copy(tempClean, tempBurned, true);
-                    PdfEngineBurn.Burn(tempBurned, _annotations, _renderDims,
-                        _docStampSpec, null, _pageRotations);
-                    // Reopen before closing, so a failed reopen leaves the tab on a usable document.
-                    var reopened = ReopenCleanWorkingCopy(ref tempClean);
-                    _doc.Close();
-                    _doc = reopened;
-                }
-                catch (Exception ex)
-                {
-                    KillerDialog.Show(this, Loc("Str_Err_ExportFailed") + "\n" + ex.Message, "KillerPDF",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-                _currentFile = tempClean;
-                sourcePath = tempBurned;
-            }
-            else
-            {
-                var temp = App.MakeTempFile("src");
-                _doc.Save(temp);
-                sourcePath = temp;
+                KillerDialog.Show(this, Loc("Str_Err_ExportFailed") + "\n" + ex.Message, "KillerPDF",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
 
-            // In-app rotations live outside the file (the working copy has /Rotate stripped -
-            // BitmapHelpers), so snapshot them and rotate the pixels like the render path does.
+            // The immutable output copy already carries the displayed page rotations.
             var rotSnapshot = new int[pageCount];
-            for (int i = 0; i < rotSnapshot.Length; i++)
-                if (_pageRotations.TryGetValue(i, out int r)) rotSnapshot[i] = r;
 
             var overlay = ShowFlattenProgress(selected.Count, Loc("Str_Busy_ExportPage"));
             bool jpeg   = opts.Jpeg;
@@ -2019,6 +1991,7 @@ namespace KillerPDF.Shell
             {
                 try { HideFlattenProgress(overlay); } catch { /* ensure overlay never leaks */ }
                 EndCancellableOp(ct);
+                try { System.IO.File.Delete(sourcePath); } catch (System.IO.IOException) { }
             }
         }
 

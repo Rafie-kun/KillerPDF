@@ -87,7 +87,7 @@ internal static class CliOutputSmoke
         return 0;
     }
 
-    private static int Command(string exe, params string[] arguments)
+    internal static int Command(string exe, params string[] arguments)
     {
         var start = new ProcessStartInfo(exe) { UseShellExecute = false, CreateNoWindow = true,
             RedirectStandardOutput = true, RedirectStandardError = true };
