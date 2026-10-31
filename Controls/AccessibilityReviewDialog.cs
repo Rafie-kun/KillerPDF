@@ -43,7 +43,7 @@ internal sealed class AccessibilityReviewDialog : Window
         _source = source; _canRepair = canRepair; _applyFix = apply; _undoFix = undo;
         _sourceCurrent = sourceCurrent; _rotations = rotations;
         _report = PdfAccessibilityInspector.Inspect(PdfDocument.Open(source));
-        Title = "KillerPDF: " + L("Str_DocumentTools_Accessibility");
+        Title = "KillerPDF - " + L("Str_DocumentTools_Accessibility");
         scale = Math.Clamp(scale, .7, 2.5);
         Width = Math.Min(720 * scale, SystemParameters.WorkArea.Width - 40);
         MaxHeight = SystemParameters.WorkArea.Height - 40; SizeToContent = SizeToContent.Height;

@@ -34,7 +34,7 @@ internal sealed class CertificateCatalogDialog : Window
     internal CertificateCatalogDialog(Window owner, CertificateCatalog? catalog = null)
     {
         _catalog = catalog ?? new CertificateCatalog();
-        Title = "KillerPDF: " + L("Str_CertCatalog_Title");
+        Title = "KillerPDF - " + L("Str_CertCatalog_Title");
         Width = 900;
         Height = 650;
         MinWidth = 650;

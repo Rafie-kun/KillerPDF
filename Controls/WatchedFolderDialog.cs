@@ -33,7 +33,7 @@ internal sealed class WatchedFolderDialog : Window
     {
         _service = service;
         _filter.Text = "*.pdf";
-        Title = "KillerPDF: " + L("Str_Watch_Title");
+        Title = "KillerPDF - " + L("Str_Watch_Title");
         Width = Math.Min(820, SystemParameters.WorkArea.Width - 40);
         Height = Math.Min(760, SystemParameters.WorkArea.Height - 40);
         MinWidth = 480; MinHeight = 380; UseLayoutRounding = true;

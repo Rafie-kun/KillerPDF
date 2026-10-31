@@ -33,7 +33,7 @@ internal sealed class GuidedTasksDialog : Window
         Func<GuidedTasksDialog, GuidedTaskRequest, IProgress<string>, CancellationToken, Task<GuidedTaskResult>> execute)
     {
         _execute = execute;
-        Title = "KillerPDF: " + L("Str_Guided_Title");
+        Title = "KillerPDF - " + L("Str_Guided_Title");
         scale = Math.Clamp(scale, .7, 2.5);
         Width = Math.Min(620 * scale, SystemParameters.WorkArea.Width - 40);
         Height = Math.Min(430 * scale, SystemParameters.WorkArea.Height - 40);

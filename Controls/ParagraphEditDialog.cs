@@ -10,6 +10,7 @@ using System.Windows.Shapes;
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Rendering;
 using KillerPDF.Services;
+using KillerPDF.Shell;
 
 namespace KillerPDF;
 
@@ -28,7 +29,7 @@ internal sealed class ParagraphEditDialog : Window
     private readonly TextBlock _fontLabel;
     private readonly Image _image = new();
     private readonly Canvas _overlay;
-    private readonly Rectangle _box = new() { StrokeThickness = 2, IsHitTestVisible = false };
+    private readonly Rectangle _box = new() { StrokeThickness = 3, IsHitTestVisible = false };
     private readonly Thumb _resize;
     private readonly CheckBox _original;
     private readonly Button _preview;
@@ -56,17 +57,20 @@ internal sealed class ParagraphEditDialog : Window
         _pixelsPerPoint = Math.Min(1000 / _page.Width, 1000 / _page.Height);
         _candidates = inspection.Candidates;
         _refusals = inspection.Refusals;
-        Title = "KillerPDF: " + L("Str_Paragraph_Title");
+        Title = "KillerPDF - " + L("Str_Paragraph_Title");
         scale = Math.Clamp(scale, .7, 2.5);
-        Width = Math.Min(760 * scale, SystemParameters.WorkArea.Width - 40);
-        MaxHeight = SystemParameters.WorkArea.Height - 40;
-        MinWidth = 460; MinHeight = 380; SizeToContent = SizeToContent.Height;
+        Width = Math.Min(980 * scale, SystemParameters.WorkArea.Width - 40);
+        Height = Math.Min(720 * scale, SystemParameters.WorkArea.Height - 40);
+        MinWidth = 640; MinHeight = 460;
         UseLayoutRounding = true;
         DialogFrame.Configure(this, owner, resizable: true);
         Id(this, "ParagraphEditDialog");
-        var body = new DockPanel { Margin = new Thickness(16, 4, 16, 14),
-            LayoutTransform = new ScaleTransform(scale, scale) };
-        var footer = new StackPanel { Margin = new Thickness(0, 6, 0, 0) };
+        var root = new DockPanel { LayoutTransform = new ScaleTransform(scale, scale) };
+
+        var sidebar = new Border { Width = 288, Background = Brushes.Transparent, Padding = new Thickness(16, 8, 0, 14) };
+        DockPanel.SetDock(sidebar, Dock.Right);
+        var side = new DockPanel();
+        var footer = new StackPanel { Margin = new Thickness(0, 10, 16, 0) };
         _status = Note(""); Id(_status, "ParagraphStatus");
         AutomationProperties.SetLiveSetting(_status, AutomationLiveSetting.Polite);
         _fontLabel = Note("");
@@ -80,30 +84,79 @@ internal sealed class ParagraphEditDialog : Window
         _apply.IsEnabled = false;
         _apply.Click += (_, _) => { if (_plan is not null && _operation is null) { Result = _plan; Close(); } };
         actions.Children.Add(_preview); actions.Children.Add(cancel); actions.Children.Add(_apply);
-        footer.Children.Add(actions); DockPanel.SetDock(footer, Dock.Bottom); body.Children.Add(footer);
+        footer.Children.Add(_status); footer.Children.Add(_fontLabel); footer.Children.Add(actions);
+        DockPanel.SetDock(footer, Dock.Bottom); side.Children.Add(footer);
 
-        var content = new StackPanel();
-        content.Children.Add(Note("Str_Paragraph_Hint"));
-        _candidateBox = new ComboBox { Style = UiKit.DarkComboStyle, Margin = new Thickness(0, 6, 0, 6),
+        var content = new StackPanel { Margin = new Thickness(0, 0, 16, 0) };
+        TextBlock hint = Note("Str_Paragraph_Hint"); hint.FontSize = 12;
+        hint.SetResourceReference(TextBlock.ForegroundProperty, "MutedTextBrush");
+        content.Children.Add(hint);
+        _candidateBox = new ComboBox { Style = UiKit.DarkComboStyle, Margin = new Thickness(0, 8, 0, 8),
             ItemsSource = _candidates.Select((candidate, index) => $"{index + 1}. " +
                 candidate.Text.Replace('\n', ' ')[..Math.Min(100, candidate.Text.Length)]).ToArray() };
         Id(_candidateBox, "ParagraphCandidates", "Str_Paragraph_Select");
         content.Children.Add(_candidateBox);
+        content.Children.Add(UiKit.GroupLabel(L("Str_Lbl_Text")));
+        _text = UiKit.Field(); _text.AcceptsReturn = true; _text.TextWrapping = TextWrapping.Wrap;
+        _text.Height = 200; _text.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+        _text.MaxLength = 10000; _text.VerticalContentAlignment = VerticalAlignment.Top;
+        Id(_text, "ParagraphText", "Str_Lbl_Text"); content.Children.Add(_text);
+        var fields = new UniformGrid { Columns = 2, Margin = new Thickness(0, 6, -8, 0) };
+        string[] labels = ["Str_Pos_Left", "Str_Pos_Top", "Str_Sign_Width", "Str_Sign_Height", "Str_Stamp_FontSize", "Str_Paragraph_Leading"];
+        string[] names = ["Left", "Top", "Width", "Height", "FontSize", "Leading"];
+        for (int i = 0; i < _numbers.Length; i++)
+        {
+            var field = new StackPanel { Margin = new Thickness(0, 2, 8, 4) };
+            field.Children.Add(UiKit.GroupLabel(L(labels[i])));
+            TextBox input = UiKit.Field(); _numbers[i] = input;
+            Id(input, "Paragraph" + names[i], labels[i]);
+            bool boxField = i < 4;
+            input.TextChanged += (_, _) => { if (!_setting) { _boxEdited |= boxField; Invalidate(); } };
+            field.Children.Add(input); fields.Children.Add(field);
+        }
+        var alignmentField = new StackPanel { Margin = new Thickness(0, 2, 8, 4) };
+        alignmentField.Children.Add(UiKit.GroupLabel(L("Str_Paragraph_Alignment")));
+        _alignment = new ComboBox { Style = UiKit.DarkComboStyle,
+            ItemsSource = new[] { L("Str_Paragraph_Left"), L("Str_Paragraph_Center"), L("Str_Paragraph_Right") }, SelectedIndex = 0 };
+        Id(_alignment, "ParagraphAlignment", "Str_Paragraph_Alignment");
+        alignmentField.Children.Add(_alignment); fields.Children.Add(alignmentField); content.Children.Add(fields);
+        side.Children.Add(new ScrollViewer { Content = content, VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled });
+        sidebar.Child = side; root.Children.Add(sidebar);
+
+        var pageColumn = new DockPanel();
+        _original = UiKit.CheckBox(L("Str_Paragraph_Original"));
+        _original.IsChecked = true; _original.Margin = new Thickness(8, 0, 8, 12);
+        Id(_original, "ParagraphOriginal");
+        _original.Checked += (_, _) => _image.Source = _originalImage;
+        _original.Unchecked += (_, _) => _image.Source = _editedImage ?? _originalImage;
+        DockPanel.SetDock(_original, Dock.Bottom); pageColumn.Children.Add(_original);
+        var pageWrap = new Border { BorderThickness = new Thickness(1), CornerRadius = UiKit.RadCard,
+            Margin = new Thickness(8, 4, 8, 8), ClipToBounds = true };
+        pageWrap.SetResourceReference(Border.BackgroundProperty, "BgCanvas");
+        pageWrap.SetResourceReference(Border.BorderBrushProperty, "PaneBorderBrush");
+        var pageGrid = new Grid();
+        if ((owner as MainWindow)?.GrainTextureSource is ImageSource grain)
+            pageGrid.Children.Add(new Border { IsHitTestVisible = false,
+                Opacity = Application.Current.Resources["GrainOpacity"] is double grainOpacity ? grainOpacity : 0.05,
+                Background = new ImageBrush(grain) { TileMode = TileMode.Tile, ViewportUnits = BrushMappingMode.Absolute,
+                    Viewport = new Rect(0, 0, 256, 256), Stretch = Stretch.None } });
         double pixelWidth = Math.Ceiling(_page.Width * _pixelsPerPoint);
         double pixelHeight = Math.Ceiling(_page.Height * _pixelsPerPoint);
-        var pageView = new Grid { Width = pixelWidth, Height = pixelHeight };
+        var pageView = new Grid { Width = pixelWidth, Height = pixelHeight, Background = Brushes.White };
+        RenderOptions.SetBitmapScalingMode(_image, BitmapScalingMode.HighQuality);
         _image.Stretch = Stretch.Fill; pageView.Children.Add(_image);
         _overlay = new Canvas { Background = Brushes.Transparent };
         Id(_overlay, "ParagraphPage", "Str_Paragraph_Select");
         _box.SetResourceReference(Shape.StrokeProperty, "SelectionAccent");
         _overlay.Children.Add(_box);
-        _resize = new Thumb { Width = 14, Height = 14, Cursor = Cursors.SizeNWSE,
+        _resize = new Thumb { Width = 20, Height = 20, Cursor = Cursors.SizeNWSE,
             Background = UiKit.Brush("PrimaryBrush"), BorderBrush = Brushes.White, BorderThickness = new Thickness(1) };
         Id(_resize, "ParagraphResize", "Str_Paragraph_Hint");
         _overlay.Children.Add(_resize); pageView.Children.Add(_overlay);
-        var pageViewport = new Viewbox { Child = pageView, Stretch = Stretch.Uniform, MaxHeight = 240,
-            HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(0, 0, 0, 6) };
-        content.Children.Add(pageViewport);
+        pageGrid.Children.Add(new Viewbox { Child = pageView, Stretch = Stretch.Uniform, Margin = new Thickness(24),
+            Effect = new System.Windows.Media.Effects.DropShadowEffect
+            { Color = Colors.Black, BlurRadius = 14, ShadowDepth = 3, Direction = 270, Opacity = 0.45 } });
         _overlay.MouseLeftButtonDown += (_, e) =>
         {
             Point point = e.GetPosition(_overlay);
@@ -119,46 +172,10 @@ internal sealed class ParagraphEditDialog : Window
             values[3] = Math.Clamp(values[3] + e.VerticalChange / _pixelsPerPoint, Math.Min(1, availableHeight), availableHeight);
             _boxEdited = true; SetNumbers(values); Invalidate();
         };
-        _original = UiKit.CheckBox(L("Str_Paragraph_Original"));
-        _original.IsChecked = true; _original.Margin = new Thickness(0, 0, 0, 6);
-        Id(_original, "ParagraphOriginal");
-        _original.Checked += (_, _) => _image.Source = _originalImage;
-        _original.Unchecked += (_, _) => _image.Source = _editedImage ?? _originalImage;
-        content.Children.Add(_original);
-        content.Children.Add(UiKit.GroupLabel(L("Str_Lbl_Text")));
-        _text = UiKit.Field(); _text.AcceptsReturn = true; _text.TextWrapping = TextWrapping.Wrap;
-        _text.Height = 90; _text.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
-        _text.MaxLength = 10000; _text.VerticalContentAlignment = VerticalAlignment.Top;
-        Id(_text, "ParagraphText", "Str_Lbl_Text"); content.Children.Add(_text);
-        var fields = new WrapPanel { Margin = new Thickness(0, 4, 0, 0) };
-        string[] labels = ["Str_Pos_Left", "Str_Pos_Top", "Str_Sign_Width", "Str_Sign_Height", "Str_Stamp_FontSize", "Str_Paragraph_Leading"];
-        string[] names = ["Left", "Top", "Width", "Height", "FontSize", "Leading"];
-        for (int i = 0; i < _numbers.Length; i++)
-        {
-            var field = new StackPanel { Width = 98, Margin = new Thickness(0, 2, 8, 4) };
-            field.Children.Add(UiKit.GroupLabel(L(labels[i])));
-            TextBox input = UiKit.Field(); _numbers[i] = input;
-            Id(input, "Paragraph" + names[i], labels[i]);
-            bool boxField = i < 4;
-            input.TextChanged += (_, _) => { if (!_setting) { _boxEdited |= boxField; Invalidate(); } };
-            field.Children.Add(input); fields.Children.Add(field);
-        }
-        var alignmentField = new StackPanel { Width = 120, Margin = new Thickness(0, 2, 0, 4) };
-        alignmentField.Children.Add(UiKit.GroupLabel(L("Str_Paragraph_Alignment")));
-        _alignment = new ComboBox { Style = UiKit.DarkComboStyle,
-            ItemsSource = new[] { L("Str_Paragraph_Left"), L("Str_Paragraph_Center"), L("Str_Paragraph_Right") }, SelectedIndex = 0 };
-        Id(_alignment, "ParagraphAlignment", "Str_Paragraph_Alignment");
-        alignmentField.Children.Add(_alignment); fields.Children.Add(alignmentField); content.Children.Add(fields);
-        content.Children.Add(_status); content.Children.Add(_fontLabel);
-        var scroll = new ScrollViewer { Content = content, VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-            HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled };
-        scroll.SizeChanged += (_, _) =>
-        {
-            _text.Height = Math.Clamp(scroll.ActualHeight - 4, 28, 90);
-            pageViewport.MaxHeight = Math.Clamp(scroll.ActualHeight - 4, 40, 240);
-        };
-        body.Children.Add(scroll);
-        Content = DialogFrame.Frame(this, owner, Title, Close, body);
+        pageWrap.Child = pageGrid;
+        pageColumn.Children.Add(UiKit.PaneWithShadow(pageWrap));
+        root.Children.Add(pageColumn);
+        Content = DialogFrame.Frame(this, owner, Title, Close, root);
         _candidateBox.SelectionChanged += (_, _) => SelectCandidate();
         _text.TextChanged += (_, _) => { if (!_setting) Invalidate(); };
         _alignment.SelectionChanged += (_, _) => { if (!_setting) Invalidate(); };
@@ -252,7 +269,7 @@ internal sealed class ParagraphEditDialog : Window
         double left = values[0] * _pixelsPerPoint, top = values[1] * _pixelsPerPoint;
         _box.Width = values[2] * _pixelsPerPoint; _box.Height = values[3] * _pixelsPerPoint;
         Canvas.SetLeft(_box, left); Canvas.SetTop(_box, top);
-        Canvas.SetLeft(_resize, left + _box.Width - 7); Canvas.SetTop(_resize, top + _box.Height - 7);
+        Canvas.SetLeft(_resize, left + _box.Width - _resize.Width / 2); Canvas.SetTop(_resize, top + _box.Height - _resize.Height / 2);
     }
 
     private async Task Preview()
