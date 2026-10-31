@@ -42,7 +42,7 @@ public static partial class PdfContentRedaction
         {
             internal Dictionary<string, List<PdfContentBounds>> Images { get; } = new(StringComparer.Ordinal);
             internal HashSet<long> ImageLengths { get; } = [];
-            internal HashSet<(int, int)> UnfilteredSizes { get; } = [];
+            internal HashSet<(int, int)> ImageSizes { get; } = [];
             internal Dictionary<string, List<ContentAreas>> Forms { get; } = new(StringComparer.Ordinal);
             internal Dictionary<string, List<ContentAreas>> Pages { get; } = new(StringComparer.Ordinal);
         }
@@ -74,8 +74,8 @@ public static partial class PdfContentRedaction
                 _store.Images[identity] = known = [];
             AddAreas(known, list);
             _store.ImageLengths.Add(image.EncodedData.Length);
-            if (PdfImageRedaction.IsUnfiltered(document, image) && PdfImageRedaction.Size(document, image) is { } size)
-                _store.UnfilteredSizes.Add(size);
+            if (PdfImageRedaction.Size(document, image) is { } size)
+                _store.ImageSizes.Add(size);
         }
 
         /// <summary>Records areas of a form's own space.</summary>
@@ -118,16 +118,15 @@ public static partial class PdfContentRedaction
             inner.Left >= outer.Left - 1e-6 && inner.Right <= outer.Right + 1e-6
             && inner.Bottom >= outer.Bottom - 1e-6 && inner.Top <= outer.Top + 1e-6;
 
-        // Another image of the same size and storage is hashed only if it could be the same one. The
-        // writer compresses unfiltered images, so one of those can come back with another stored length.
+        // Equal decoded samples can use different filters or compression. Dimensions can rule out a
+        // match, but stored length cannot, so every same-sized candidate needs its content identity.
         internal IReadOnlyList<PdfContentBounds>? ImageAreas(PdfStream image)
         {
             if (_store.Images.Count == 0) return null;
             if (!_identities.TryGetValue(image, out string? identity))
             {
                 bool candidate = _store.ImageLengths.Contains(image.EncodedData.Length)
-                    || PdfImageRedaction.Size(document, image) is { } size && _store.UnfilteredSizes.Contains(size)
-                        && PdfImageRedaction.IsFlate(document, image);
+                    || PdfImageRedaction.Size(document, image) is { } size && _store.ImageSizes.Contains(size);
                 _identities[image] = identity = candidate ? PdfImageRedaction.Identity(document, image) : null;
             }
             return identity is not null && _store.Images.TryGetValue(identity, out List<PdfContentBounds>? areas) ? areas : null;

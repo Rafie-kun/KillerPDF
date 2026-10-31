@@ -13,6 +13,54 @@ public sealed class PdfContentRedactionSurvivorTests
     private static readonly (byte, byte, byte) Blue = (0, 0, 255);
     private static readonly (byte, byte, byte) Secret = (0x53, 0x45, 0x43);
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void DifferentlyEncodedHiddenCopiesLoseCoveredSamples(bool compressCopy)
+    {
+        byte[] samples = HalfImage(40, 20, Blue, Secret);
+        byte[] copy = samples;
+        if (compressCopy)
+        {
+            using var buffer = new MemoryStream();
+            using (var compressor = new System.IO.Compression.ZLibStream(buffer,
+                System.IO.Compression.CompressionLevel.SmallestSize, leaveOpen: true)) compressor.Write(samples);
+            copy = buffer.ToArray();
+        }
+        byte[] sourceBytes = CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R >>",
+            "<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 200] /Resources << /XObject << /Original 7 0 R >> >> /Contents 5 0 R >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 400 200] /Resources << /XObject << /Other 8 0 R >> >> /Contents 6 0 R >>",
+            Stream("q 400 0 0 200 0 0 cm /Original Do Q"),
+            Stream("q 0 0 200 200 re W n 400 0 0 200 0 0 cm /Other Do Q"),
+            ImageObject(Encoding.ASCII.GetBytes(Convert.ToHexString(samples) + ">"), 40, 20,
+                "/ColorSpace /DeviceRGB /Filter /ASCIIHexDecode"),
+            ImageObject(copy, 40, 20, "/ColorSpace /DeviceRGB" + (compressCopy ? " /Filter /FlateDecode" : ""))
+        ]);
+        PdfDocument source = PdfDocument.Open(sourceBytes);
+        Assert.Equal(800, CountOriginalPixels(source, Secret));
+        var region = new PdfRedactionRegion(0, new PdfContentBounds(200, 0, 400, 200));
+
+        PdfContentRedactionResult result = PdfContentRedaction.Apply(source, [region]);
+
+        if (Environment.GetEnvironmentVariable("KILLERPDF_TEST_SURVIVOR_OUTPUT") is { Length: > 0 } capture)
+        {
+            Directory.CreateDirectory(capture);
+            string stem = compressCopy ? "flate-copy" : "raw-copy";
+            File.WriteAllBytes(Path.Combine(capture, stem + "-source.pdf"), sourceBytes);
+            File.WriteAllBytes(Path.Combine(capture, stem + "-output.pdf"), result.Document.ToArray());
+        }
+
+        Assert.True(result.Verification.Succeeded);
+        Assert.Empty(result.Plan.RasterPages);
+        PdfDocument output = PdfDocument.Open(result.Document);
+        Assert.Equal(0, CountOriginalPixels(output, Secret));
+        AssertRendersTheSame(source, output, 0, except: region.Bounds);
+        AssertRendersTheSame(source, output, 1);
+        PdfContentRedaction.VerifyRetainedContent(source, [region], output);
+    }
+
     [Fact]
     public void HiddenCopiesWithDifferentSoftMasksKeepTheirVisiblePixels()
     {

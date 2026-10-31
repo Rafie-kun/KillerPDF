@@ -10,7 +10,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Fixed
 
-- Redaction removes covered content from repeated and byte-identical images and text, including content outside a crop box or behind a divided spread. Rasterized pages lose their old search layer, and verification checks for surviving text.
+- Redaction removes covered content from repeated images and text, including identical image samples stored with different encodings, content outside a crop box, and content behind a divided spread. Rasterized pages lose their old search layer, and verification checks for surviving text.
 - Redaction clears hidden copies, private editor data, parent-field values, structure descriptions, Header & Footer descriptions, and comments referenced by replies. Deep structure trees are cleaned completely or refused.
 - Find and Redact includes current text edits and form values, removes matched overlays, and refuses stale search marks. Ligatures, invisible characters, and words split across lines remain searchable without losing literal hyphens.
 - Redaction finds annotation appearance text, including button captions, signature names, and stamps. Unreadable page, field, or annotation content is identified instead of reported as no match; macro and command line redaction save nothing and exit with 3 when a search is incomplete.
