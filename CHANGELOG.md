@@ -13,6 +13,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Deleting a form field retires its pending text and formatting, so a recreated field cannot inherit them. Undo restores the deleted field's values.
 - A failed form conversion or flattening keeps pending field values and formatting intact.
 - Damaged encrypted files remain protected when security names use legal escapes or intervening comments.
+- Certified PDFs that permit form filling accept incremental value updates while preserving signatures and field locks.
 - Image export asks before replacing numbered output files and preserves existing images when a write fails.
 - Exported images include current form values, formatting, markup, and page rotation without changing the open document.
 - OCR output uses the current form values, visible markup, and page orientation instead of an older saved document.

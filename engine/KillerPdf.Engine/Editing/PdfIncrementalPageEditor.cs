@@ -2379,9 +2379,7 @@ public sealed class PdfIncrementalPageEditor
             && !_pagePresentationChanged && !_catalogPresentationChanged && !_formValuesChanged)
             throw new InvalidOperationException("The incremental page update is empty.");
         EnforcePasswordPermissions();
-        if (PdfSignatureReader.ReadCertificationPermission(_document).HasValue)
-            throw new InvalidOperationException(
-                "The document certification signature prohibits page-tree changes.");
+        EnforceCertificationPermissions();
         ValidateExistingStructureTreePageSet();
         _taggedOverlays.Clear();
         var update = new PdfIncrementalUpdateBuilder(_document, permissionsCheckedByCaller: true);
@@ -4658,6 +4656,40 @@ public sealed class PdfIncrementalPageEditor
             throw new InvalidOperationException(
                 $"The checkbox field '{fieldName}' does not define exactly one on appearance state.");
         return onStates[0];
+    }
+
+    private void EnforceCertificationPermissions()
+    {
+        PdfSignatureCertificationPermission? permission = PdfSignatureReader.ReadCertificationPermission(_document);
+        bool valueOnly = _formValuesChanged && !_orderChanged && !_rotationChanged
+            && !_pageGeometryChanged && !_pagePresentationChanged && !_catalogPresentationChanged
+            && _textFieldValues.Values.All(value => !value.HasBackgroundColor && value.AppearanceStyle is null);
+        if (permission.HasValue && (permission == PdfSignatureCertificationPermission.NoChanges || !valueOnly))
+            throw new InvalidOperationException("The document certification signature prohibits these changes.");
+        if (!_formValuesChanged) return;
+
+        var changed = _checkBoxValues.Keys.Concat(_radioButtonValues.Keys).Concat(_textFieldValues.Keys)
+            .Concat(_choiceFieldValues.Keys).Concat(_resetFieldValues.Keys).ToHashSet(StringComparer.Ordinal);
+        foreach (PdfSignatureInfo signature in PdfSignatureReader.Read(_document).Where(signature => signature.IsSigned))
+        {
+            if (signature.FieldLockPermission == PdfSignatureLockPermission.NoChanges)
+                throw new InvalidOperationException("A signed field lock prohibits subsequent changes.");
+            if (signature.FieldLockAction is not { } action) continue;
+            foreach (string field in changed)
+            {
+                bool listed = signature.LockedFields?.Any(name => field == name
+                    || field.StartsWith(name + ".", StringComparison.Ordinal)) == true;
+                bool locked = action == PdfSignatureLockAction.All
+                    || action == PdfSignatureLockAction.Include && listed
+                    || action == PdfSignatureLockAction.Exclude && !listed;
+                if (locked) throw new InvalidOperationException($"The signed field lock prohibits changing '{field}'.");
+            }
+        }
+        if (permission.HasValue)
+            for (int page = 0; page < _pages.Count; page++)
+                foreach (PdfFormWidgetInfo widget in PdfFormWidgetReader.ReadPage(_document, page))
+                    if ((widget.Flags & 1) != 0 && changed.Contains(widget.FieldName))
+                        throw new InvalidOperationException($"The certified field '{widget.FieldName}' is read-only.");
     }
 
     private void EnforcePasswordPermissions()
