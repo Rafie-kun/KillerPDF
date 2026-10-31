@@ -15,6 +15,24 @@ internal static class AtomicFileOutput
     internal static void Write(string destination, ReadOnlyMemory<byte> bytes, CancellationToken cancellation = default)
         => Write(destination, stream => stream.Write(bytes.Span), cancellation);
 
+    /// <summary>Publishes a complete new file without replacing an output created after preflight.</summary>
+    internal static void WriteNew(string destination, ReadOnlyMemory<byte> bytes, CancellationToken cancellation = default)
+    {
+        cancellation.ThrowIfCancellationRequested();
+        string temporary = TemporaryPath(destination);
+        try
+        {
+            using (var stream = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            {
+                stream.Write(bytes.Span);
+                stream.Flush(flushToDisk: true);
+            }
+            cancellation.ThrowIfCancellationRequested();
+            File.Move(temporary, destination);
+        }
+        finally { TryDelete(temporary, new FileOperations()); }
+    }
+
     /// <summary>Writes one of many outputs of a batch. The publish stays atomic, but the disk flush
     /// is kept only when an existing file is replaced: a file that did not exist before has no
     /// older copy to protect, and the flush costs about 1.5 ms per file.</summary>

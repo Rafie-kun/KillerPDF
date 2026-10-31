@@ -18,7 +18,7 @@ internal static class FormWorkflowFailureSmoke
     internal static int Run(Window owner, string folder, bool deletion = false)
         => WithCleanup(owner, () => deletion ? RunDeletion(owner, folder) : RunCore(owner, folder));
 
-    internal static int WithCleanup(Window owner, Func<int> run)
+    internal static int WithCleanup(Window owner, Func<int> run, bool dismissDuringRun = true)
     {
         var dialogs = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(30) };
         dialogs.Tick += (_, _) =>
@@ -33,10 +33,11 @@ internal static class FormWorkflowFailureSmoke
                 else dialog.Close();
             }
         };
-        dialogs.Start();
+        if (dismissDuringRun) dialogs.Start();
         try { return run(); }
         finally
         {
+            dialogs.Start();
             try { owner.Close(); }
             finally { dialogs.Stop(); }
         }

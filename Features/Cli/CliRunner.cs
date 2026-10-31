@@ -410,7 +410,7 @@ namespace KillerPDF.Features
             "                                           list embedded files, or extract them to a folder",
             "  killerpdf decrypt <in.pdf> <out.pdf> [--password <p>]",
             "                                           remove encryption (lossless when possible)",
-            "  killerpdf to-image <in.pdf> <outDir> [--dpi <n>] [--format png|jpg] [--pages <range>] [--transparent]",
+            "  killerpdf to-image <in.pdf> <outDir> [--dpi <n>] [--format png|jpg] [--pages <range>] [--transparent] [--overwrite]",
             "                                           render pages to images (default 150 dpi, png;",
             "                                           background composites to white unless --transparent, png only)",
             "  killerpdf flatten <in.pdf> <out.pdf> [--dpi <n>] [--color-mode color|grayscale|black-white]",
@@ -456,7 +456,7 @@ namespace KillerPDF.Features
             "                                           [--mime <type>] [--relationship <name>] [--remove]",
             "  killerpdf comments <in.pdf> [--json]            list review comments and their replies",
             "  killerpdf measurements <in.pdf> [--json | --csv] report the saved measurements",
-            "  killerpdf separations <in.pdf> [<outDir>] [--pages <range>] [--dpi <n>] [--json]",
+            "  killerpdf separations <in.pdf> [<outDir>] [--pages <range>] [--dpi <n>] [--json] [--overwrite]",
             "                                           list inks, or write each page's plates as images",
             "  killerpdf compare-structure <original.pdf> <changed.pdf> [--json]",
             "                                           compare content, resources and geometry; exit 3 when they differ",
@@ -1683,7 +1683,7 @@ namespace KillerPDF.Features
         {
             if (pos.Count != 2)
             {
-                con.WriteLine("Usage: KillerPDF.exe --to-image <in.pdf> <outputFolder> [--dpi <n>] [--format png|jpg] [--pages <range>] [--transparent] [--allow-incomplete]");
+                con.WriteLine("Usage: KillerPDF.exe --to-image <in.pdf> <outputFolder> [--dpi <n>] [--format png|jpg] [--pages <range>] [--transparent] [--allow-incomplete] [--overwrite]");
                 return 2;
             }
             string inPath = Path.GetFullPath(pos[0]), outDir = Path.GetFullPath(pos[1]);
@@ -1720,18 +1720,33 @@ namespace KillerPDF.Features
 
             string baseName = Path.GetFileNameWithoutExtension(inPath);
             int digits = Math.Max(3, pageCount.ToString().Length);
-            foreach (var idx in selected)
+            string[] paths = PdfRasterize.PlanPageImagePaths(inPath, selected, outDir, baseName, digits, fmt == "jpg");
+            HashSet<string>? approved = options.ContainsKey("--overwrite")
+                ? paths.ToHashSet(StringComparer.OrdinalIgnoreCase) : null;
+            try { PdfRasterize.ValidateImageOutputs(paths, approved); }
+            catch (IOException error) { con.WriteLine(error.Message + " Use --overwrite to replace existing images."); return 2; }
+            int written = 0;
+            try
             {
-                PdfRenderedPage rendered = renderSession.RenderPage(idx, transparent,
-                    requireComplete: !allowIncomplete);
-                incomplete.Note(idx, rendered);
-                byte[] raw = rendered.Pixels;
-                int w = rendered.Width, h = rendered.Height;
-                int rot = rotations != null && idx < rotations.Length ? rotations[idx] : 0;
-                if (rot != 0) (raw, w, h) = BitmapHelpers.RotateBitmap(raw, w, h, rot);
-                var bytes = fmt == "png" ? BitmapHelpers.RenderToPng(raw, w, h, dpi) : BitmapHelpers.EncodeJpeg(raw, w, h, dpi);
-                var name = $"{baseName}-page-{(idx + 1).ToString().PadLeft(digits, '0')}.{fmt}";
-                File.WriteAllBytes(Path.Combine(outDir, name), bytes);
+                foreach (var idx in selected)
+                {
+                    PdfRenderedPage rendered = renderSession.RenderPage(idx, transparent,
+                        requireComplete: !allowIncomplete);
+                    incomplete.Note(idx, rendered);
+                    byte[] raw = rendered.Pixels;
+                    int w = rendered.Width, h = rendered.Height;
+                    int rot = rotations != null && idx < rotations.Length ? rotations[idx] : 0;
+                    if (rot != 0) (raw, w, h) = BitmapHelpers.RotateBitmap(raw, w, h, rot);
+                    var bytes = fmt == "png" ? BitmapHelpers.RenderToPng(raw, w, h, dpi) : BitmapHelpers.EncodeJpeg(raw, w, h, dpi);
+                    if (approved is not null) AtomicFileOutput.Write(paths[written], bytes);
+                    else AtomicFileOutput.WriteNew(paths[written], bytes);
+                    written++;
+                }
+            }
+            catch (Exception error) when (error is not OutOfMemoryException)
+            {
+                con.WriteLine($"Image export stopped after {written} of {selected.Count} images in {outDir}. " + error.Message);
+                return 1;
             }
             CliReportIncomplete(incomplete, con);
             con.WriteLine($"Rendered {selected.Count} pages at {dpi:0} dpi ({fmt}) into {outDir}");

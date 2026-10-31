@@ -232,6 +232,14 @@ internal static class TableExportSmoke
                 return ReplacementFailureSmoke.Run(owner, folder, reopen: true);
             if (windowSessionCase == "--verify-page-navigation-replace-fallback-history")
                 return ReplacementFailureSmoke.RunFallback(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-cli-image-publication")
+                return CliOutputSmoke.Run(appPath, folder, merge: false);
+            if (windowSessionCase == "--verify-page-navigation-cli-merge-input")
+                return CliOutputSmoke.Run(appPath, folder, merge: true);
+            if (windowSessionCase == "--verify-page-navigation-cli-plate-names")
+                return CliOutputSmoke.RunPlates(appPath, folder);
+            if (windowSessionCase == "--verify-page-navigation-image-overwrite-consent")
+                return ImageExportWorkflowSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-other-pane-save")
                 return OtherPaneSaveSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-dialog-buttons-theme")

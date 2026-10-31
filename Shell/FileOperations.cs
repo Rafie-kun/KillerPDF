@@ -1937,12 +1937,21 @@ namespace KillerPDF.Shell
             {
                 Filter = Loc("Str_Filter_Images") + (opts.Jpeg ? "|*.jpg" : "|*.png"),
                 Title  = Loc("Str_ExportImg_Suffix"),
+                OverwritePrompt = false,
                 CheckFileExists = false, CheckPathExists = true,
                 FileName = System.IO.Path.GetFileNameWithoutExtension(_originalFile ?? _currentFile) + "." + ext,
             };
             if (dlg.ShowDialog(this) != true) return;
             string outDir   = System.IO.Path.GetDirectoryName(dlg.FileName) is { Length: > 0 } d2 ? d2 : ".";
             string baseName = System.IO.Path.GetFileNameWithoutExtension(dlg.FileName);
+            int digits = Math.Max(3, pageCount.ToString().Length);
+            string[] outputPaths = PdfRasterize.PlanPageImagePaths(_originalFile ?? _currentFile,
+                selected, outDir, baseName, digits, opts.Jpeg);
+            var approvedOverwrites = outputPaths.Where(System.IO.File.Exists).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            if (approvedOverwrites.Count > 0 && KillerDialog.Show(this,
+                    string.Format(Loc("Str_Dlg_OverwriteMsg"), string.Join("\n", approvedOverwrites.Select(System.IO.Path.GetFileName))),
+                    Loc("Str_ExportImg_Suffix"), MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+                return;
 
             // Burn pending annotations + stamps into a temp render source (UI thread).
             string sourcePath;
@@ -1985,7 +1994,6 @@ namespace KillerPDF.Shell
                 if (_pageRotations.TryGetValue(i, out int r)) rotSnapshot[i] = r;
 
             var overlay = ShowFlattenProgress(selected.Count, Loc("Str_Busy_ExportPage"));
-            int digits  = Math.Max(3, pageCount.ToString().Length);
             bool jpeg   = opts.Jpeg;
             double dpi  = opts.Dpi;
             var pages   = selected;
@@ -1999,7 +2007,7 @@ namespace KillerPDF.Shell
                 int written = await Task.Run(() => PdfRasterize.ExportPageImages(sourcePath, pages,
                     rotSnapshot, dpi, jpeg, outDir, baseName, digits,
                     (n, total) => Dispatcher.BeginInvoke(new Action(() => UpdateFlattenProgress(overlay, n, total))),
-                    ct, incomplete));
+                    ct, incomplete, approvedOverwrites));
                 SetStatus(string.Format(Loc("Str_ExportImg_Done"), written, outDir));
                 WarnIncompletePages(incomplete);
             }

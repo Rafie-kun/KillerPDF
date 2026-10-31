@@ -144,46 +144,74 @@ namespace KillerPDF.Services
         }
 
         /// <summary>
-        /// Renders each selected page of <paramref name="sourcePath"/> at <paramref name="dpi"/>
-        /// and writes base-page-NNN.png/.jpg files into <paramref name="outDir"/>. In-app
-        /// rotations arrive as a snapshot array (the working file has /Rotate stripped). Returns
-        /// how many files were written; cancellation stops after the current page. With
-        /// <paramref name="incomplete"/> a page that cannot be drawn exactly is written as rendered
-        /// and noted there; without it such a page fails the export.
+        /// Plans unique numbered image destinations before rendering any page.
         /// </summary>
+        internal static string[] PlanPageImagePaths(string sourcePath, IReadOnlyList<int> pages,
+            string outDir, string baseName, int digits, bool jpeg)
+        {
+            string[] paths = [.. pages.Select(index => Path.GetFullPath(Path.Combine(outDir,
+                $"{baseName}-page-{(index + 1).ToString().PadLeft(digits, '0')}.{(jpeg ? "jpg" : "png")}")))];
+            if (paths.Distinct(StringComparer.OrdinalIgnoreCase).Count() != paths.Length
+                || paths.Any(path => string.Equals(path, Path.GetFullPath(sourcePath), StringComparison.OrdinalIgnoreCase)))
+                throw new ArgumentException("Image output filenames must be unique and cannot replace the source file.");
+            return paths;
+        }
+
+        internal static void ValidateImageOutputs(IReadOnlyList<string> paths, IReadOnlySet<string>? approvedOverwrites)
+        {
+            foreach (string path in paths)
+                if (Directory.Exists(path) || File.Exists(path) && !(approvedOverwrites?.Contains(path) ?? false))
+                    throw new IOException($"Image output already exists: {path}. Approve replacement before exporting.");
+        }
+
+        /// <summary>Renders selected pages with pending rotations and returns the number of complete
+        /// images published, including a partial batch when canceled. Without an incomplete-page log,
+        /// a page that cannot render completely fails the export.</summary>
         internal static int ExportPageImages(string sourcePath, IReadOnlyList<int> pages,
             int[] rotSnapshot, double dpi, bool jpeg, string outDir, string baseName, int digits,
-            Action<int, int> progress, CancellationToken ct, IncompletePageLog? incomplete = null)
+            Action<int, int> progress, CancellationToken ct, IncompletePageLog? incomplete = null,
+            IReadOnlySet<string>? approvedOverwrites = null)
         {
+            string[] paths = PlanPageImagePaths(sourcePath, pages, outDir, baseName, digits, jpeg);
+            ValidateImageOutputs(paths, approvedOverwrites);
             int written = 0;
             using var renderSession = PdfPageRenderSession.OpenEngineFirst(
                 sourcePath, dpi / 72.0);
             int done = 0;
-            foreach (var idx in pages)
+            try
             {
-                if (ct.IsCancellationRequested) return written;
-                byte[] raw; int w, h;
+                foreach (var idx in pages)
                 {
-                    // Composite over white (#148, Ryokoxx): bare GetImage leaves the
-                    // unpainted background at BGRA 0,0,0,0 - JPEG export dropped the
-                    // alpha and produced black pages, PNG came out transparent.
-                    // #141: WithAnnotations - an exported image should show the markup the file
-                    // carries, the same as the page does on screen.
-                    PdfRenderedPage rendered = renderSession.RenderPage(idx,
-                        requireComplete: incomplete is null, cancellationToken: ct);
-                    incomplete?.Note(idx, rendered);
-                    w = rendered.Width;
-                    h = rendered.Height;
-                    raw = rendered.Pixels;
+                    if (ct.IsCancellationRequested) return written;
+                    byte[] raw; int w, h;
+                    {
+                        // Composite over white (#148, Ryokoxx): bare GetImage leaves the
+                        // unpainted background at BGRA 0,0,0,0 - JPEG export dropped the
+                        // alpha and produced black pages, PNG came out transparent.
+                        // #141: WithAnnotations - an exported image should show the markup the file
+                        // carries, the same as the page does on screen.
+                        PdfRenderedPage rendered = renderSession.RenderPage(idx,
+                            requireComplete: incomplete is null, cancellationToken: ct);
+                        incomplete?.Note(idx, rendered);
+                        w = rendered.Width;
+                        h = rendered.Height;
+                        raw = rendered.Pixels;
+                    }
+                    int rot = idx < rotSnapshot.Length ? rotSnapshot[idx] : 0;
+                    if (rot != 0) (raw, w, h) = BitmapHelpers.RotateBitmap(raw, w, h, rot);
+                    var bytes = jpeg ? BitmapHelpers.EncodeJpeg(raw, w, h, dpi) : BitmapHelpers.RenderToPng(raw, w, h, dpi);
+                    string destination = paths[written];
+                    if (approvedOverwrites?.Contains(destination) == true) AtomicFileOutput.Write(destination, bytes, ct);
+                    else AtomicFileOutput.WriteNew(destination, bytes, ct);
+                    written++;
+                    int n = ++done;
+                    progress(n, pages.Count);
                 }
-                int rot = idx < rotSnapshot.Length ? rotSnapshot[idx] : 0;
-                if (rot != 0) (raw, w, h) = BitmapHelpers.RotateBitmap(raw, w, h, rot);
-                var bytes = jpeg ? BitmapHelpers.EncodeJpeg(raw, w, h, dpi) : BitmapHelpers.RenderToPng(raw, w, h, dpi);
-                var name  = $"{baseName}-page-{(idx + 1).ToString().PadLeft(digits, '0')}.{(jpeg ? "jpg" : "png")}";
-                File.WriteAllBytes(Path.Combine(outDir, name), bytes);
-                written++;
-                int n = ++done;
-                progress(n, pages.Count);
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested) { return written; }
+            catch (Exception error) when (error is not OutOfMemoryException)
+            {
+                throw new IOException($"Image export stopped after {written} of {pages.Count} images in {outDir}. " + error.Message, error);
             }
             return written;
         }
