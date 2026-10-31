@@ -8,6 +8,7 @@ namespace KillerPDF.Services
         int WaitForProcess, bool Machine, string? InstallerArguments)
     {
         internal const string InstallerAsset = "KillerPDF.exe";
+        internal const string StoreAsset = "KillerPDF-Store.exe";
         internal const string PortableAsset = "KillerPDF-Portable.exe";
 
         private static readonly UpdateTargetChoice None = new(true, InstallerAsset, null, 0, false, null);
@@ -15,7 +16,8 @@ namespace KillerPDF.Services
         /// <summary>
         /// An installed copy runs the signed installer (KillerPDF.exe) with the same /install-user or
         /// /silent command a manual upgrade uses, into the folder it is installed in, and asks it to
-        /// start the new copy afterward. A machine-wide copy is one registered under HKLM, or one in a
+        /// start the new copy afterward. An installation carrying its runtime uses KillerPDF-Store.exe
+        /// so its update keeps that runtime. A machine-wide copy is one registered under HKLM, or one in a
         /// folder this process cannot write; an administrator running the Program Files copy can write
         /// there and must still update it machine-wide. A packaged portable copy replaces its launcher
         /// (KillerPDF-Portable.exe) once the launcher and this process have exited, and only when the
@@ -35,9 +37,12 @@ namespace KillerPDF.Services
                 int pid = int.TryParse(launcherPid, out int parsed) && parsed > 0 ? parsed : 0;
                 return new(false, PortableAsset, launcher, pid, false, null);
             }
-            bool machine = !canWrite(Path.GetDirectoryName(Path.GetFullPath(currentExe!))!)
+            string directory = Path.GetDirectoryName(Path.GetFullPath(currentExe!))!;
+            bool bundledRuntime = fileExists(Path.Combine(directory, "coreclr.dll"))
+                && fileExists(Path.Combine(directory, "System.Private.CoreLib.dll"));
+            bool machine = !canWrite(directory)
                 || machineRegistered(currentExe!);
-            return new(false, InstallerAsset, null, 0, machine,
+            return new(false, bundledRuntime ? StoreAsset : InstallerAsset, null, 0, machine,
                 Features.InstalledUpdateCommand.Arguments(currentExe!, machine, null));
         }
     }

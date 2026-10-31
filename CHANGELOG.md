@@ -20,6 +20,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Failed text replacement leaves the document and overlays unchanged and reports the error instead of claiming success.
 - Command line text replacement reports partial failures and counts only completed replacements.
 - Command line orientation fixes use the supplied password when saving and preserve the document's encryption.
+- Store installations keep their bundled runtime when choosing an update package.
 - Redacting a shared image preserves the transparency and colors of untouched pages that use a different mask or color settings.
 - Redaction search reports unreadable annotation appearances while keeping readable captions and matches from other annotations.
 - Calculator-based PDF colors use the correct zero-filled bit shifts and round negative halfway values correctly.

@@ -15,7 +15,21 @@ public sealed class UpdateTargetTests
 
     private static UpdateTargetChoice Choose(string? exe = Installed, bool portable = false, string? launcher = null,
         string? pid = null, bool writable = true, bool hklm = false, bool launcherExists = true)
-        => UpdateTargetChoice.Choose(exe, portable, launcher, pid, _ => writable, _ => hklm, _ => launcherExists);
+        => UpdateTargetChoice.Choose(exe, portable, launcher, pid, _ => writable, _ => hklm,
+            path => path == Launcher && launcherExists);
+
+    [Theory]
+    [InlineData(false, "KillerPDF-Store.exe")]
+    [InlineData(true, "KillerPDF-Portable.exe")]
+    public void BundledRuntimePreservesItsInstalledChannelButPortableKeepsItsLauncher(bool portable, string asset)
+    {
+        string directory = Path.GetDirectoryName(Installed)!;
+        var choice = UpdateTargetChoice.Choose(Installed, portable, Launcher, "42", _ => true, _ => false,
+            path => path == Launcher || path == Path.Combine(directory, "coreclr.dll")
+                || path == Path.Combine(directory, "System.Private.CoreLib.dll"));
+        Assert.Equal(asset, choice.Asset);
+        Assert.False(choice.Unsupported);
+    }
 
     [Fact]
     public void InstalledCopyTakesTheInstallerAsset()
