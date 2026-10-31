@@ -54,7 +54,7 @@ public interface IPreviewHandlerVisuals
     void SetTextColor(uint color);
 }
 
-[ComImport, Guid("b7d14566-0509-4cce-a71f-0a554233bd9b"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+[ComImport, Guid("b824b49d-22ac-4161-ac8a-9916e8fa3f7f"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 public interface IInitializeWithStream
 {
     void Initialize(IStream stream, uint mode);

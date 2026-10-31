@@ -264,6 +264,8 @@ internal static class TableExportSmoke
                 return PreviewFailureSmoke.Run(owner, appPath, folder);
             if (windowSessionCase.StartsWith("--verify-page-navigation-sidebar-", StringComparison.Ordinal))
                 return SidebarPersistenceSmoke.Run(owner, folder, windowSessionCase["--verify-page-navigation-sidebar-".Length..]);
+            if (windowSessionCase == "--verify-page-navigation-preview-com")
+                return PreviewComSmoke.Run(owner, appPath, folder);
             if (windowSessionCase == "--verify-page-navigation-image-overwrite-consent")
                 return ImageExportWorkflowSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-image-pending-forms")

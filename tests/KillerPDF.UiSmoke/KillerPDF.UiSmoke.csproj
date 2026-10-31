@@ -11,5 +11,6 @@
   <ItemGroup>
     <!-- Test tooling only. The application excludes tests/** from its item globs. -->
     <PackageReference Include="FlaUI.UIA3" Version="5.0.0" />
+    <Compile Include="..\..\PreviewHandler\ShellInterfaces.cs" Link="PreviewShellInterfaces.cs" />
   </ItemGroup>
 </Project>

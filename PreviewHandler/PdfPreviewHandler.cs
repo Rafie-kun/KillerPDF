@@ -34,16 +34,21 @@ public sealed partial class PdfPreviewHandler : IPreviewHandler, IPreviewHandler
     private object? _site;
     private IPreviewHandlerFrame? _frame;
     private PreviewPane? _pane;
+    private IntPtr _window;
     private uint? _background;
     private uint? _text;
+    private long _documentEpoch;
 
     public void Initialize(IStream stream, uint mode)
     {
-        _data = null;
+        long epoch = Interlocked.Increment(ref _documentEpoch);
+        PreviewUiThread.Invoke(() => { if (epoch == Volatile.Read(ref _documentEpoch)) _data = null; });
+        byte[]? data = null;
+        string? name = null;
         try
         {
             stream.Stat(out STATSTG stat, 0);
-            if (!string.IsNullOrWhiteSpace(stat.pwcsName)) _name = Path.GetFileName(stat.pwcsName);
+            if (!string.IsNullOrWhiteSpace(stat.pwcsName)) name = Path.GetFileName(stat.pwcsName);
             if (stat.cbSize > MaximumBytes) throw new InvalidDataException("The file is too large to preview.");
             using var buffer = new MemoryStream(stat.cbSize > 0 ? (int)stat.cbSize : 1 << 20);
             byte[] chunk = new byte[1 << 20];
@@ -63,59 +68,82 @@ public sealed partial class PdfPreviewHandler : IPreviewHandler, IPreviewHandler
             {
                 Marshal.FreeCoTaskMem(read);
             }
-            _data = buffer.ToArray();
+            data = buffer.ToArray();
         }
         catch (InvalidDataException)
         {
             // Too large: the pane says it cannot preview the file.
-            _data = null;
+            data = null;
         }
         finally
         {
             Marshal.ReleaseComObject(stream);
         }
+        PreviewUiThread.Invoke(() =>
+        {
+            if (epoch != Volatile.Read(ref _documentEpoch)) return;
+            _data = data;
+            if (name is not null) _name = name;
+        });
     }
 
     public void SetWindow(IntPtr window, ref NativeRect rect)
     {
-        _parent = window;
-        _bounds = rect;
-        _pane?.Reparent(window, rect);
+        NativeRect bounds = rect;
+        PreviewUiThread.Invoke(() =>
+        {
+            _parent = window;
+            _bounds = bounds;
+            _pane?.Reparent(window, bounds);
+        });
     }
 
     public void SetRect(ref NativeRect rect)
     {
-        _bounds = rect;
-        _pane?.Resize(rect);
+        NativeRect bounds = rect;
+        PreviewUiThread.Invoke(() => { _bounds = bounds; _pane?.Resize(bounds); });
     }
 
     public void DoPreview()
     {
-        _pane?.Dispose();
-        _pane = new PreviewPane(_parent, _bounds, _data ?? [], _name, _background, _text);
+        PreviewUiThread.Invoke(() =>
+        {
+            PreviewPane? previous = _pane;
+            _pane = null;
+            Interlocked.Exchange(ref _window, IntPtr.Zero);
+            previous?.Dispose();
+            _pane = new PreviewPane(_parent, _bounds, _data ?? [], _name, _background, _text);
+            Interlocked.Exchange(ref _window, _pane.Handle);
+        });
     }
 
     public void Unload()
     {
-        _pane?.Dispose();
-        _pane = null;
-        _data = null;
+        Interlocked.Increment(ref _documentEpoch);
+        PreviewUiThread.Invoke(() =>
+        {
+            PreviewPane? previous = _pane;
+            _pane = null;
+            Interlocked.Exchange(ref _window, IntPtr.Zero);
+            _data = null;
+            previous?.Dispose();
+        });
     }
 
-    public void SetFocus() => _pane?.FocusFirst();
+    public void SetFocus() => PreviewUiThread.Invoke(() => _pane?.FocusFirst());
 
-    public void QueryFocus(out IntPtr window) => window = GetFocus();
+    public void QueryFocus(out IntPtr window) => window = PreviewUiThread.Invoke(GetFocus);
 
     public int TranslateAccelerator(ref NativeMessage message) =>
         _frame?.TranslateAccelerator(ref message) ?? False;
 
-    public void SetBackgroundColor(uint color) => _background = color;
+    public void SetBackgroundColor(uint color) => PreviewUiThread.Invoke(() => { _background = color; });
 
     public void SetFont(IntPtr font)
     {
     }
 
-    public void SetTextColor(uint color) => _text = color;
+    public void SetTextColor(uint color) => PreviewUiThread.Invoke(() => { _text = color; });
 
     public void SetSite(object? site)
     {
@@ -134,7 +162,8 @@ public sealed partial class PdfPreviewHandler : IPreviewHandler, IPreviewHandler
 
     public int GetWindow(out IntPtr window)
     {
-        window = _pane?.Handle ?? _parent;
+        // This input-synchronous shell call must not dispatch or make outgoing COM calls.
+        window = Volatile.Read(ref _window);
         return window == IntPtr.Zero ? Fail : Ok;
     }
 

@@ -12,6 +12,13 @@ namespace KillerPDF.Tests;
 /// </summary>
 public sealed class PreviewHandlerRegistrationTests : IDisposable
 {
+    [Fact]
+    public void StreamInitializationUsesTheWindowsStreamInterfaceIdentity()
+    {
+        Assert.Equal(new Guid("b824b49d-22ac-4161-ac8a-9916e8fa3f7f"),
+            typeof(KillerPDF.PreviewHandler.IInitializeWithStream).GUID);
+    }
+
     private const string PreviewPath = @"Software\Classes\.pdf\shellex\{8895b1c6-b41f-4c1c-a562-0d564250836f}";
     private const string ServerPath = @"Software\Classes\CLSID\" + PreviewHandlerRegistration.ClassId + @"\InprocServer32";
 

@@ -61,7 +61,7 @@ internal static class PreviewFailureSmoke
         return 0;
     });
 
-    private static byte[] Fixture(string state)
+    internal static byte[] Fixture(string state)
     {
         var objects = new List<string>
         {
