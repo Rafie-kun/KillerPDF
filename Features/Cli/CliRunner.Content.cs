@@ -212,6 +212,13 @@ namespace KillerPDF.Features
             }
             Directory.CreateDirectory(outDir);
             // Existing outputs are kept unless --overwrite names them all, matching --split.
+            if (plan.OutputFileNames.Select(name => Path.GetFullPath(Path.Combine(outDir, name)))
+                .Any(path => string.Equals(path, template, StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(path, data, StringComparison.OrdinalIgnoreCase)))
+            {
+                con.WriteLine("Data-merge output cannot replace an input template or data file.");
+                return 2;
+            }
             HashSet<string>? approved = options.ContainsKey("--overwrite")
                 ? [.. plan.OutputFileNames.Select(name => Path.GetFullPath(Path.Combine(outDir, name)))]
                 : null;
