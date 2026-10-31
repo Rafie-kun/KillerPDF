@@ -18,6 +18,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Separation exports keep inks with punctuation or case differences in separate files and require approval to replace existing plates.
 - Data merge refuses to overwrite its input template, even with the command line overwrite option.
 - Failed text replacement leaves the document and overlays unchanged and reports the error instead of claiming success.
+- Command line text replacement reports partial failures and counts only completed replacements.
 - Command line orientation fixes use the supplied password when saving and preserve the document's encryption.
 - Redacting a shared image preserves the transparency and colors of untouched pages that use a different mask or color settings.
 - Redaction search reports unreadable annotation appearances while keeping readable captions and matches from other annotations.

@@ -247,6 +247,7 @@ namespace KillerPDF.Features
             bool matchCase = options.ContainsKey("--match-case"), wholeWord = options.ContainsKey("--whole-word");
             IReadOnlyList<PdfPageInformation> geometry = PdfEngineIntegration.ReadPageInformation(source);
             var edits = new List<PdfTextLineEdit>();
+            var matchCounts = new List<int>();
             int occurrences = 0, skippedTurned = 0;
             using (PdfContentDocument content = PdfContentDocument.Open(source))
             {
@@ -274,7 +275,7 @@ namespace KillerPDF.Features
                             ToCanvas(word.Letters[0].EndBaseLine.X, word.Letters[0].EndBaseLine.Y));
                         if (TextTurn.Normalize(turn) != 0)
                         {
-                            if (TextReplacePlanner.FindAll(word.Text, find, matchCase, wholeWord).Count > 0) skippedTurned++;
+                            skippedTurned += TextReplacePlanner.FindAll(word.Text, find, matchCase, wholeWord).Count;
                             continue;
                         }
                         level.Add(new ReplaceWord(word.Text, rect));
@@ -289,6 +290,7 @@ namespace KillerPDF.Features
                             Substitute = Controls.PdfViewer.SubstituteFont(levelSource[plan.WordIndices[0]], plan.NewText)
                         });
                         occurrences += plan.MatchBounds.Count;
+                        matchCounts.Add(plan.MatchBounds.Count);
                     }
                 }
             }
@@ -298,15 +300,16 @@ namespace KillerPDF.Features
                 CliEnsureParentDir(output);
                 File.Copy(source, output, overwrite: true);
                 con.WriteLine($"No matches to replace.{turnedNote} -> {output}");
-                return 0;
+                return skippedTurned > 0 ? 3 : 0;
             }
             IReadOnlyList<int> failed = [];
             CliWriteEditedCopy(source, output, path => failed = PdfEngineIntegration.ReplaceTextLines(path, edits));
+            occurrences -= failed.Sum(index => matchCounts[index]);
             con.WriteLine($"Replaced {occurrences} matches on {edits.Count - failed.Count} lines.{turnedNote}"
                 + (failed.Count > 0 ? $" {failed.Count} lines could not be rewritten in the page content (on pages "
                     + string.Join(", ", failed.Select(index => edits[index].PageIndex + 1).Distinct()) + ") and were left as they were." : string.Empty)
                 + $" -> {output}");
-            return failed.Count == edits.Count ? 1 : 0;
+            return failed.Count == edits.Count ? 1 : failed.Count > 0 || skippedTurned > 0 ? 3 : 0;
         }
 
         // ============================================================

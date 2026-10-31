@@ -240,6 +240,8 @@ internal static class TableExportSmoke
                 return CliOutputSmoke.RunPlates(appPath, folder);
             if (windowSessionCase == "--verify-page-navigation-cli-password-orientation")
                 return CliOutputSmoke.RunOrientation(appPath, folder);
+            if (windowSessionCase == "--verify-page-navigation-cli-replacement-outcomes")
+                return CliReplacementSmoke.Run(appPath, folder);
             if (windowSessionCase == "--verify-page-navigation-image-overwrite-consent")
                 return ImageExportWorkflowSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-image-pending-forms")
