@@ -118,7 +118,8 @@ internal static class PreviewComSmoke
         const string classId = "{0EB8F20D-6E18-4B80-9CDF-FF663C52B5BD}";
         const string appId = "{CC8F3FF2-266A-4827-9CFA-964310EB6676}";
         const string extension = @"Software\Classes\.pdf\shellex\{8895b1c6-b41f-4c1c-a562-0d564250836f}";
-        string installed = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(appPath)!, "..", "..", "package-routes-test", "installed"));
+        string installed = Path.GetFullPath(Environment.GetEnvironmentVariable("KILLERPDF_TEST_PREVIEW_ROOT")
+            ?? Path.Combine(Path.GetDirectoryName(appPath)!, "..", "..", "package-routes-test", "installed"));
         if (!File.Exists(Path.Combine(installed, "KillerPDF.PreviewHandler.comhost.dll")))
             throw new FileNotFoundException("Install the test-owned ordinary package first.");
         string[] ownedKeys = [@"Software\Classes\CLSID\" + classId, @"Software\Classes\AppID\" + appId,
