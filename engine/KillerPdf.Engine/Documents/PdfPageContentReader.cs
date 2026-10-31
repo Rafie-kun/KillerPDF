@@ -307,9 +307,14 @@ public sealed class PdfPageContentReader
         }
         PdfObject Resource(PdfDictionary current, string category, PdfName key)
         {
-            if (!current.TryGetValue(Name(category), out var categoryValue) || Resolve(categoryValue) is not PdfDictionary dictionary ||
-                !dictionary.TryGetValue(key, out var value)) throw new FormatException($"Missing {category} resource {key.ValueAsLatin1()}.");
-            return value;
+            if (Lookup(current) is { } value) return value;
+            // An appearance sits on the page, so a nested form with no resources of its own draws with the page's.
+            if (appearance is not null && Lookup(resources) is { } inherited) return inherited;
+            throw new FormatException($"Missing {category} resource {key.ValueAsLatin1()}.");
+
+            PdfObject? Lookup(PdfDictionary scope) =>
+                scope.TryGetValue(Name(category), out var categoryValue) && Resolve(categoryValue) is PdfDictionary dictionary
+                && dictionary.TryGetValue(key, out var found) ? found : null;
         }
         void Walk(byte[] bytes, PdfDictionary current, Matrix ctm, PdfContentBounds clip, int depth)
         {

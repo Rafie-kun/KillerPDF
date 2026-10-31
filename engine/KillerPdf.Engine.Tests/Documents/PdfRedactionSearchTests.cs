@@ -391,9 +391,36 @@ public sealed class PdfRedactionSearchTests
         }).Matches);
     }
 
-    private static PdfPageContent Read(string text, string? toUnicode = null)
+    // Justified text breaks a word at the line end, so the page holds two words and a hyphen.
+    [Fact]
+    public void FindsAWordHyphenatedAcrossALineBreak()
     {
-        string content = $"BT /F1 12 Tf 20 100 Td ({text}) Tj ET";
+        PdfPageContent page = Read(null!, content: "BT /F1 12 Tf 20 100 Td (The word align-) Tj 0 -14 Td (ment follows) Tj ET");
+
+        PdfRedactionMatch match = Assert.Single(PdfRedactionSearch.Find([page], new PdfRedactionSearchOptions
+        {
+            Kind = PdfRedactionSearchKind.ExactText,
+            Query = "alignment"
+        }).Matches);
+
+        Assert.Equal(2, match.Areas.Count);
+    }
+
+    [Fact]
+    public void AHyphenInsideALineStaysPartOfTheText()
+    {
+        PdfPageContent page = Read("A well-known word");
+
+        Assert.Empty(PdfRedactionSearch.Find([page], new PdfRedactionSearchOptions
+        {
+            Kind = PdfRedactionSearchKind.ExactText,
+            Query = "wellknown"
+        }).Matches);
+    }
+
+    private static PdfPageContent Read(string text, string? toUnicode = null, string? content = null)
+    {
+        content ??= $"BT /F1 12 Tf 20 100 Td ({text}) Tj ET";
         string stream = $"<< /Length {Encoding.Latin1.GetByteCount(content)} >>\nstream\n{content}\nendstream";
         List<string> objects = ["<< /Type /Catalog /Pages 2 0 R >>",
             "<< /Type /Pages /Kids [3 0 R] /Count 1 /MediaBox [0 0 300 400] /Resources << /Font << /F1 4 0 R >> >> >>",

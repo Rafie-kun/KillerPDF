@@ -427,11 +427,14 @@ namespace KillerPDF.Services
             // A ligature spells out to several characters that all map to its one glyph.
             var text = new System.Text.StringBuilder();
             var map = new List<(int Word, int Letter)>();
+            bool joined = false;
             for (int w = 0; w < words.Count; w++)
             {
-                if (w > 0) { text.Append(' '); map.Add((-1, -1)); }
+                if (w > 0 && !joined) { text.Append(' '); map.Add((-1, -1)); }
+                // A word hyphenated across a line break reads whole, its hyphen and the space gone.
+                joined = w + 1 < words.Count && KillerPdf.Engine.Documents.PdfSearchText.BreaksAcrossLines(words[w], words[w + 1]);
                 var letters = words[w].Letters;
-                for (int l = 0; l < letters.Count; l++)
+                for (int l = 0; l < letters.Count - (joined ? 1 : 0); l++)
                     foreach (char c in KillerPdf.Engine.Documents.PdfSearchText.Fold(letters[l].Value)) { text.Append(c); map.Add((w, l)); }
             }
 

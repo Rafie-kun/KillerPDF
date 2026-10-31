@@ -1374,6 +1374,26 @@ public sealed class PdfContentRedactionTests
 
     // A button caption, a signature's printed name and a stamp are drawn from the annotation, with no
     // value or contents to search, so a search of those alone reports nothing while the words stay shown.
+    // A nested form with no resources of its own draws with the page's, as a viewer shows it.
+    [Fact]
+    public void SearchFindsAppearanceTextThatUsesThePagesFont()
+    {
+        string inner = "BT /F1 10 Tf 2 2 Td (SIGNEDBYJANE) Tj ET";
+        string outer = "/N2 Do";
+        PdfDocument document = PdfDocument.Open(CreatePdf([
+            "<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields [6 0 R] >> >>",
+            "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R /Annots [6 0 R] >>",
+            Helvetica,
+            Stream("BT /F1 12 Tf 72 700 Td (Plain visible text) Tj ET"),
+            "<< /Type /Annot /Subtype /Widget /FT /Sig /T (sig) /Rect [100 500 300 540] /P 3 0 R /F 4 /AP << /N 7 0 R >> >>",
+            $"<< /Type /XObject /Subtype /Form /BBox [0 0 200 40] /Resources << /XObject << /N2 8 0 R >> >> /Length {outer.Length} >>\nstream\n{outer}\nendstream",
+            $"<< /Type /XObject /Subtype /Form /BBox [0 0 200 40] /Length {inner.Length} >>\nstream\n{inner}\nendstream"]));
+
+        Assert.Single(PdfRedactionSearch.FindInAnnotations(document,
+            new PdfRedactionSearchOptions { Kind = PdfRedactionSearchKind.ExactText, Query = "SIGNEDBYJANE" }).Matches);
+    }
+
     [Theory]
     [InlineData("SECRETCAPTION")]
     [InlineData("SIGNEDBYJANE")]

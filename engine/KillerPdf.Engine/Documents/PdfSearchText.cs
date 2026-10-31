@@ -16,13 +16,54 @@ public static class PdfSearchText
     /// character it came from. The map has one extra entry holding the length of <paramref name="text"/>,
     /// so the end of a match can be read from it.
     /// </summary>
-    public static string Fold(string text, out int[] origin)
+    public static string Fold(string text, out int[] origin) => Fold(text, [], out origin);
+
+    /// <summary>
+    /// The joined text of <paramref name="words"/> with one space between them, folded for a search. A
+    /// word hyphenated across a line break comes out whole, and <paramref name="origin"/> maps each
+    /// character back to the plain join of the words.
+    /// </summary>
+    public static string FoldWords(IReadOnlyList<PdfExtractedWord> words, out int[] origin)
+    {
+        ArgumentNullException.ThrowIfNull(words);
+        var dropped = new HashSet<int>();
+        int offset = 0;
+        for (int index = 0; index < words.Count; index++)
+        {
+            offset += words[index].Text.Length;
+            if (index + 1 < words.Count && BreaksAcrossLines(words[index], words[index + 1]))
+            {
+                dropped.Add(offset - 1);
+                dropped.Add(offset);
+            }
+            offset++;
+        }
+        return Fold(string.Join(' ', words.Select(word => word.Text)), dropped, out origin);
+    }
+
+    /// <summary>
+    /// Whether <paramref name="word"/> ends in a hyphen at a line end and <paramref name="next"/> carries
+    /// on the same word on a later line. A capital after the hyphen is a compound, not a broken word.
+    /// </summary>
+    public static bool BreaksAcrossLines(PdfExtractedWord word, PdfExtractedWord next)
+    {
+        ArgumentNullException.ThrowIfNull(word);
+        ArgumentNullException.ThrowIfNull(next);
+        string text = word.Text;
+        if (text.Length < 2 || next.Text.Length == 0 || text[^1] is not ('-' or '‐' or '­')
+            || !char.IsLetter(text[^2]) || !char.IsLower(next.Text[0])) return false;
+        return Math.Abs(word.BoundingBox.Bottom - next.BoundingBox.Bottom)
+            > 0.5 * Math.Min(word.BoundingBox.Height, next.BoundingBox.Height);
+    }
+
+    private static string Fold(string text, HashSet<int> dropped, out int[] origin)
     {
         ArgumentNullException.ThrowIfNull(text);
         var folded = new StringBuilder(text.Length);
         var map = new List<int>(text.Length + 1);
         for (int index = 0; index < text.Length; index++)
         {
+            if (dropped.Contains(index)) continue;
             foreach (char letter in Letters(text, index))
             {
                 folded.Append(letter);

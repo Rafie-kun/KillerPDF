@@ -359,7 +359,7 @@ public static class PdfRedactionSearch
             var spans = new List<(PdfExtractedWord Word, int Start, int End)>();
             // Matches run over the folded text and land back on the stored characters, so a word set
             // with a ligature is found by its letters and the areas still cover its real glyphs.
-            string text = PdfSearchText.Fold(string.Join(' ', page.Words.Select(word => word.Text)), out int[] origin);
+            string text = PdfSearchText.FoldWords(page.Words, out int[] origin);
             int offset = 0;
             foreach (PdfExtractedWord word in page.Words)
             {
