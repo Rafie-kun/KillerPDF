@@ -244,6 +244,8 @@ internal static class TableExportSmoke
                 return FormReplacementRulesSmoke.Run(owner, folder, calculation: false);
             if (windowSessionCase == "--verify-page-navigation-form-replacement-calculation")
                 return FormReplacementRulesSmoke.Run(owner, folder, calculation: true);
+            if (windowSessionCase == "--verify-page-navigation-certified-form-save")
+                return CertifiedFormSaveSmoke.Run(owner, appPath, folder);
             if (windowSessionCase == "--verify-page-navigation-cli-image-publication")
                 return CliOutputSmoke.Run(appPath, folder, merge: false);
             if (windowSessionCase == "--verify-page-navigation-cli-merge-input")

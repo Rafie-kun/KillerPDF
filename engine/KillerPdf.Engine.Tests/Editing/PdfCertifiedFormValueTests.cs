@@ -12,11 +12,13 @@ namespace KillerPdf.Engine.Tests.Editing;
 public sealed class PdfCertifiedFormValueTests
 {
     [Theory]
-    [InlineData(2)]
-    [InlineData(3)]
-    public void PermittedFieldFillingPreservesTheGenuineCertificationAndSignedRevision(int permission)
+    [InlineData(2, false)]
+    [InlineData(3, false)]
+    [InlineData(2, true)]
+    [InlineData(3, true)]
+    public void PermittedFieldFillingPreservesTheGenuineCertificationAndSignedRevision(int permission, bool unsignedApproval)
     {
-        byte[] signed = Certified(permission);
+        byte[] signed = Certified(permission, unsignedApproval: unsignedApproval);
         PdfDocument document = PdfDocument.Open(signed);
         Verify(signed);
 
@@ -31,7 +33,7 @@ public sealed class PdfCertifiedFormValueTests
         if (!string.IsNullOrWhiteSpace(output))
         {
             Directory.CreateDirectory(output);
-            string fixture = Path.Combine(output, $"certified-p{permission}-{Guid.NewGuid():N}");
+            string fixture = Path.Combine(output, $"certified-p{permission}-{(unsignedApproval ? "unsigned-" : "")}{Guid.NewGuid():N}");
             File.WriteAllBytes(fixture + ".pdf", signed);
             File.WriteAllBytes(fixture + "-filled.pdf", filled);
         }
@@ -89,17 +91,19 @@ public sealed class PdfCertifiedFormValueTests
         Verify(signed);
     }
 
-    private static byte[] Certified(int permission, PdfSignatureFieldLock? fieldLock = null, bool readOnly = false)
+    private static byte[] Certified(int permission, PdfSignatureFieldLock? fieldLock = null, bool readOnly = false, bool unsignedApproval = false)
     {
         using RSA key = RSA.Create(2048);
         using X509Certificate2 certificate = new CertificateRequest("CN=Certified Form Fixture", key,
             HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1)
             .CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
-        byte[] source = new PdfDocumentBuilder().AddBlankPage()
+        var builder = new PdfDocumentBuilder().AddBlankPage()
             .AddTextField(0, "customer.name", 20, 100, 150, 24, "Original",
                 options: new PdfTextFieldOptions { ReadOnly = readOnly })
             .AddTextField(0, "customer.other", 20, 150, 150, 24, "Other")
-            .AddSignatureField(0, "certification", 20, 20, 150, 40, fieldLock: fieldLock).Build();
+            .AddSignatureField(0, "certification", 20, 20, 150, 40, fieldLock: fieldLock);
+        if (unsignedApproval) builder.AddSignatureField(0, "approval", 200, 20, 150, 40);
+        byte[] source = builder.Build();
         return PdfDetachedSignatureWriter.Sign(PdfDocument.Open(source), content =>
         {
             var cms = new SignedCms(new ContentInfo(content.ToArray()), detached: true);
@@ -119,7 +123,7 @@ public sealed class PdfCertifiedFormValueTests
     private static void Verify(byte[] source)
     {
         PdfDocument document = PdfDocument.Open(source);
-        PdfSignatureInfo signature = Assert.Single(PdfSignatureReader.Read(document));
+        PdfSignatureInfo signature = Assert.Single(PdfSignatureReader.Read(document), signature => signature.IsSigned);
         var result = PdfSignatureVerifier.VerifyIntegrity(document, signature);
         Assert.True(result.IsStructurallyValid);
         Assert.True(result.IsCryptographicallyValid);

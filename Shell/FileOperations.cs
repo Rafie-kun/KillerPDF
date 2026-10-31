@@ -1399,6 +1399,7 @@ namespace KillerPDF.Shell
                 if (conflict == MessageBoxResult.No) { SaveAs_Click(this, new RoutedEventArgs()); return; }
                 if (conflict != MessageBoxResult.Yes) return;
             }
+            if (TrySaveCertifiedFormFill(_originalFile!)) return;
             if (!ConfirmSignatureRemoval(_originalFile!)) return;
             CommitActiveTextBox();
             OfferRescaleOutOfRangePages();   // Adobe page-size guard
@@ -1574,6 +1575,7 @@ namespace KillerPDF.Shell
                 SaveRestrictedFormFill(dlg.FileName);
                 return;
             }
+            if (TrySaveCertifiedFormFill(dlg.FileName, openCopy, confirmOtherSignedTarget: true)) return;
             // A signed document with no changes is copied byte for byte, so the copy keeps valid
             // signatures. Any rewrite clears them, so say so first even for a new file (BF-A005).
             string? unchanged = UnchangedDocumentBytes();
