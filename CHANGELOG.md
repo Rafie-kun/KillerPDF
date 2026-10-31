@@ -37,6 +37,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Renaming an attachment while changing its description or type writes the document once for that row, not once for each field.
 - Extract Pages and other page imports accept a check box or radio button that has no appearance for its Off state, which the PDF standard allows and prefilled tax forms use.
 - Rebuild and Merge accept a file specification written as /FileSpec, and a merge leaves out a damaged associated-file entry instead of failing. The attachment itself stays.
+- PDFs made with Pillow, the Python imaging library, work in Extract, Merge and everything else that opened them strictly. They displayed fine, but those commands stopped on an out-of-range cross-reference generation that Pillow writes into every file (#463).
 - Merge accepts a soft mask at a different resolution from its image, and DeviceN colors whose process, colorant and mixing entries name more than the color uses, as the PDF standard allows (#455).
 - Saving a damaged PDF works when the viewer can read objects its cross-reference table lost track of, and when a form field is listed twice. That content is kept and written back properly. Signed, certified and usage-rights files are still refused.
 - Type 3 text is measured correctly for selection and search.

@@ -248,7 +248,7 @@ public static class PdfCrossReferenceReader
                     objectNumber = 0;
                 }
                 PdfCrossReferenceEntry entry = ParseClassicEntry(
-                    source.Length, objectNumber, field1, field2, statusToken,
+                    source, objectNumber, field1, field2, statusToken,
                     compatibilityRecovery);
                 if (!entries.TryAdd(objectNumber, entry))
                 {
@@ -260,8 +260,11 @@ public static class PdfCrossReferenceReader
         }
     }
 
+    private static bool MentionsEncryption(ReadOnlySpan<byte> source) =>
+        source.IndexOf("/Encrypt"u8) >= 0 || source.IndexOf("/Standard"u8) >= 0 || source.IndexOf("/Adobe.PubSec"u8) >= 0;
+
     private static PdfCrossReferenceEntry ParseClassicEntry(
-        int sourceLength,
+        ReadOnlyMemory<byte> source,
         int objectNumber,
         long field1,
         long field2,
@@ -277,7 +280,12 @@ public static class PdfCrossReferenceReader
             && (IsKeyword(statusToken, "f") || IsKeyword(statusToken, "n")))
             return new PdfCrossReferenceEntry(
                 0, PdfCrossReferenceEntryType.Free, 0, 65_535);
-        if (field2 is < 0 or > 65_535)
+        // Pillow writes its free-list head one past the limit in every PDF it makes, and it never
+        // encrypts. Any file that mentions encryption stays out, since this same entry failing is
+        // what sends one with a lost /Encrypt to recovery, where the hidden encryption is caught.
+        bool pillowHead = objectNumber == 0 && field2 == 65_536 && IsKeyword(statusToken, "f")
+            && !MentionsEncryption(source.Span);
+        if (!pillowHead && field2 is < 0 or > 65_535)
             throw Error("An xref generation must be between 0 and 65,535", statusToken.Offset);
         if (objectNumber == 0 && !IsKeyword(statusToken, "f"))
             throw Error("Cross-reference object 0 must be free with generation 65,535",
@@ -287,7 +295,7 @@ public static class PdfCrossReferenceReader
 
         if (IsKeyword(statusToken, "n"))
         {
-            if (field1 < 0 || field1 >= sourceLength || field2 == 65_535)
+            if (field1 < 0 || field1 >= source.Length || field2 == 65_535)
             {
                 if (compatibilityRecovery)
                     return new PdfCrossReferenceEntry(

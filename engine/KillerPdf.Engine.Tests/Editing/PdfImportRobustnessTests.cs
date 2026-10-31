@@ -115,6 +115,28 @@ public sealed class PdfImportRobustnessTests
         else Assert.Contains(refused, Assert.Throws<InvalidOperationException>(() => import()).Message, StringComparison.Ordinal);
     }
 
+    // The window's Extract and Merge open files strictly, and Pillow's xref stopped them on a file
+    // that displayed perfectly (#463).
+    [Fact]
+    public void APillowPdfCanBeExtractedFromAndMergedInto()
+    {
+        byte[] pillow = PillowHead(new PdfDocumentBuilder().AddBlankPage().AddBlankPage().AddBlankPage().Build());
+
+        PdfDocument document = PdfDocument.Open(pillow);
+        Assert.Equal(3, PdfPageInformation.Read(document).Count);
+        byte[] extracted = new PdfIncrementalPageEditor(Empty()).AddImportedPage(document, 1).Build();
+        Assert.Single(PdfPageInformation.Read(PdfDocument.Open(extracted)));
+        byte[] merged = new PdfIncrementalPageEditor(document).AddImportedDocument(PdfDocument.Open(OnePage())).Build();
+        Assert.Equal(4, PdfPageInformation.Read(PdfDocument.Open(merged)).Count);
+
+        static byte[] PillowHead(byte[] source)
+        {
+            string text = Encoding.Latin1.GetString(source);
+            Assert.Contains("0000000000 65535 f", text, StringComparison.Ordinal);
+            return Encoding.Latin1.GetBytes(text.Replace("0000000000 65535 f", "0000000000 65536 f", StringComparison.Ordinal));
+        }
+    }
+
     // A shared dictionary lists more than this space uses, and hints take a /Default key.
     [Fact]
     public void DeviceNDescriptionsMayNameMoreThanTheColorUses()

@@ -224,11 +224,41 @@ public sealed class PdfCrossReferenceReaderTests
         Assert.Equal(65_535, entry.Field2);
     }
 
+    // Pillow writes this into every PDF it makes, so only the exact entry is let through.
+    [Theory]
+    [InlineData("0000000000 65536 f", true)]
+    [InlineData("0000000000 65536 n", false)]
+    [InlineData("0000000000 65537 f", false)]
+    public void ReadSection_AcceptsPillowsFreeListHeadAndNothingNearIt(string entry, bool accepted)
+    {
+        byte[] source = Encoding.ASCII.GetBytes($"xref\n0 1\n{entry}\ntrailer\n<< /Size 1 >>");
+        if (!accepted)
+        {
+            Assert.Throws<PdfSyntaxException>(() => PdfCrossReferenceReader.ReadSection(source, 0));
+            return;
+        }
+        PdfCrossReferenceEntry head = PdfCrossReferenceReader.ReadSection(source, 0)[0];
+        Assert.Equal(PdfCrossReferenceEntryType.Free, head.Type);
+        Assert.Equal(65_535, head.Field2);
+    }
+
+    // That entry failing is what sends an encrypted file with a lost /Encrypt to recovery, where the
+    // hidden encryption is caught, as GHOSTSCRIPT-691661-1.pdf shows. Pillow never encrypts.
+    [Theory]
+    [InlineData("/Encrypt 5 0 R")]
+    [InlineData("/Filter /Standard")]
+    [InlineData("/Filter /Adobe.PubSec")]
+    public void ReadSection_LeavesThatEntryToRecoveryInAFileThatMentionsEncryption(string mention)
+    {
+        byte[] source = Encoding.ASCII.GetBytes($"xref\n0 1\n0000000000 65536 f\ntrailer\n<< /Size 1 >>\n5 0 obj << {mention} >> endobj");
+        Assert.Throws<PdfSyntaxException>(() => PdfCrossReferenceReader.ReadSection(source, 0));
+    }
+
     [Fact]
     public void ReadSection_CompatibilityRecoveryCanonicalizesMalformedObjectZeroGeneration()
     {
         byte[] source = Encoding.ASCII.GetBytes(
-            "xref\n0 1\n0000000000 65536 f\ntrailer\n<< /Size 1 >>");
+            "xref\n0 1\n0000000000 65537 f\ntrailer\n<< /Size 1 >>");
 
         Assert.Throws<PdfSyntaxException>(() =>
             PdfCrossReferenceReader.ReadSection(source, 0));
