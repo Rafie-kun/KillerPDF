@@ -106,6 +106,8 @@ public partial class MainWindow
         {
             WriteFormValuesToDocument(path);
             apply(path);
+        }, onPublished: () =>
+        {
             ActiveViewer.FormTextValuesRef.Clear();
             ActiveViewer.FormChoiceValuesRef.Clear();
             ActiveViewer.FormMultiChoiceValuesRef.Clear();
