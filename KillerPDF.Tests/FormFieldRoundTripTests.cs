@@ -11,6 +11,32 @@ namespace KillerPDF.Tests;
 
 public sealed class FormFieldRoundTripTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void FontSizeOnlyEditPreservesExistingValueAndChangesAppearance(bool editSibling)
+    {
+        string path = Path.Combine(Path.GetTempPath(), $"killerpdf-field-size-{Guid.NewGuid():N}.pdf");
+        try
+        {
+            File.WriteAllBytes(path, Fixture("Original"));
+            byte[] before = Render(PdfDocument.Open(File.ReadAllBytes(path)));
+            PdfEngineIntegration.ApplyFormValues(path, new PdfEngineIntegration.FormEdits(
+                editSibling ? new Dictionary<string, string> { ["sibling"] = "Changed" } : new(),
+                new Dictionary<string, string>(), new Dictionary<string, IReadOnlyList<string>>(),
+                new Dictionary<string, bool>(), new Dictionary<string, string>(),
+                new Dictionary<string, double> { ["customer"] = 20 }));
+
+            PdfDocument saved = PdfDocument.Open(File.ReadAllBytes(path));
+            var fields = PdfFormWidgetReader.ReadPage(saved, 0).ToDictionary(field => field.FieldName);
+            Assert.Equal("Original", fields["customer"].Value);
+            Assert.Contains("20 Tf", fields["customer"].DefaultAppearance);
+            Assert.Equal(editSibling ? "Changed" : "Keep", fields["sibling"].Value);
+            Assert.False(before.AsSpan().SequenceEqual(Render(saved)));
+        }
+        finally { if (File.Exists(path)) File.Delete(path); }
+    }
+
     [Fact]
     public void ClearingTextPersistsEmptyValueAndAppearanceWithoutChangingSibling()
     {
