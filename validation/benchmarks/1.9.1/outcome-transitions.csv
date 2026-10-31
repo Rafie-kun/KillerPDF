@@ -1,0 +1,9 @@
+Collection,Before,After,Count
+public-regression,FAIL,OK,4
+public-regression,SKIP,OK,163
+public-standards,FAIL,OK,1
+public-standards,SKIP,OK,5
+private-stress,FAIL,OK,90
+private-stress,FAIL,SKIP,1
+private-stress,SKIP,FAIL,6
+private-stress,SKIP,OK,278
