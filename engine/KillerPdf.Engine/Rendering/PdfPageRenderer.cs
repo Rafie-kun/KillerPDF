@@ -20,6 +20,8 @@ public sealed partial class PdfPageRenderer
     private const int MaximumMeshVerticesPerRow = 65_536;
     // An image's converted plane holds at most this many cells; larger images are averaged down.
     private const long MaximumImagePlaneCells = 4_000_000L;
+    // A 600 dpi scan of an A4 page.
+    private const long MaximumScanPlaneCells = 36_000_000L;
     private const int MaximumIsolatedGroupTilePixels = 2 * 1024 * 1024;
     private const int MaximumTransparencyTileWidth = 4096;
     private static readonly ArrayPool<byte> RasterBuffers = PdfScratchBuffers.Bytes;
@@ -5945,8 +5947,12 @@ public sealed partial class PdfPageRenderer
         int samplingHeight = sourceHeight;
         int factor = Math.Max(1, (int)Math.Floor(Math.Min(
             samplingWidth / (double)fullDestinationWidth, samplingHeight / (double)fullDestinationHeight)));
+        // Larger 8-bit images are read from their samples and leave the plane, but scans of one bit
+        // or a palette have only the plane, and a 300 dpi page is over the limit. The factor above
+        // already reduces them on a small page, so the room is only used when every sample shows.
+        long planeLimit = imageMask || bits == 1 || colorSpace.Palette is not null ? MaximumScanPlaneCells : MaximumImagePlaneCells;
         while (((long)samplingWidth + factor - 1) / factor * (((long)samplingHeight + factor - 1) / factor)
-            > MaximumImagePlaneCells) factor++;
+            > planeLimit) factor++;
         int planeWidth = (int)(((long)samplingWidth + factor - 1) / factor);
         int planeHeight = (int)(((long)samplingHeight + factor - 1) / factor);
         // Opaque page painting can retain separate inks through sampling and clip coverage.

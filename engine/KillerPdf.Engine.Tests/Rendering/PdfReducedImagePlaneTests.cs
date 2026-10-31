@@ -14,6 +14,27 @@ namespace KillerPdf.Engine.Tests.Rendering;
 // content and shifted a pixel from there on.
 public sealed class PdfReducedImagePlaneTests
 {
+    // A 300 dpi page is 8.4 million samples. Holding a one-bit image to the plane limit averaged it
+    // two to one at every zoom, so black-and-white scans stayed soft however large they were drawn.
+    [Theory]
+    [InlineData(3000, 2000)]
+    [InlineData(6000, 4000)]
+    public void ALargeOneBitImageKeepsEverySampleWhenItIsNotReduced(int width, int height)
+    {
+        const int sourceWidth = 3000, sourceHeight = 2000;
+        var samples = new byte[sourceWidth * sourceHeight];
+        for (int index = 0; index < samples.Length; index++) samples[index] = (index % sourceWidth) % 2 == 0 ? (byte)0 : (byte)255;
+        byte[] source = new PdfDocumentBuilder()
+            .AddPage(720, 480, new PdfContentStreamBuilder().DrawImage(PdfImage.FromBitonal(sourceWidth, sourceHeight, samples), 0, 0, 720, 480))
+            .Build();
+        PdfRenderedPage page = new PdfPageRenderer(PdfDocument.Open(source)).Render(0, new PdfRenderOptions(width, height), CancellationToken.None);
+        ReadOnlySpan<byte> pixels = page.Pixels.Span;
+        for (int index = 0; index < pixels.Length; index += 4) Assert.True(pixels[index] is 0 or 255, $"Gray {pixels[index]} at byte {index}.");
+        int step = width / sourceWidth;
+        for (int column = 0; column < sourceWidth; column += 7)
+            Assert.Equal(column % 2 == 0 ? 0 : 255, pixels[(height / 2 * width + column * step + step / 2) * 4]);
+    }
+
     [Theory]
     [InlineData("10 0 0 10 0.0001 0.0001")]
     [InlineData("10 0 0 10 4.6 3.3")]
