@@ -217,8 +217,8 @@ namespace KillerPDF.Features
             if (dlg.ShowDialog(_host.Window) != true || !isSourceCurrent()) return;
             string outPath = dlg.FileName;
 
-            // Snapshot the current document to a temp; we render and re-open from this so the live doc
-            // is never touched. (Unburned overlay annotations are not included in v1.)
+            // Recognize the complete displayed document from an immutable copy, including pending
+            // form values, visible markup and page rotations.
             string src = App.MakeTempFile("ocrsrc");
             try { _host.SaveDocumentTo(src); }
             catch (Exception ex)

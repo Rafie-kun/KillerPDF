@@ -51,7 +51,8 @@ namespace KillerPDF.Features
         /// matches what is on screen.</summary>
         void CommitActiveTextBox();
 
-        /// <summary>Saves the live document to <paramref name="path"/>. Throws on failure.</summary>
+        /// <summary>Writes an immutable snapshot with current forms, visible markup and page rotation
+        /// to <paramref name="path"/> without changing the live document. Throws on failure.</summary>
         void SaveDocumentTo(string path);
 
         /// <summary>Registers the cancellable operation (Esc offers to cancel it) and puts up the

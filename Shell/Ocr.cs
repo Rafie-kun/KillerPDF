@@ -382,7 +382,12 @@ namespace KillerPDF.Shell
         Func<bool> IOcrHost.CaptureDocumentOrigin() => CaptureDocumentOrigin();
         Task<bool> IOcrHost.EnsureOcrModelsReadyAsync() => EnsureOcrModelsReadyAsync();
         void IOcrHost.CommitActiveTextBox() => CommitActiveTextBox();
-        void IOcrHost.SaveDocumentTo(string path) => _doc!.Save(path);
+        void IOcrHost.SaveDocumentTo(string path)
+        {
+            string snapshot = WriteSavedCopyToTemp(forRasterization: true, throwaway: true);
+            try { System.IO.File.Copy(snapshot, path, overwrite: true); }
+            finally { System.IO.File.Delete(snapshot); }
+        }
 
         // The busy overlay Border stays a shell detail: the host tracks the one live overlay so
         // the controller can speak in intents (BeginOp / SetBusyMessage / HideBusy / EndOp). Only
