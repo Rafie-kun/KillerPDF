@@ -495,9 +495,9 @@ namespace KillerPDF.Shell
                 Search.Run(find);
                 return;
             }
-            var (page, left, bottom, right, top) = Search.CurrentMatch.Value;
-            var result = ActiveViewer.ReplaceTextExt(find, _replaceBox?.Text ?? "", Search.MatchCase, Search.WholeWord,
-                (page, left, bottom, right, top));
+            if (Search.CurrentOccurrence is not { } occurrence) return;
+            var result = ActiveViewer.ReplaceTextOccurrenceExt(find, _replaceBox?.Text ?? "",
+                Search.LastMatchCase, Search.LastWholeWord, occurrence);
             if (result.Failed) return;
             if (result.Occurrences == 0)
             {

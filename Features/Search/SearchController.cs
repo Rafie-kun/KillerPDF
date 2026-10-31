@@ -35,7 +35,7 @@ namespace KillerPDF.Features
 
         // Flat, reading-ordered list of every match (page + rect) so Enter steps word-by-word rather
         // than page-by-page; _matchCursor indexes it and that match is drawn with extra emphasis.
-        private readonly List<(int page, double left, double bottom, double right, double top)> _matches = [];
+        private readonly List<SearchHit> _matches = [];
         private int _matchCursor = -1;
         private int _totalHits;
 
@@ -60,6 +60,9 @@ namespace KillerPDF.Features
 
         /// <summary>The emphasized match, or null when the cursor is not on one.</summary>
         internal (int page, double left, double bottom, double right, double top)? CurrentMatch =>
+            CurrentOccurrence?.Rectangle;
+
+        internal SearchHit? CurrentOccurrence =>
             _matchCursor >= 0 && _matchCursor < _matches.Count ? _matches[_matchCursor] : null;
 
         internal bool TryGetPageRects(int page,
@@ -71,7 +74,7 @@ namespace KillerPDF.Features
         /// <summary>The part of a search a tab parks through <see cref="Capture"/>. Its rects, pages
         /// and page cursor already park as fields of their own on the tab's session.</summary>
         internal sealed record ParkedSearch(string Query, bool MatchCase, bool WholeWord,
-            IReadOnlyList<(int page, double left, double bottom, double right, double top)> Matches, int MatchCursor);
+            IReadOnlyList<SearchHit> Matches, int MatchCursor);
 
         internal ParkedSearch Capture() =>
             new(LastQuery, LastMatchCase, LastWholeWord, [.. _matches], _matchCursor);
@@ -192,9 +195,8 @@ namespace KillerPDF.Features
 
             // Flatten every match into one reading-ordered list (page asc, then top-to-bottom,
             // then left-to-right) so navigation steps word-by-word across the whole document.
-            foreach (var page in ResultPages)
-                foreach (var (left, bottom, right, top) in AllSearchRects[page].OrderByDescending(r => r.top).ThenBy(r => r.left))
-                    _matches.Add((page, left, bottom, right, top));
+            foreach (SearchHit hit in sr.Hits.OrderBy(hit => hit.page).ThenByDescending(hit => hit.top).ThenBy(hit => hit.left))
+                if (!_host.IsCovered(hit.page, hit.left, hit.bottom, hit.right, hit.top)) _matches.Add(hit);
 
             if (_matches.Count == 0)
             {

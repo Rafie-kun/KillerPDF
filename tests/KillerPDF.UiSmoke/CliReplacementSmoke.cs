@@ -31,7 +31,7 @@ internal static class CliReplacementSmoke
         return 0;
     }
 
-    private static byte[] Fixture(string content)
+    internal static byte[] Fixture(string content)
     {
         string[] objects =
         [

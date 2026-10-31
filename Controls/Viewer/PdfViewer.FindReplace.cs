@@ -22,6 +22,10 @@ namespace KillerPDF.Controls
             (int Page, double Left, double Bottom, double Right, double Top)? onlyMatch = null)
             => ReplaceText(find, replace, matchCase, wholeWord, onlyMatch);
 
+        internal TextReplaceResult ReplaceTextOccurrenceExt(string find, string replace, bool matchCase,
+            bool wholeWord, SearchHit occurrence) =>
+            ReplaceText(find, replace, matchCase, wholeWord, occurrence.Rectangle, occurrence.Start);
+
         /// <summary>True when an existing cover already hides this part of the page, so the text
         /// under it is no longer what the reader sees. Rects are unrotated page points.</summary>
         internal bool IsPdfRectCovered(int pageIndex, double left, double bottom, double right, double top)
@@ -35,7 +39,7 @@ namespace KillerPDF.Controls
         }
 
         private TextReplaceResult ReplaceText(string find, string replace, bool matchCase, bool wholeWord,
-            (int Page, double Left, double Bottom, double Right, double Top)? onlyMatch)
+            (int Page, double Left, double Bottom, double Right, double Top)? onlyMatch, int? onlyStart = null)
         {
             if (_doc is null || string.IsNullOrEmpty(_currentFile) || string.IsNullOrEmpty(find))
                 return default;
@@ -65,8 +69,11 @@ namespace KillerPDF.Controls
                     var words = page.GetWords().ToList();
                     var level = new List<ReplaceWord>();
                     var levelSource = new List<KillerPdf.Engine.Documents.PdfExtractedWord>();
+                    int sourceStart = 0;
                     foreach (var word in words)
                     {
+                        int wordStart = sourceStart;
+                        sourceStart += word.Text.Length + 1;
                         var b = word.BoundingBox;
                         Rect rect = RedactionGeometry.PageToCanvas(b.Left, b.Bottom, b.Right, b.Top,
                             frame.PdfWidth, frame.PdfHeight, frame.RenderWidth, frame.RenderHeight, frame.Rotation);
@@ -83,7 +90,7 @@ namespace KillerPDF.Controls
                             if (TextReplacePlanner.FindAll(word.Text, find, matchCase, wholeWord).Count > 0) skippedTurned++;
                             continue;
                         }
-                        level.Add(new ReplaceWord(word.Text, rect));
+                        level.Add(new ReplaceWord(word.Text, rect, wordStart));
                         levelSource.Add(word);
                     }
 
@@ -91,7 +98,8 @@ namespace KillerPDF.Controls
                         ? existing.OfType<CoverAnnotation>().Select(c => c.Bounds).ToList()
                         : [];
                     var plans = TextReplacePlanner.Plan(level, find, replace, matchCase, wholeWord,
-                        onlyCanvas is Rect target ? bounds => Intersection(bounds, target) > 0 : null);
+                        onlyStart is null && onlyCanvas is Rect target ? bounds => Intersection(bounds, target) > 0 : null,
+                        onlyStart);
                     foreach (ReplaceLine plan in plans)
                     {
                         // A line someone already edited with a cover is consumed: its replacement

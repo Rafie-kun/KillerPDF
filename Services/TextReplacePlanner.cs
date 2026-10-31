@@ -4,7 +4,7 @@ using System.Windows;
 namespace KillerPDF.Services;
 
 /// <summary>One extracted word in the reading frame of its line: text runs left to right.</summary>
-internal readonly record struct ReplaceWord(string Text, Rect Bounds);
+internal readonly record struct ReplaceWord(string Text, Rect Bounds, int SourceStart = -1);
 
 /// <summary>
 /// A line of page text that Find and Replace rewrites. <see cref="WordIndices"/> point into the
@@ -111,22 +111,32 @@ internal static class TextReplacePlanner
     /// occurrences (Replace for the current match); lines with none left are skipped.
     /// </summary>
     internal static IReadOnlyList<ReplaceLine> Plan(IReadOnlyList<ReplaceWord> words, string find,
-        string replace, bool matchCase, bool wholeWord, Func<Rect, bool>? includeMatch = null)
+        string replace, bool matchCase, bool wholeWord, Func<Rect, bool>? includeMatch = null,
+        int? onlyStart = null)
     {
         var plans = new List<ReplaceLine>();
         if (string.IsNullOrEmpty(find)) return plans;
         replace ??= string.Empty;
+        var sourceStarts = new int[words.Count];
+        int sourceOffset = 0;
+        for (int index = 0; index < words.Count; index++)
+        {
+            sourceStarts[index] = words[index].SourceStart >= 0 ? words[index].SourceStart : sourceOffset;
+            sourceOffset += words[index].Text.Length + 1;
+        }
 
         foreach (IReadOnlyList<int> line in GroupLines(words))
         {
             // Line text with one space between words, and each character mapped to its word.
             var text = new StringBuilder();
             var owner = new List<int>();
+            var source = new List<int>();
             foreach (int index in line)
             {
-                if (text.Length > 0) { text.Append(' '); owner.Add(-1); }
+                if (text.Length > 0) { text.Append(' '); owner.Add(-1); source.Add(-1); }
                 text.Append(words[index].Text);
                 owner.AddRange(Enumerable.Repeat(index, words[index].Text.Length));
+                source.AddRange(Enumerable.Range(sourceStarts[index], words[index].Text.Length));
             }
             string lineText = text.ToString();
 
@@ -134,6 +144,7 @@ internal static class TextReplacePlanner
             var matchBounds = new List<Rect>();
             foreach (int start in FindAll(lineText, find, matchCase, wholeWord))
             {
+                if (onlyStart is int selected && source[start] != selected) continue;
                 Rect bounds = Rect.Empty;
                 foreach (int index in owner.Skip(start).Take(find.Length).Where(i => i >= 0).Distinct())
                     bounds.Union(words[index].Bounds);

@@ -2,8 +2,16 @@ using PdfDocument = KillerPDF.Services.PdfContentDocument;
 
 namespace KillerPDF.Services
 {
+    internal sealed record SearchHit(int page, double left, double bottom, double right, double top,
+        int Start, int Length)
+    {
+        internal (int page, double left, double bottom, double right, double top) Rectangle =>
+            (page, left, bottom, right, top);
+    }
+
     internal sealed class SearchResult
     {
+        internal List<SearchHit> Hits { get; } = [];
         public Dictionary<int, List<(double Left, double Bottom, double Right, double Top)>> PageRects { get; } = [];
         public List<int> ResultPages { get; } = [];
         public int TotalHits { get; set; }
@@ -135,7 +143,9 @@ namespace KillerPDF.Services
                 try
                 {
                     page = doc.GetPage(pi + 1);
-                    hits = FindMatchesOnPage(page, query, matchCase, wholeWord);
+                    var occurrences = FindHitsOnPage(page, pi, query, matchCase, wholeWord);
+                    result.Hits.AddRange(occurrences);
+                    hits = [.. occurrences.Select(hit => (hit.left, hit.bottom, hit.right, hit.top))];
                 }
                 catch (Exception ex) when (CanSkipPage(ex))
                 {
@@ -208,55 +218,33 @@ namespace KillerPDF.Services
 
         internal static List<(double Left, double Bottom, double Right, double Top)> FindMatchesOnPage(
             KillerPdf.Engine.Documents.PdfPageContent page, string query, bool matchCase = false, bool wholeWord = false)
+            => [.. FindHitsOnPage(page, 0, query, matchCase, wholeWord)
+                .Select(hit => (hit.left, hit.bottom, hit.right, hit.top))];
+
+        private static List<SearchHit> FindHitsOnPage(KillerPdf.Engine.Documents.PdfPageContent page,
+            int pageIndex, string query, bool matchCase, bool wholeWord)
         {
-            var result = new List<(double, double, double, double)>();
-            var words = page.GetWords().ToList();
-            // Compared by what the page shows, so a word set with a ligature is found by its letters.
-            List<string> texts = [.. words.Select(word => KillerPdf.Engine.Documents.PdfSearchText.Fold(word.Text))];
+            var result = new List<SearchHit>();
             query = KillerPdf.Engine.Documents.PdfSearchText.Fold(query);
             if (query.Length == 0) return result;
-            var comparison = matchCase ? System.StringComparison.Ordinal : System.StringComparison.OrdinalIgnoreCase;
-            bool Matches(string text) => wholeWord
-                ? TextReplacePlanner.FindAll(text, query, matchCase, wholeWord: true).Count > 0
-                : text.Contains(query, comparison);
-
-            // A multi-word phrase can span adjacent words; a single token never does, so for single-token
-            // queries we only do the per-word substring match (the cross-word union box below would
-            // otherwise highlight whole runs of words leading up to the matching one).
-            bool isPhrase = query.Trim().Contains(' ');
-
-            for (int i = 0; i < words.Count; i++)
+            var options = new KillerPdf.Engine.Documents.PdfRedactionSearchOptions
             {
-                if (Matches(texts[i]))
-                {
-                    var bb = words[i].BoundingBox;
-                    result.Add((bb.Left, bb.Bottom, bb.Right, bb.Top));
-                    continue;
-                }
-
-                if (!isPhrase) continue;
-
-                // Multi-word match
-                string combined = texts[i];
-                for (int j = i + 1; j < words.Count && combined.Length < query.Length + 20; j++)
-                {
-                    combined += " " + texts[j];
-                    if (Matches(combined))
-                    {
-                        double minX = double.MaxValue, minY = double.MaxValue;
-                        double maxX = double.MinValue, maxY = double.MinValue;
-                        for (int k = i; k <= j; k++)
-                        {
-                            var wbb = words[k].BoundingBox;
-                            minX = Math.Min(minX, wbb.Left);
-                            minY = Math.Min(minY, wbb.Bottom);
-                            maxX = Math.Max(maxX, wbb.Right);
-                            maxY = Math.Max(maxY, wbb.Top);
-                        }
-                        result.Add((minX, minY, maxX, maxY));
-                        break;
-                    }
-                }
+                Query = wholeWord ? @"(?<![\p{L}\p{Nd}_])" + System.Text.RegularExpressions.Regex.Escape(query)
+                    + @"(?![\p{L}\p{Nd}_])" : query,
+                Kind = wholeWord ? KillerPdf.Engine.Documents.PdfRedactionSearchKind.RegularExpression
+                    : KillerPdf.Engine.Documents.PdfRedactionSearchKind.ExactText,
+                MatchCase = matchCase
+            };
+            foreach (var match in KillerPdf.Engine.Documents.PdfRedactionSearch.Find([page], options).Matches)
+            {
+                var bounds = match.Areas.Count > 0
+                    ? new KillerPdf.Engine.Documents.PdfContentBounds(match.Areas.Min(area => area.Left),
+                        match.Areas.Min(area => area.Bottom), match.Areas.Max(area => area.Right), match.Areas.Max(area => area.Top))
+                    : match.Bounds;
+                string[] identity = match.Id.Split(':');
+                result.Add(new SearchHit(pageIndex, bounds.Left, bounds.Bottom, bounds.Right, bounds.Top,
+                    int.Parse(identity[1], System.Globalization.CultureInfo.InvariantCulture),
+                    int.Parse(identity[2], System.Globalization.CultureInfo.InvariantCulture)));
             }
             return result;
         }
