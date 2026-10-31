@@ -24,6 +24,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Store installations keep their bundled runtime when choosing an update package.
 - Redacting a shared image preserves the transparency and colors of untouched pages that use a different mask or color settings.
 - Redaction search reports unreadable annotation appearances while keeping readable captions and matches from other annotations.
+- Redaction search preserves literal hyphens across line breaks while also finding words split by typesetting.
 - Calculator-based PDF colors use the correct zero-filled bit shifts and round negative halfway values correctly.
 - Search and redaction find a word set with a ligature, so a name like Offner in a typeset paper is redacted instead of staying on the page while verification passed. A soft hyphen, zero-width character or unidentified code inside a word no longer hides it either, and redaction finds a word hyphenated across a line break.
 - Redaction finds text an annotation shows with no value or contents behind it, such as a button caption, the name on a signature or the wording of a stamp. It used to say nothing matched while the words stayed on the page.

@@ -23,7 +23,12 @@ public static class PdfSearchText
     /// word hyphenated across a line break comes out whole, and <paramref name="origin"/> maps each
     /// character back to the plain join of the words.
     /// </summary>
-    public static string FoldWords(IReadOnlyList<PdfExtractedWord> words, out int[] origin)
+    public static string FoldWords(IReadOnlyList<PdfExtractedWord> words, out int[] origin) =>
+        FoldWords(words, out origin, preserveLineEndHyphens: false);
+
+    /// <summary>Folds joined words, optionally retaining visible hyphens at line breaks.</summary>
+    public static string FoldWords(IReadOnlyList<PdfExtractedWord> words, out int[] origin,
+        bool preserveLineEndHyphens)
     {
         ArgumentNullException.ThrowIfNull(words);
         var dropped = new HashSet<int>();
@@ -33,7 +38,7 @@ public static class PdfSearchText
             offset += words[index].Text.Length;
             if (index + 1 < words.Count && BreaksAcrossLines(words[index], words[index + 1]))
             {
-                dropped.Add(offset - 1);
+                if (!preserveLineEndHyphens) dropped.Add(offset - 1);
                 dropped.Add(offset);
             }
             offset++;

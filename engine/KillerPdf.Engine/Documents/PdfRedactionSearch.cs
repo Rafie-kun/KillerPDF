@@ -359,30 +359,38 @@ public static class PdfRedactionSearch
             var spans = new List<(PdfExtractedWord Word, int Start, int End)>();
             // Matches run over the folded text and land back on the stored characters, so a word set
             // with a ligature is found by its letters and the areas still cover its real glyphs.
-            string text = PdfSearchText.FoldWords(page.Words, out int[] origin);
+            string literal = PdfSearchText.Fold(string.Join(' ', page.Words.Select(word => word.Text)), out int[] literalOrigin);
+            string joined = PdfSearchText.FoldWords(page.Words, out int[] joinedOrigin, preserveLineEndHyphens: true);
+            string unhyphenated = PdfSearchText.FoldWords(page.Words, out int[] unhyphenatedOrigin);
             int offset = 0;
             foreach (PdfExtractedWord word in page.Words)
             {
                 spans.Add((word, offset, offset + word.Text.Length));
                 offset += word.Text.Length + 1;
             }
+            var seen = new HashSet<(int Start, int End)>();
+            var found = new List<(int Start, PdfRedactionMatch Match)>();
+            foreach (var (text, origin) in new[] { (literal, literalOrigin), (joined, joinedOrigin), (unhyphenated, unhyphenatedOrigin) }
+                         .DistinctBy(item => item.Item1, StringComparer.Ordinal))
             foreach (Match match in expression.Matches(text))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 if (!Accepted(options.Kind, match.Value)) continue;
                 int start = origin[match.Index];
                 int end = match.Length > 0 ? origin[match.Index + match.Length - 1] + 1 : start;
+                if (!seen.Add((start, end))) continue;
                 var words = spans.Select((span, index) => (span, index))
                     .Where(item => item.span.End > start && item.span.Start < end)
                     .ToArray();
                 if (words.Length == 0) continue;
-                results.Add(new PdfRedactionMatch($"{pageIndex}:{start}:{end - start}", pageIndex,
+                found.Add((start, new PdfRedactionMatch($"{pageIndex}:{start}:{end - start}", pageIndex,
                     match.Value, PdfContentBounds.Union(words.Select(item => item.span.Word.BoundingBox)),
                     words[0].index, words.Length, options.ReasonCode, options.OverlayText)
                 {
                     Areas = MatchAreas(words.Select(item => item.span), start, end)
-                });
+                }));
             }
+            results.AddRange(found.OrderBy(item => item.Start).Select(item => item.Match));
         }
         return new PdfRedactionReview(results);
     }

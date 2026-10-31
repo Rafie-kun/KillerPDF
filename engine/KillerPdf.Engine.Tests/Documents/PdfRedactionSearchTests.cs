@@ -418,6 +418,19 @@ public sealed class PdfRedactionSearchTests
         }).Matches);
     }
 
+    [Theory]
+    [InlineData("well-")]
+    [InlineData("well-known")]
+    [InlineData("wellknown")]
+    [InlineData("known")]
+    public void WrappedHyphensKeepLiteralAndOptionalJoinedSpellingsWithoutDuplicateMatches(string query)
+    {
+        PdfPageContent page = Read(null!, content: "BT /F1 12 Tf 20 100 Td (well-) Tj 0 -14 Td (known) Tj ET");
+        PdfRedactionMatch match = Assert.Single(PdfRedactionSearch.Find([page],
+            new PdfRedactionSearchOptions { Query = query }).Matches);
+        Assert.Equal(query is "wellknown" or "well-known" ? 2 : 1, match.Areas.Count);
+    }
+
     private static PdfPageContent Read(string text, string? toUnicode = null, string? content = null)
     {
         content ??= $"BT /F1 12 Tf 20 100 Td ({text}) Tj ET";
