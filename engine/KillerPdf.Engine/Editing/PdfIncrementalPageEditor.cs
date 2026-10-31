@@ -12944,11 +12944,11 @@ public sealed class PdfIncrementalPageEditor
                 return array;
             }
         }
+        // These entries only describe colorants, and they can name more than this space uses: a process
+        // space lists all its components, a dictionary may be shared, and hints take a /Default key. So
+        // they are held to their shape and never to this space's own colorant names.
         void ValidateDeviceNAttributes(PdfDictionary attributes, PdfArray colorantNames)
         {
-            var definedColorants = colorantNames
-                .Select(item => ((PdfName)Resolve(item)).ValueAsLatin1())
-                .ToHashSet(StringComparer.Ordinal);
             if (attributes.TryGetValue(Name("Subtype"), out PdfObject? subtype))
             {
                 string subtypeName = (Resolve(subtype) as PdfName)?.ValueAsLatin1()
@@ -12969,9 +12969,6 @@ public sealed class PdfIncrementalPageEditor
                         $"{description} /DeviceN attributes /Colorants is not a dictionary.");
                 foreach (var entry in colorants)
                 {
-                    if (!definedColorants.Contains(entry.Key.ValueAsLatin1()))
-                        throw new InvalidOperationException(
-                            $"{description} /DeviceN attributes /Colorants contains an unregistered colorant.");
                     PdfObject colorant = Resolve(entry.Value);
                     if (colorant is not PdfArray separation || separation.Count == 0
                         || Resolve(separation[0]) is not PdfName family
@@ -13001,11 +12998,9 @@ public sealed class PdfIncrementalPageEditor
                 string[] processComponents = [.. components.Select(item =>
                     ((PdfName)Resolve(item)).ValueAsLatin1())];
                 if (processComponents.Distinct(StringComparer.Ordinal).Count()
-                        != processComponents.Length
-                    || processComponents.Any(component =>
-                        !definedColorants.Contains(component)))
+                        != processComponents.Length || processComponents.Contains("None"))
                     throw new InvalidOperationException(
-                        $"{description} /DeviceN attributes /Process contains duplicate or unregistered components.");
+                        $"{description} /DeviceN attributes /Process contains duplicate or /None components.");
                 int? componentCount = PageColorComponentCount(document, processColorSpace);
                 if (componentCount.HasValue && components.Count != componentCount.Value)
                     throw new InvalidOperationException(
@@ -13020,8 +13015,7 @@ public sealed class PdfIncrementalPageEditor
                 PdfArray order = Resolve(orderValue) as PdfArray
                     ?? throw new InvalidOperationException(
                         $"{description} /DeviceN attributes /MixingHints /PrintingOrder is not an array.");
-                if (order.Count == 0 || order.Any(item => Resolve(item) is not PdfName name
-                    || !definedColorants.Contains(name.ValueAsLatin1())))
+                if (order.Count == 0 || order.Any(item => Resolve(item) is not PdfName))
                     throw new InvalidOperationException(
                         $"{description} /DeviceN attributes /MixingHints /PrintingOrder contains invalid colorants.");
             }
@@ -13031,8 +13025,7 @@ public sealed class PdfIncrementalPageEditor
                     ?? throw new InvalidOperationException(
                         $"{description} /DeviceN attributes /MixingHints /Solidities is not a dictionary.");
                 foreach (var entry in solidities)
-                    if (!definedColorants.Contains(entry.Key.ValueAsLatin1())
-                        || !TryColorNumber(Resolve(entry.Value), out double solidity)
+                    if (!TryColorNumber(Resolve(entry.Value), out double solidity)
                         || !double.IsFinite(solidity) || solidity is < 0 or > 1)
                         throw new InvalidOperationException(
                             $"{description} /DeviceN attributes /MixingHints /Solidities entry is invalid.");
@@ -13044,9 +13037,6 @@ public sealed class PdfIncrementalPageEditor
                         $"{description} /DeviceN attributes /MixingHints /DotGain is not a dictionary.");
                 foreach (var entry in dotGain)
                 {
-                    if (!definedColorants.Contains(entry.Key.ValueAsLatin1()))
-                        throw new InvalidOperationException(
-                            $"{description} /DeviceN attributes /MixingHints /DotGain contains an unregistered colorant.");
                     ValidatePageFunction(document, entry.Value,
                         $"{description} /DeviceN attributes /MixingHints /DotGain /{entry.Key.ValueAsLatin1()}",
                         depth + 1);
@@ -14796,11 +14786,13 @@ public sealed class PdfIncrementalPageEditor
                     && softImageMaskValue.Value)
                     throw new InvalidOperationException(
                         $"{description} /SMask value is an explicit image mask.");
-                foreach (string key in new[] { "Width", "Height" })
-                    if (((PdfInteger)Resolve(maskStream.Dictionary[Name(key)])).Value
-                        != ((PdfInteger)Resolve(dictionary[Name(key)])).Value)
-                        throw new InvalidOperationException(
-                            $"{description} /SMask dimensions do not match the image.");
+                // A soft mask may have its own resolution. Only /Matte ties it to the image's pixels.
+                if (maskStream.Dictionary.ContainsKey(Name("Matte")))
+                    foreach (string key in new[] { "Width", "Height" })
+                        if (((PdfInteger)Resolve(maskStream.Dictionary[Name(key)])).Value
+                            != ((PdfInteger)Resolve(dictionary[Name(key)])).Value)
+                            throw new InvalidOperationException(
+                                $"{description} /SMask with /Matte does not match the image's dimensions.");
                 if (!maskStream.Dictionary.TryGetValue(
                         Name("ColorSpace"), out PdfObject? softColorSpace)
                     || Resolve(softColorSpace) is not PdfName softColorName

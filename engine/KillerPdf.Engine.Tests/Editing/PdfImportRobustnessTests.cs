@@ -89,6 +89,79 @@ public sealed class PdfImportRobustnessTests
         Assert.NotEmpty(PdfDocument.Open(output).Trailer);
     }
 
+    // /Process names the process color space's own components, which a DeviceN space may use only
+    // part of, so they answer to that space and not to the colorants it lists.
+    [Theory]
+    [InlineData(null, "/Cyan /Magenta /Yellow /Black")]
+    [InlineData("duplicate", "/Cyan /Magenta /Yellow /Cyan")]
+    [InlineData("duplicate", "/Cyan /Magenta /None /Black")]
+    public void ADeviceNProcessListsTheComponentsOfItsOwnColorSpace(string? refused, string components)
+    {
+        byte[] source = Update(OnePage(), (document, update, root, catalog) =>
+        {
+            PdfIndirectReference tint = update.AddObject(new PdfStream(Dictionary(
+                ("FunctionType", new PdfInteger(4)), ("Domain", Numbers(0, 1, 0, 1, 0, 1)),
+                ("Range", Numbers(0, 1, 0, 1, 0, 1, 0, 1))), "{ 0 }"u8.ToArray()));
+            var space = new PdfArray([Name("DeviceN"), new PdfArray([Name("Cyan"), Name("Magenta"), Name("Yellow")]),
+                Name("DeviceCMYK"), tint, Dictionary(("Subtype", Name("NChannel")), ("Process", Dictionary(
+                    ("ColorSpace", Name("DeviceCMYK")),
+                    ("Components", new PdfArray([.. components.Split(' ').Select(item => (PdfObject)Name(item[1..]))])))))]);
+            ReplacePage(document, update, page => Replace(page, "Resources", Dictionary(("ColorSpace", Dictionary(("CS0", space))))));
+            return catalog;
+        });
+
+        var import = () => new PdfIncrementalPageEditor(Empty()).AddImportedPage(PdfDocument.Open(source), 0).Build();
+        if (refused is null) Assert.NotEmpty(import());
+        else Assert.Contains(refused, Assert.Throws<InvalidOperationException>(() => import()).Message, StringComparison.Ordinal);
+    }
+
+    // A shared dictionary lists more than this space uses, and hints take a /Default key.
+    [Fact]
+    public void DeviceNDescriptionsMayNameMoreThanTheColorUses()
+    {
+        byte[] source = Update(OnePage(), (document, update, root, catalog) =>
+        {
+            PdfIndirectReference tint = update.AddObject(new PdfStream(Dictionary(
+                ("FunctionType", new PdfInteger(4)), ("Domain", Numbers(0, 1)), ("Range", Numbers(0, 1, 0, 1, 0, 1, 0, 1))), "{ 0 0 0 }"u8.ToArray()));
+            PdfIndirectReference tintOther = update.AddObject(new PdfStream(Dictionary(
+                ("FunctionType", new PdfInteger(4)), ("Domain", Numbers(0, 1)), ("Range", Numbers(0, 1, 0, 1, 0, 1, 0, 1))), "{ 0 0 0 }"u8.ToArray()));
+            var other = new PdfArray([Name("Separation"), Name("Other"), Name("DeviceCMYK"), tintOther]);
+            var space = new PdfArray([Name("DeviceN"), new PdfArray([Name("Spot")]), Name("DeviceCMYK"), tint, Dictionary(
+                ("Colorants", Dictionary(("Other", other))),
+                ("MixingHints", Dictionary(("Solidities", Dictionary(("Default", new PdfInteger(0)))),
+                    ("PrintingOrder", new PdfArray([Name("Cyan"), Name("Spot")])))))]);
+            ReplacePage(document, update, page => Replace(page, "Resources", Dictionary(("ColorSpace", Dictionary(("CS0", space))))));
+            return catalog;
+        });
+
+        Assert.NotEmpty(new PdfIncrementalPageEditor(Empty()).AddImportedPage(PdfDocument.Open(source), 0).Build());
+    }
+
+    // A soft mask may have its own resolution. Only /Matte ties it to the image's pixels.
+    [Theory]
+    [InlineData(178, 94, false, false)]
+    [InlineData(154, 81, true, false)]
+    [InlineData(178, 94, true, true)]
+    public void ASoftMaskOnlyMatchesItsImageWhenItHasAMatte(int width, int height, bool matte, bool refused)
+    {
+        byte[] source = Update(OnePage(), (document, update, root, catalog) =>
+        {
+            var mask = new List<(string, PdfObject)> { ("Type", Name("XObject")), ("Subtype", Name("Image")), ("Width", new PdfInteger(width)),
+                ("Height", new PdfInteger(height)), ("ColorSpace", Name("DeviceGray")), ("BitsPerComponent", new PdfInteger(8)) };
+            if (matte) mask.Add(("Matte", Numbers(0, 0, 0)));
+            PdfIndirectReference softMask = update.AddObject(new PdfStream(Dictionary([.. mask]), new byte[width * height]));
+            PdfIndirectReference image = update.AddObject(new PdfStream(Dictionary(("Type", Name("XObject")), ("Subtype", Name("Image")),
+                ("Width", new PdfInteger(154)), ("Height", new PdfInteger(81)), ("ColorSpace", Name("DeviceRGB")),
+                ("BitsPerComponent", new PdfInteger(8)), ("SMask", softMask)), new byte[154 * 81 * 3]));
+            ReplacePage(document, update, page => Replace(page, "Resources", Dictionary(("XObject", Dictionary(("R614", image))))));
+            return catalog;
+        });
+
+        var import = () => new PdfIncrementalPageEditor(Empty()).AddImportedPage(PdfDocument.Open(source), 0).Build();
+        if (!refused) Assert.NotEmpty(import());
+        else Assert.Contains("/SMask with /Matte", Assert.Throws<InvalidOperationException>(() => import()).Message, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void AddingAnAttachmentIgnoresMetadataThatIsNotXml()
     {

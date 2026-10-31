@@ -3146,7 +3146,6 @@ public sealed class PdfIncrementalPageEditorTests
     }
 
     [Theory]
-    [InlineData(false, 9, "/SMask dimensions do not match the image")]
     [InlineData(true, 10, "/SMask has no /DeviceGray color space")]
     public void Build_RejectsMalformedImportedImageSoftMasks(
         bool omitColorSpace, int maskWidth, string expectedMessage)
