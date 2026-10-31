@@ -132,7 +132,7 @@ $payloadApp = Join-Path $payloadDir 'KillerPDF.App.exe'
 # unsigned/invalid first-party bytes before generating a manifest or launcher.
 $null = @(Get-FirstPartyPayloadFiles $payloadDir)
 if ($RepackOnly -and $RequireSignature) { Assert-FirstPartyPayloadSignatures $payloadDir }
-& (Join-Path $PSScriptRoot 'Test-GuiStartup.ps1') -ExePath $payloadApp
+# release.ps1 checks the final portable and installed app once after packaging.
 
 $manifestPath = Join-Path $payloadDir 'payload.manifest'
 $payloadFiles = @([IO.Directory]::GetFiles($payloadDir, '*', [IO.SearchOption]::AllDirectories) |
