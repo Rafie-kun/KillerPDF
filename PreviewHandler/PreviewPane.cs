@@ -41,6 +41,9 @@ internal sealed partial class PreviewPane : IDisposable
             SnapsToDevicePixels = true
         };
         internal Image Picture { get; } = new() { Stretch = Stretch.Fill };
+        internal Border Notice { get; } = new() { Visibility = Visibility.Collapsed, Background = SystemColors.InfoBrush,
+            Padding = new Thickness(8), VerticalAlignment = VerticalAlignment.Bottom };
+        internal Button? Retry { get; set; }
         internal int RequestedWidth { get; set; }
     }
 
@@ -198,7 +201,7 @@ internal sealed partial class PreviewPane : IDisposable
                 var slot = new PageSlot(_slots.Count,
                     Math.Max(1, quarterTurn ? page.Height : page.Width),
                     Math.Max(1, quarterTurn ? page.Width : page.Height));
-                slot.Frame.Child = slot.Picture;
+                InitializePageNotice(slot);
                 _slots.Add(slot);
                 _column.Children.Add(slot.Frame);
             }
@@ -303,6 +306,38 @@ internal sealed partial class PreviewPane : IDisposable
         }
     }
 
+    private void InitializePageNotice(PageSlot slot)
+    {
+        var layer = new Grid();
+        layer.Children.Add(slot.Picture);
+        var content = new StackPanel();
+        var message = new TextBlock { Text = PreviewStrings.Get(PreviewStrings.Key.Incomplete),
+            TextWrapping = TextWrapping.Wrap, Foreground = SystemColors.InfoTextBrush };
+        System.Windows.Automation.AutomationProperties.SetName(message, message.Text);
+        System.Windows.Automation.AutomationProperties.SetLiveSetting(message, System.Windows.Automation.AutomationLiveSetting.Polite);
+        content.Children.Add(message);
+        var actions = new WrapPanel();
+        var template = ButtonTemplate(new SolidColorBrush(Color.FromArgb(0x26, 0, 0, 0)));
+        Button retry = MakeButton(template, null, PreviewStrings.Get(PreviewStrings.Key.Retry), null, () =>
+        {
+            if (_disposed) return;
+            slot.Retry!.IsEnabled = false;
+            slot.RequestedWidth = 0;
+            ScheduleRefresh();
+        });
+        retry.Tag = "retry";
+        retry.Foreground = SystemColors.InfoTextBrush;
+        slot.Retry = retry;
+        actions.Children.Add(retry);
+        Button open = MakeButton(template, null, PreviewStrings.Get(PreviewStrings.Key.Open), null, OpenInKillerPdf);
+        open.Foreground = SystemColors.InfoTextBrush;
+        actions.Children.Add(open);
+        content.Children.Add(actions);
+        slot.Notice.Child = content;
+        layer.Children.Add(slot.Notice);
+        slot.Frame.Child = layer;
+    }
+
     private async Task RenderLoop()
     {
         CancellationToken token = _closing.Token;
@@ -316,6 +351,7 @@ internal sealed partial class PreviewPane : IDisposable
                     PdfPageRenderer? renderer = _renderer;
                     if (renderer is null) return;
                     BitmapSource? bitmap = null;
+                    bool incomplete = false;
                     try
                     {
                         var options = new PdfRenderOptions(request.Width, request.Height)
@@ -324,6 +360,7 @@ internal sealed partial class PreviewPane : IDisposable
                             MaximumParallelism = Math.Clamp(Environment.ProcessorCount / 2, 1, 4)
                         };
                         PdfRenderedPage page = renderer.Render(request.Slot.Index, options, token);
+                        incomplete = PdfRenderCompleteness.Classify(page.Diagnostics).Any(item => item.BlocksPublication);
                         byte[] pixels = MemoryMarshal.TryGetArray(page.Pixels, out ArraySegment<byte> segment)
                             && segment.Offset == 0 && segment.Array is not null
                             ? segment.Array : page.Pixels.ToArray();
@@ -334,17 +371,18 @@ internal sealed partial class PreviewPane : IDisposable
                     catch (OperationCanceledException) { return; }
                     catch (Exception ex) when (ex is not OutOfMemoryException)
                     {
-                        // A page the engine cannot draw stays blank; the rest of the file still previews.
                         bitmap = null;
+                        incomplete = true;
                     }
-                    if (bitmap is null) continue;
                     RenderRequest done = request;
-                    BitmapSource result = bitmap;
+                    BitmapSource? result = bitmap;
+                    bool showNotice = incomplete;
                     _ = _dispatcher.BeginInvoke(DispatcherPriority.Background, () =>
                     {
-                        // A render from before a zoom change still beats an empty page.
-                        if (_disposed || (done.Generation != _generation && done.Slot.Picture.Source is not null)) return;
+                        if (_disposed || done.Generation != _generation) return;
                         done.Slot.Picture.Source = result;
+                        done.Slot.Notice.Visibility = showNotice ? Visibility.Visible : Visibility.Collapsed;
+                        done.Slot.Retry!.IsEnabled = true;
                     });
                 }
             }

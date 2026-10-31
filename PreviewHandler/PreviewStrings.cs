@@ -8,7 +8,7 @@ namespace KillerPDF.PreviewHandler;
 /// </summary>
 internal static class PreviewStrings
 {
-    internal enum Key { FitWidth, FitPage, ZoomOut, ZoomIn, Open, Protected, Failed }
+    internal enum Key { FitWidth, FitPage, ZoomOut, ZoomIn, Open, Protected, Failed, Incomplete, Retry }
 
     private static readonly Dictionary<string, string[]> Tables = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -66,9 +66,35 @@ internal static class PreviewStrings
             "此 PDF 受密碼保護。請在 KillerPDF 中開啟並輸入密碼。", "無法預覽此 PDF。"],
     };
 
-    private static readonly string[] Current = Tables[Resolve(CultureInfo.CurrentUICulture)];
+    private static readonly Dictionary<string, string[]> PageProblems = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["en-US"] = ["This page could not be displayed completely.", "Retry"],
+        ["bn"] = ["এই পৃষ্ঠাটি সম্পূর্ণভাবে দেখানো যায়নি।", "আবার চেষ্টা করুন"],
+        ["cs-CZ"] = ["Tuto stránku nelze zobrazit úplně.", "Zkusit znovu"],
+        ["de-DE"] = ["Diese Seite konnte nicht vollständig angezeigt werden.", "Erneut versuchen"],
+        ["es"] = ["No se pudo mostrar esta página por completo.", "Reintentar"],
+        ["fr-FR"] = ["Cette page n’a pas pu être affichée entièrement.", "Réessayer"],
+        ["hu-HU"] = ["Ez az oldal nem jeleníthető meg teljes egészében.", "Újra"],
+        ["it-IT"] = ["Non è stato possibile visualizzare completamente questa pagina.", "Riprova"],
+        ["ja-JP"] = ["このページを完全に表示できませんでした。", "再試行"],
+        ["kk-KZ"] = ["Бұл бетті толық көрсету мүмкін болмады.", "Қайталау"],
+        ["nb-NO"] = ["Denne siden kunne ikke vises fullstendig.", "Prøv igjen"],
+        ["pl-PL"] = ["Nie można wyświetlić tej strony w całości.", "Spróbuj ponownie"],
+        ["pt-BR"] = ["Não foi possível exibir esta página por completo.", "Tentar novamente"],
+        ["ru-RU"] = ["Не удалось полностью отобразить эту страницу.", "Повторить"],
+        ["sl-SI"] = ["Te strani ni bilo mogoče prikazati v celoti.", "Poskusi znova"],
+        ["tr-TR"] = ["Bu sayfa tam olarak görüntülenemedi.", "Yeniden dene"],
+        ["uk-UA"] = ["Не вдалося повністю відобразити цю сторінку.", "Повторити"],
+        ["vi-VN"] = ["Không thể hiển thị đầy đủ trang này.", "Thử lại"],
+        ["zh-CN"] = ["无法完整显示此页面。", "重试"],
+        ["zh-TW"] = ["無法完整顯示此頁面。", "重試"]
+    };
 
-    internal static string Get(Key key) => Current[(int)key];
+    private static readonly string Language = Resolve(CultureInfo.CurrentUICulture);
+    private static readonly string[] Current = Tables[Language];
+
+    internal static string Get(Key key) => key >= Key.Incomplete
+        ? PageProblems[Language][(int)key - (int)Key.Incomplete] : Current[(int)key];
 
     internal static string Resolve(CultureInfo culture)
     {

@@ -248,6 +248,8 @@ internal static class TableExportSmoke
                 return CliReplacementSmoke.Run(appPath, folder);
             if (windowSessionCase == "--verify-page-navigation-physical-output")
                 return PhysicalOutputSmoke.Run(appPath, folder);
+            if (windowSessionCase == "--verify-page-navigation-preview-failure")
+                return PreviewFailureSmoke.Run(owner, appPath, folder);
             if (windowSessionCase.StartsWith("--verify-page-navigation-sidebar-", StringComparison.Ordinal))
                 return SidebarPersistenceSmoke.Run(owner, folder, windowSessionCase["--verify-page-navigation-sidebar-".Length..]);
             if (windowSessionCase == "--verify-page-navigation-image-overwrite-consent")
