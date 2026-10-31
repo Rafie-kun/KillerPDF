@@ -23,6 +23,19 @@ public sealed class PdfCalculatorColorTests
     [InlineData("-8 0 bitshift -8 eq")]
     public void BitshiftProducesTheSpecifiedTint(string expression) => AssertWhite(expression);
 
+    // Adobe PostScript Language Reference, third edition, round (p. 652).
+    [Theory]
+    [InlineData("-2.5 round -2 eq")]
+    [InlineData("2.5 round 3 eq")]
+    [InlineData("-6.5 round -6 eq")]
+    [InlineData("-0.5 round 0 eq")]
+    [InlineData("-2.5000000000000004 round -3 eq")]
+    [InlineData("-2.4999999999999996 round -2 eq")]
+    [InlineData("0.49999999999999994 round 0 eq")]
+    [InlineData("0.5000000000000001 round 1 eq")]
+    [InlineData("2 round 2 eq")]
+    public void RoundProducesTheSpecifiedTint(string expression) => AssertWhite(expression);
+
     private static void AssertWhite(string expression)
     {
         static PdfName Name(string value) => new(Encoding.ASCII.GetBytes(value));

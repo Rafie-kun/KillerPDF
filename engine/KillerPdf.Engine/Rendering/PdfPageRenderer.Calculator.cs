@@ -433,9 +433,11 @@ public sealed partial class PdfPageRenderer
                         break;
                     }
                     case Opcode.Round:
-                        Push(stack, ref count, Number(Math.Round(Pop(stack, ref count),
-                            MidpointRounding.AwayFromZero)));
+                    {
+                        double value = Pop(stack, ref count), lower = Math.Floor(value);
+                        Push(stack, ref count, Number(value - lower >= 0.5 ? lower + 1 : lower));
                         break;
+                    }
                     case Opcode.Sin: Push(stack, ref count, Number(Math.Sin(Pop(stack, ref count) * Math.PI / 180))); break;
                     case Opcode.Sqrt: Push(stack, ref count, Number(Math.Sqrt(Pop(stack, ref count)))); break;
                     case Opcode.Sub:
