@@ -66,7 +66,7 @@ namespace KillerPDF.Shell
             // A single click on a text form field only selects it (#307), so the keys that follow reach this
             // window. A plain character moves the keyboard into the field and is typed there, and the key is
             // left unhandled so it arrives as text. Chords such as Ctrl+S and every other control keep going.
-            if (_syntheticShortcut is null && ReferenceEquals(e.OriginalSource, this) && _doc is not null
+            if (_syntheticShortcut is null && (ReferenceEquals(e.OriginalSource, this) || e.OriginalSource is ScrollViewer) && _doc is not null
                 && ShortcutsOverlay.Visibility != Visibility.Visible && AboutOverlay.Visibility != Visibility.Visible
                 && ActiveViewer.CanTypeIntoSelectedFormFieldExt
                 && FormFieldTypeAhead.StartsEditing(e.Key, Keyboard.Modifiers,

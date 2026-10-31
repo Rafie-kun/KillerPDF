@@ -72,10 +72,11 @@ public sealed class FormFieldTypeAheadTests
         Assert.True(typeAhead < source.IndexOf("TryRunExpandedShortcut(", StringComparison.Ordinal));
         Assert.True(typeAhead < source.IndexOf("TryToolShortcut(key)", StringComparison.Ordinal));
 
-        // Only the window itself, with no other control holding the keyboard, hands a key to the field.
+        // Only the window or the viewer's scroller, where a click leaves the keyboard, hands a key to the field.
         string call = source[(typeAhead - 400)..(typeAhead + 400)];
         Assert.Contains("_syntheticShortcut is null", call);
         Assert.Contains("ReferenceEquals(e.OriginalSource, this)", call);
+        Assert.Contains("e.OriginalSource is ScrollViewer", call);
         Assert.Contains("ActiveViewer.CanTypeIntoSelectedFormFieldExt", call);
         Assert.Contains("ActiveViewer.BeginTypedFormFieldEditExt()", call);
         // The key itself must reach the field as text, so the window leaves it unhandled.
@@ -103,9 +104,19 @@ public sealed class FormFieldTypeAheadTests
         Match begin = Regex.Match(forms, @"internal bool BeginTypedFormFieldEdit\(\)\s*\{(?<body>.*?)\n        \}",
             RegexOptions.Singleline);
         Assert.True(begin.Success, "BeginTypedFormFieldEdit was not found.");
-        // The field takes the keyboard with its content selected, so the character that follows replaces
-        // the value, as it does over a selected spreadsheet cell.
-        Assert.Matches(@"\.Focus\(\)[\s\S]*SelectAll\(\)", begin.Groups["body"].Value);
+        // The field takes the keyboard with the caret at the end, so a stray key adds to the value and
+        // cannot wipe it.
+        Assert.Matches(@"\.Focus\(\)[\s\S]*CaretIndex = textBox\.Text\.Length", begin.Groups["body"].Value);
+        Assert.DoesNotContain("textBox.SelectAll", begin.Groups["body"].Value);
+    }
+
+    // Without this, a key pressed after clicking the canvas beside the page landed in the old field.
+    [Fact]
+    public void AClickAnywhereElseLeavesNoFieldSelected()
+    {
+        string viewer = File.ReadAllText(Path.Combine(FindRepositoryRoot(), "Controls", "Viewer", "PdfViewer.xaml.cs"));
+        Assert.Matches(@"PreviewMouseLeftButtonDown \+= \(_, _\) =>\s*\{\s*if \(_currentTool != EditTool\.Select\) return;\s*_selectedFormFieldName = null;", viewer);
+        Assert.Contains("_formValueBoxes.ContainsValue(box)", viewer);
     }
 
     [Fact]

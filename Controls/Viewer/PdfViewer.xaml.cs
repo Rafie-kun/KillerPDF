@@ -34,6 +34,20 @@ namespace KillerPDF.Controls
             InitializeComponent();
             InitializeRailShadow();
             InitializeReadingSurface();
+            // A click on a field selects it again on its way down, so any other click leaves no field
+            // selected or holding the keyboard to catch the keys that follow.
+            PreviewMouseLeftButtonDown += (_, _) =>
+            {
+                if (_currentTool != EditTool.Select) return;
+                _selectedFormFieldName = null;
+                if (Keyboard.FocusedElement is TextBox { IsMouseOver: false } box && _formValueBoxes.ContainsValue(box))
+                {
+                    // The window hands focus back to the element its scope remembers, so that goes first.
+                    FocusManager.SetFocusedElement(FocusManager.GetFocusScope(box), null);
+                    Keyboard.ClearFocus();
+                    Window.GetWindow(this)?.Focus();
+                }
+            };
             // ScrollViewer consumes manipulation events for one-finger panning. Listen even when
             // they are already marked handled so a two-finger scale can share that input surface.
             PagePreviewPanel.AddHandler(ManipulationStartingEvent,

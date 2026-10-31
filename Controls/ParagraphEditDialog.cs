@@ -71,9 +71,9 @@ internal sealed class ParagraphEditDialog : Window
         DockPanel.SetDock(sidebar, Dock.Right);
         var side = new DockPanel();
         var footer = new StackPanel { Margin = new Thickness(0, 10, 16, 0) };
-        _status = Note(""); Id(_status, "ParagraphStatus");
+        _status = Note(""); _status.FontSize = 12; Id(_status, "ParagraphStatus");
         AutomationProperties.SetLiveSetting(_status, AutomationLiveSetting.Polite);
-        _fontLabel = Note("");
+        _fontLabel = Note(""); _fontLabel.FontSize = 12;
         var actions = new WrapPanel { HorizontalAlignment = HorizontalAlignment.Right,
             Margin = new Thickness(0, 8, 0, 0) };
         _preview = Button("Str_Dlg_Preview", "ParagraphPreview", false);

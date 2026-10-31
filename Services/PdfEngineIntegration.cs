@@ -2431,9 +2431,10 @@ internal static partial class PdfEngineIntegration
         foreach (string family in SourceFontKind.Families(candidate.FontName))
         {
             if (!FontCoverage.Covers(family, text) || LoadTextFont(family, text, style.Bold, style.Italic) is not { } face) continue;
-            // Wider is the costly direction, since each row it spills is a row the paragraph may not have.
+            // Wider is the costly direction, since each row it spills is a row the paragraph may not
+            // have, and a little narrower only leaves a little more room at the end of a line.
             double ratio = PdfParagraphEditor.WidthRatio(candidate, face.Font);
-            double off = ratio > 1 ? (ratio - 1) * 3 : 1 - ratio;
+            double off = ratio > 1 ? (ratio - 1) * 3 : (1 - ratio) * 0.5;
             if (off < gap) { gap = off; closest = face; }
         }
         return closest ?? LoadTextFont(style.Family, text, style.Bold, style.Italic);

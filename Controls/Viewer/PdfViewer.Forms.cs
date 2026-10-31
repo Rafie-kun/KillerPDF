@@ -252,12 +252,13 @@ namespace KillerPDF.Controls
         internal bool CanTypeIntoSelectedFormField => SelectedFormFieldEditor() is not null;
 
         // A single click only selects a text field (#307), so the keys that follow reach the window and
-        // run tool shortcuts. Typing a character moves the keyboard into the field with its value
-        // selected, as typing over a spreadsheet cell does, and the character is typed there.
+        // run tool shortcuts. Typing a character moves the keyboard into the field and adds to its value,
+        // which a stray key must not wipe. A password box hides its value and offers no caret, so it is
+        // replaced as a whole.
         internal bool BeginTypedFormFieldEdit()
         {
             if (SelectedFormFieldEditor() is not Control editor || !editor.Focus()) return false;
-            if (editor is TextBox textBox) textBox.SelectAll();
+            if (editor is TextBox textBox) textBox.CaretIndex = textBox.Text.Length;
             else if (editor is PasswordBox password) password.SelectAll();
             return true;
         }
