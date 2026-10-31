@@ -246,6 +246,10 @@ internal static class TableExportSmoke
                 return FormReplacementRulesSmoke.Run(owner, folder, calculation: true);
             if (windowSessionCase == "--verify-page-navigation-certified-form-save")
                 return CertifiedFormSaveSmoke.Run(owner, appPath, folder);
+            if (windowSessionCase == "--verify-page-navigation-print-copies")
+                return PrintMemorySmoke.Run(owner, appPath, folder, 10, copies: 2, subset: true);
+            if (windowSessionCase.StartsWith("--verify-page-navigation-print-memory-", StringComparison.Ordinal))
+                return PrintMemorySmoke.Run(owner, appPath, folder, int.Parse(windowSessionCase["--verify-page-navigation-print-memory-".Length..]));
             if (windowSessionCase == "--verify-page-navigation-cli-image-publication")
                 return CliOutputSmoke.Run(appPath, folder, merge: false);
             if (windowSessionCase == "--verify-page-navigation-cli-merge-input")
@@ -262,10 +266,10 @@ internal static class TableExportSmoke
                 return PhysicalTransformSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-preview-failure")
                 return PreviewFailureSmoke.Run(owner, appPath, folder);
-            if (windowSessionCase.StartsWith("--verify-page-navigation-sidebar-", StringComparison.Ordinal))
-                return SidebarPersistenceSmoke.Run(owner, folder, windowSessionCase["--verify-page-navigation-sidebar-".Length..]);
             if (windowSessionCase == "--verify-page-navigation-preview-com")
                 return PreviewComSmoke.Run(owner, appPath, folder);
+            if (windowSessionCase.StartsWith("--verify-page-navigation-sidebar-", StringComparison.Ordinal))
+                return SidebarPersistenceSmoke.Run(owner, folder, windowSessionCase["--verify-page-navigation-sidebar-".Length..]);
             if (windowSessionCase == "--verify-page-navigation-image-overwrite-consent")
                 return ImageExportWorkflowSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-image-pending-forms")

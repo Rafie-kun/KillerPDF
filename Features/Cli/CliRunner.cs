@@ -1900,7 +1900,7 @@ namespace KillerPDF.Features
         // ============================================================
         // Slimmed headless version of the GUI print spool: rasterize at 300
         // dpi (the GUI's print resolution), fit-scale each page centered on
-        // the printable area, build a FixedDocument, and write it to the
+        // the printable area, and write a disk-backed paginator to the
         // queue via XPS. Copies replicate the page sequence (ticket CopyCount
         // is unreliable across drivers - same reason the GUI does this, #83).
         private static int CliPrint(List<string> pos, Dictionary<string, string> options, TextWriter con)
@@ -1948,7 +1948,7 @@ namespace KillerPDF.Features
             }
 
             // Rasterize the selected pages at 300 dpi, rotation-corrected.
-            var bitmaps = new List<(BitmapSource Bs, int W, int H)>();
+            using var document = new PrintRasterDocument(copies);
             List<int> selected;
             using (var renderSession = PdfPageRenderSession.OpenEngineFirst(
                 renderPath, 300.0 / 72.0))
@@ -1974,12 +1974,12 @@ namespace KillerPDF.Features
                     if (rot != 0) (raw, w, h) = BitmapHelpers.RotateBitmap(raw, w, h, rot);
                     var bs = BitmapSource.Create(w, h, 96, 96, PixelFormats.Bgra32, null, raw, w * 4);
                     bs.Freeze();
-                    bitmaps.Add((bs, w, h));
+                    document.Add(bs);
                 }
             }
 
             // Orient the sheet to the majority of the selected pages.
-            bool landscape = bitmaps.Count(b => b.W > b.H) * 2 > bitmaps.Count;
+            bool landscape = document.Landscape;
 
             var pd = new System.Windows.Controls.PrintDialog { PrintQueue = queue };
             var ticket = pd.PrintTicket;
@@ -1989,32 +1989,11 @@ namespace KillerPDF.Features
             double aw = pd.PrintableAreaWidth, ah = pd.PrintableAreaHeight;
             if (landscape && ah > aw) (aw, ah) = (ah, aw);
 
-            var fixedDoc = new FixedDocument();
-            for (int c = 0; c < copies; c++)
-            {
-                foreach (var (bs, w, h) in bitmaps)
-                {
-                    double wDip = w * 96.0 / 300.0, hDip = h * 96.0 / 300.0;
-                    double s = Math.Min(aw / wDip, ah / hDip);
-                    double sw = wDip * s, sh = hDip * s;
-                    var img = new System.Windows.Controls.Image { Source = bs, Width = sw, Height = sh };
-                    var fp = new FixedPage { Width = aw, Height = ah };
-                    FixedPage.SetLeft(img, (aw - sw) / 2);
-                    FixedPage.SetTop(img, (ah - sh) / 2);
-                    fp.Children.Add(img);
-                    fp.Measure(new Size(aw, ah));
-                    fp.Arrange(new Rect(0, 0, aw, ah));
-                    fp.UpdateLayout();
-                    var pc = new PageContent();
-                    ((IAddChild)pc).AddChild(fp);
-                    fixedDoc.Pages.Add(pc);
-                }
-            }
-
-            // Write the FixedDocument (not its paginator) - see PrintPreviewWindow
-            // DoPrint for why. Synchronous Write is fine headless.
+            document.PageSize = new Size(aw, ah);
+            // All pages passed render validation before any job is submitted. The paginator
+            // decodes only the current small cache instead of retaining the entire job's pixels.
             var writer = PrintQueue.CreateXpsDocumentWriter(queue);
-            writer.Write(fixedDoc, ticket);
+            writer.Write(document, ticket);
             CliReportIncomplete(incomplete, con);
             con.WriteLine($"Sent {selected.Count} pages x{copies} to \"{queue.FullName}\".");
             return 0;
