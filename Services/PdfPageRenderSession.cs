@@ -301,10 +301,10 @@ internal sealed class PdfPageRenderSession : IDisposable
         double pageHeight = (float)(quarterTurn ? pageInformation.Width : pageInformation.Height);
         double renderScale = maximumWidth > 0
             ? Math.Min(maximumWidth / pageWidth, maximumHeight / pageHeight) : _scale > 0
-            ? _scale : Math.Min(_maximumWidth / pageWidth, _maximumHeight / pageHeight);
+            ? _scale * pageInformation.UserUnit : Math.Min(_maximumWidth / pageWidth, _maximumHeight / pageHeight);
         // Preserve the previous viewer's truncation of scaled page dimensions.
-        int engineWidth = Math.Max(1, (int)(pageWidth * renderScale));
-        int engineHeight = Math.Max(1, (int)(pageHeight * renderScale));
+        int engineWidth = Math.Max(1, checked((int)(pageWidth * renderScale)));
+        int engineHeight = Math.Max(1, checked((int)(pageHeight * renderScale)));
         return new EngineRenderOptions(engineWidth, engineHeight, transparentBackground,
             includeAnnotations, includeFormFields)
         {

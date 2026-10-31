@@ -13,10 +13,16 @@ public sealed record PdfPageInformation
     public double Left { get; init; }
     /// <summary>Gets the bottom edge of the effective crop or media box.</summary>
     public double Bottom { get; init; }
-    /// <summary>Gets the page width in PDF points before rotation.</summary>
+    /// <summary>Gets the page width in default user-space units before rotation.</summary>
     public required double Width { get; init; }
-    /// <summary>Gets the page height in PDF points before rotation.</summary>
+    /// <summary>Gets the page height in default user-space units before rotation.</summary>
     public required double Height { get; init; }
+    /// <summary>Gets the number of 1/72-inch points in one default user-space unit.</summary>
+    public double UserUnit { get; init; } = 1;
+    /// <summary>Gets the physical width in 1/72-inch points before rotation.</summary>
+    public double PhysicalWidth => Width * UserUnit;
+    /// <summary>Gets the physical height in 1/72-inch points before rotation.</summary>
+    public double PhysicalHeight => Height * UserUnit;
     /// <summary>Gets the clockwise page rotation in degrees.</summary>
     public required int Rotation { get; init; }
 
@@ -54,10 +60,23 @@ public sealed record PdfPageInformation
                 Bottom = box.Bottom,
                 Width = box.Width,
                 Height = box.Height,
+                UserUnit = ReadUserUnit(document, page.Dictionary, index),
                 Rotation = rotation
             };
         }
         return result;
+    }
+
+    internal static double ReadUserUnit(PdfDocument document, PdfDictionary page, int index)
+    {
+        if (!page.TryGetValue(Name("UserUnit"), out PdfObject? value)) return 1;
+        try
+        {
+            double unit = Number(document, value, index);
+            if (double.IsFinite(unit) && unit > 0 && unit <= 75_000) return unit;
+            throw new InvalidOperationException($"Page {index + 1} UserUnit is outside the supported range.");
+        }
+        catch (InvalidOperationException) when (document.UsesCompatibilityRecovery) { return 1; }
     }
 
     /// <summary>

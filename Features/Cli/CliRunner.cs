@@ -1623,7 +1623,7 @@ namespace KillerPDF.Features
                 for (int i = 0; i < pages.Count; i++)
                 {
                     rotations[i] = pages[i].Rotation;
-                    dims[i] = (pages[i].Width, pages[i].Height);
+                    dims[i] = (pages[i].PhysicalWidth, pages[i].PhysicalHeight);
                     if (rotations[i] != 0) anyRot = true;
                 }
                 if (!anyRot) return (workPath, rotations, dims);

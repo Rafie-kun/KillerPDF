@@ -80,7 +80,7 @@ namespace KillerPDF.Controls
             int page = State.CurrentPage;
             if (_doc is null || page < 0 || page >= _doc.PageCount) return null;
             PdfEngineDocumentSession session = EnsureEngineDocumentSession();
-            var (width, height) = session.VisualPageSize(page, _pageRotations);
+            var (width, height) = session.PhysicalPageSize(page, _pageRotations);
             return PageSizeFormatter.Format(width, height, metric, imagePixels ? session.PageImagePixels(page, _pageRotations) : null);
         }
         internal double ZoomLevelExt => _zoomLevel;

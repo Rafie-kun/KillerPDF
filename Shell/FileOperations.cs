@@ -1769,7 +1769,7 @@ namespace KillerPDF.Shell
                 var pageDims = new (double widthPt, double heightPt)[pageCount];
                 for (int i = 0; i < pageCount; i++)
                 {
-                    pageDims[i] = engineSession.VisualPageSize(i, _pageRotations);
+                    pageDims[i] = engineSession.PhysicalPageSize(i, _pageRotations);
                 }
 
                 // Show a progress overlay so the user knows we're working
@@ -1912,7 +1912,7 @@ namespace KillerPDF.Shell
             int pageCount = engineSession.PageCount;
             int previewPage = Math.Max(0, Math.Min(PageList.SelectedIndex, pageCount - 1));
             var (pageWidthPoints, pageHeightPoints) =
-                engineSession.VisualPageSize(previewPage, _pageRotations);
+                engineSession.PhysicalPageSize(previewPage, _pageRotations);
 
             var opts = new ExportImagesDialog(
                 this, presetRange, pageWidthPoints, pageHeightPoints);
@@ -2092,7 +2092,7 @@ namespace KillerPDF.Shell
                 pageDipH = new double[pageCount];
                 for (int i = 0; i < pageCount; i++)
                 {
-                    var (pw, ph) = engineSession.VisualPageSize(i, visualRotations);
+                    var (pw, ph) = engineSession.PhysicalPageSize(i, visualRotations);
                     pageDipW[i] = pw * 96.0 / 72.0;
                     pageDipH[i] = ph * 96.0 / 72.0;
                 }

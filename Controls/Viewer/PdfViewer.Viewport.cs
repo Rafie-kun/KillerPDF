@@ -521,7 +521,7 @@ namespace KillerPDF.Controls
             //   zoom = viewportW / _continuousPageW
             // and if _continuousPageW were derived from the current zoom level the two
             // would cancel and FitToWidth would always return approximately the old zoom.
-            var (referenceWidth, _) = engineSession.VisualPageSize(0, _pageRotations);
+            var (referenceWidth, _) = engineSession.PhysicalPageSize(0, _pageRotations);
             _continuousPageW = Math.Max(200.0, referenceWidth * (96.0 / 72.0));
 
             double y = 0;
@@ -1729,7 +1729,7 @@ namespace KillerPDF.Controls
             int idx = _viewMode == ViewMode.Grid ? 0 : Math.Max(0, State.CurrentPage);   // never the shared sidebar's index (see ApplyZoom)
             if (idx < 0 || idx >= engineSession.PageCount) return 1.0;
             if (!_renderDims.TryGetValue(idx, out var d) || d.w <= 0) return 1.0;
-            var (wpt, _) = engineSession.VisualPageSize(idx, _pageRotations);
+            var (wpt, _) = engineSession.PhysicalPageSize(idx, _pageRotations);
             double naturalW = wpt * 96.0 / 72.0;
             if (naturalW <= 0) return 1.0;
             return d.w / naturalW;

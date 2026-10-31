@@ -61,6 +61,13 @@ internal sealed class PdfEngineDocumentSession
         return OutputPixelDimensions.Oriented(size, width, height);
     }
 
+    internal (double Width, double Height) PhysicalPageSize(
+        int pageIndex, IReadOnlyDictionary<int, int>? rotations = null)
+    {
+        var (width, height) = VisualPageSize(pageIndex, rotations);
+        return (width * Pages[pageIndex].UserUnit, height * Pages[pageIndex].UserUnit);
+    }
+
     internal (double Width, double Height) VisualPageSize(
         int pageIndex, IReadOnlyDictionary<int, int>? rotations = null)
     {

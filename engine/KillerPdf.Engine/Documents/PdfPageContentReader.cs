@@ -230,7 +230,8 @@ public sealed class PdfPageContentReader
             text.Select(t => new PdfExtractedLetter(t.Text, t.Bounds, t.FontName, t.FontSize,
                 t.PointSize, t.Origin, t.AdvanceEnd) { MarkedContentId = t.MarkedContentId }),
             images, interpretedInstructions,
-            paths, shadings, diagnostics);
+            paths, shadings, diagnostics)
+        { UserUnit = PdfPageInformation.ReadUserUnit(_document, page.Dictionary, page.Index) };
 
         string Font(PdfObject value)
         {

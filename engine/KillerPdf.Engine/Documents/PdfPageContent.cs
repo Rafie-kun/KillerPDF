@@ -206,6 +206,8 @@ public sealed class PdfPageContent
     public double Width { get; }
     /// <summary>Gets the page height in points.</summary>
     public double Height { get; }
+    /// <summary>Gets the physical scale of default user-space coordinates, in 1/72-inch points.</summary>
+    public double UserUnit { get; init; } = 1;
     /// <summary>Gets all decoded characters.</summary>
     public IReadOnlyList<PdfExtractedLetter> Letters { get; }
     /// <summary>Gets geometrically grouped words.</summary>

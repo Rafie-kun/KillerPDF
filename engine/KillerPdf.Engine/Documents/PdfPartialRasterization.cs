@@ -48,8 +48,8 @@ public static class PdfPartialRasterization
                 nameof(region), "The raster region must remain inside the page.");
         if (!double.IsFinite(dpi) || dpi <= 0 || dpi > 2400)
             throw new ArgumentOutOfRangeException(nameof(dpi));
-        int pixelWidth = CheckedPixels(region.Width, dpi);
-        int pixelHeight = CheckedPixels(region.Height, dpi);
+        int pixelWidth = CheckedPixels(region.Width * page.UserUnit, dpi);
+        int pixelHeight = CheckedPixels(region.Height * page.UserUnit, dpi);
         return new PdfPartialRasterizationPlan
         {
             Region = region,
@@ -142,8 +142,8 @@ public static class PdfPartialRasterization
             throw new ArgumentException(
                 "The rasterization plan does not fit the selected page.", nameof(replacement));
         if (!double.IsFinite(plan.Dpi) || plan.Dpi <= 0 || plan.Dpi > 2400
-            || plan.PixelWidth != CheckedPixels(plan.Region.Width, plan.Dpi)
-            || plan.PixelHeight != CheckedPixels(plan.Region.Height, plan.Dpi))
+            || plan.PixelWidth != CheckedPixels(plan.Region.Width * page.UserUnit, plan.Dpi)
+            || plan.PixelHeight != CheckedPixels(plan.Region.Height * page.UserUnit, plan.Dpi))
             throw new ArgumentException(
                 "The rasterization plan dimensions are inconsistent.", nameof(replacement));
         if (replacement.Raster.Width != plan.PixelWidth
