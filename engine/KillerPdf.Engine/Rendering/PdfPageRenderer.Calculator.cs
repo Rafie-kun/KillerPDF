@@ -248,8 +248,8 @@ public sealed partial class PdfPageRenderer
                     case Opcode.Bitshift:
                     {
                         int shift = PopInteger(stack, ref count), value = PopInteger(stack, ref count);
-                        Push(stack, ref count, Number(shift >= 32 ? 0 : shift <= -32 ? value < 0 ? -1 : 0
-                            : shift >= 0 ? value << shift : value >> -shift));
+                        Push(stack, ref count, Number(shift >= 32 || shift <= -32 ? 0
+                            : shift >= 0 ? value << shift : (int)((uint)value >> -shift)));
                         break;
                     }
                     case Opcode.Ceiling: Push(stack, ref count, Number(Math.Ceiling(Pop(stack, ref count)))); break;

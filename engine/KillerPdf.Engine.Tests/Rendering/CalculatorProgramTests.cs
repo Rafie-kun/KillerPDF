@@ -28,8 +28,8 @@ public sealed class CalculatorProgramTests
         }
         for (int index = 0; index < outputCount; index++)
         {
-            range[index * 2] = -1e9;
-            range[index * 2 + 1] = 1e9;
+            range[index * 2] = -1e12;
+            range[index * 2 + 1] = 1e12;
         }
         var outputs = new double[outputCount];
         Compile(source).Evaluate(inputs, domain, range, outputs);
@@ -55,7 +55,7 @@ public sealed class CalculatorProgramTests
     [InlineData("{ 1 index }", new double[] { 7, 9 }, new double[] { 7, 9, 7 })]
     [InlineData("{ dup exch }", new double[] { 4 }, new double[] { 4, 4 })]
     [InlineData("{ 7 3 idiv 7 3 mod }", new double[] { }, new double[] { 2, 1 })]
-    [InlineData("{ 1 3 bitshift -8 -2 bitshift }", new double[] { }, new double[] { 8, -2 })]
+    [InlineData("{ 1 3 bitshift -8 -2 bitshift }", new double[] { }, new double[] { 8, 1073741822 })]
     [InlineData("{ 2.5 round -2.5 round 2.7 truncate 2.2 ceiling }", new double[] { },
         new double[] { 3, -3, 2, 3 })]
     [InlineData("{ 2 cvr }", new double[] { }, new double[] { 2 })]
