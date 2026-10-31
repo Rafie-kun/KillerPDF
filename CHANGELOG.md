@@ -6,7 +6,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ## [1.9.1] - Unreleased
 
-1.9.1 closes redaction and protected-file gaps, preserves edits through saves and exports, expands paragraph editing, and improves scan quality, search, and damaged-PDF recovery.
+1.9.1 strengthens redaction and protected-file handling, preserves edits through saves and exports, and improves paragraph editing, search, scan quality, damaged-PDF recovery, and Windows previews.
 
 ### Fixed
 
@@ -19,11 +19,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Failed form conversion, flattening, and text replacement preserve pending values, formatting, document state, and history. Deleting a field retires its pending values so a recreated field cannot inherit them; Undo restores the deleted values.
 - Image and separation exports ask before replacing their actual output files and preserve existing output on write failure. Distinct ink names no longer collide, and data merge refuses to overwrite its input template.
 - Malformed nested stream lengths, color spaces, or long bookmark chains no longer crash the app and lose other tabs' unsaved work. Save failures when moving fields, placing presets, scaling or reordering pages, and editing bookmarks report an error.
+- Explorer previews initialize correctly in the Windows preview host and keep their interface responsive through resize and reuse. Incomplete and failed pages show an accessible warning and Retry while readable neighbors remain available.
 - Redaction preserves unrelated images, transparency, colors, Type 3 text, patterns, masks, and stamps that share resources. Shared image lists and tagged forms no longer cause false failures, crop-offset marks stay aligned, and harmless distant drawing content prompts for rasterization less often.
 - Image export and OCR-generated PDFs include current form values, formatting, visible markup, and page orientation without changing the open document. Font-size-only form edits survive saving and printing.
 - The Text tool works in Single, Two-Page, and Grid views after page turns and tab changes. Editing a line keeps its own size and position, places replacement text above intervening content, and refuses later content or clips that would hide it without removing a neighboring numeral or watermark.
 - Find counts each occurrence within a word, and Replace Current changes only the selected occurrence. Find and Replace preserves unmatched ligature letters, honors field length limits and read-only fields, and recalculates dependent form values.
 - Search runs in the background, cancels superseded queries, and keeps each tab's results and options separate. Damaged-document searches retain readable matches and name unreadable pages; the search-text command exits with 3 for incomplete results.
+- Command line printing keeps a small image cache for long documents while preserving selected-page order and copies.
 - Black-and-white and palette scans retain their full resolution in the viewer, exports, and print. Convert Scan to Text keeps remaining scanned words sharp without unnecessarily enlarging small scans.
 - Edit paragraph accepts justified and line-by-line text, browser and Ghostscript output, pdfTeX font expansion, tagged inline content, and additional color spaces without refusing unrelated content elsewhere on the page.
 - Edit paragraph preserves spaces, ligatures, line-end word joins, intentional line breaks, indentation, baselines, and underlines. It identifies uncertain joins and mixed styles, accepts Greek, Cyrillic, CJK, math, symbols, and combining accents, and explains unsupported shaping or unidentified characters.
@@ -38,7 +40,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 - Calculator-based colors use zero-filled right shifts and correct halfway rounding. Type 3 selection and search measurements, malformed numeric content, and shapes interrupted by graphics-state saves render correctly; impossible pattern grids and damaged inline images report bounded failures.
 - Command line replacement counts completed matches and reports partial failure. Orientation fixes save with the supplied password and retain encryption. Store updates retain the installation's bundled runtime.
 - Form-field typing stays in the field instead of firing tool shortcuts, and clicking outside releases it. Escape cancels text edits; AltGr combinations type their characters. Signature pickers close after selection, and placing a signature while filling a field does not stamp it twice.
-- Explorer preview identifies incomplete and failed pages, offers retry, and keeps readable neighbors available. The sidebar remembers deliberate arrow and F9 changes across restarts.
+- The sidebar remembers deliberate arrow and F9 changes across restarts.
 - Find and Redact results keep page numbers separate from text. Repaired documents explain when they need resaving before editing, and failed or declined empty-document opens leave no half-open tab.
 
 ### Changed
