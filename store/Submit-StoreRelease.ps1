@@ -109,8 +109,8 @@ $packages = @(Get-Field (Invoke-Store GET '/packages') 'packages' | Where-Object
 if ($packages.Count -ne 1) { throw "Expected one package in the draft, found $($packages.Count). Update it in Partner Center." }
 $package = $packages[0]
 $packageId = Get-Field $package 'packageId'
-$packageUrl = Get-Field $package 'packageUrl'
-Write-Host "  Package ${packageId}: $packageUrl"
+$existingPackageUrl = Get-Field $package 'packageUrl'
+Write-Host "  Package ${packageId}: $existingPackageUrl"
 if ($PreflightOnly) { Write-Host "  Store preflight OK."; return }
 
 # Sync translated listings before submitting the installer, including newly added languages.
@@ -122,7 +122,7 @@ if (-not $DryRun) { $listingArgs += '-DraftOnly' }
 & powershell @listingArgs
 if ($LASTEXITCODE -ne 0) { throw 'Store listing sync failed. The installer was not submitted.' }
 
-if ($packageUrl -eq $PackageUrl) {
+if ($existingPackageUrl -eq $PackageUrl) {
     Write-Host "  The draft already points at this installer."
 } elseif ($DryRun) {
     Write-Host "DryRun: would change the package URL to $PackageUrl, commit it and submit." -ForegroundColor Cyan
