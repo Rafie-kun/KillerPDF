@@ -8,9 +8,11 @@ namespace KillerPDF.Tests;
 public sealed class PdfPrintSourceRenderedTests
 {
     [Theory]
-    [InlineData(72)]
-    [InlineData(300)]
-    public void PendingPrintCopyMatchesFreshlyReopenedSavedFieldOutput(int dpi)
+    [InlineData(72, false)]
+    [InlineData(300, false)]
+    [InlineData(72, true)]
+    [InlineData(300, true)]
+    public void PendingPrintCopyMatchesFreshlyReopenedSavedFieldOutput(int dpi, bool sizeOnly)
     {
         string directory = Path.Combine(Path.GetTempPath(), $"killerpdf-print-pixels-{Guid.NewGuid():N}");
         Directory.CreateDirectory(directory);
@@ -27,12 +29,14 @@ public sealed class PdfPrintSourceRenderedTests
             string sameSessionPrint = Path.Combine(directory, "same-session-print.pdf");
             File.WriteAllBytes(working, original);
             var edits = new PdfEngineIntegration.FormEdits(
-                new Dictionary<string, string> { ["customer.name"] = "Updated" },
-                new Dictionary<string, string> { ["customer.country"] = "CA" },
+                sizeOnly ? new Dictionary<string, string>() : new Dictionary<string, string> { ["customer.name"] = "Updated" },
+                sizeOnly ? new Dictionary<string, string>() : new Dictionary<string, string> { ["customer.country"] = "CA" },
                 new Dictionary<string, IReadOnlyList<string>>(),
-                new Dictionary<string, bool> { ["customer.approved"] = true },
-                new Dictionary<string, string>(), new Dictionary<string, double>());
+                sizeOnly ? new Dictionary<string, bool>() : new Dictionary<string, bool> { ["customer.approved"] = true },
+                new Dictionary<string, string>(), sizeOnly ? new Dictionary<string, double> { ["customer.name"] = 7.5 }
+                    : new Dictionary<string, double>());
 
+            Assert.True(PdfPrintSource.HasValues(edits));
             PdfPrintSource.Create(working, pendingPrint, PdfPrintSource.Snapshot(edits));
             File.Copy(working, saved);
             PdfEngineIntegration.ApplyFormValues(saved, edits);
@@ -56,6 +60,7 @@ public sealed class PdfPrintSourceRenderedTests
             double scale = dpi / 72.0;
             foreach (var (x, y, width, height) in new[] { (20, 20, 140, 24), (20, 60, 140, 24), (20, 100, 20, 20) })
             {
+                if (sizeOnly && y != 20) continue;
                 bool changed = false;
                 for (int row = (int)Math.Ceiling((792 - y - height + 2) * scale); row < (int)Math.Floor((792 - y - 2) * scale); row++)
                 for (int column = (int)Math.Ceiling((x + 2) * scale); column < (int)Math.Floor((x + width - 2) * scale); column++)
@@ -66,8 +71,12 @@ public sealed class PdfPrintSourceRenderedTests
                 Assert.True(changed, $"Field interior at {x},{y} must show its edited value.");
             }
             Assert.Equal(original, File.ReadAllBytes(working));
-            Assert.Equal("Updated", edits.TextValues["customer.name"]);
-            Assert.True(edits.CheckBoxValues["customer.approved"]);
+            if (sizeOnly) Assert.Equal(7.5, edits.TextFontSizes["customer.name"]);
+            else
+            {
+                Assert.Equal("Updated", edits.TextValues["customer.name"]);
+                Assert.True(edits.CheckBoxValues["customer.approved"]);
+            }
         }
         finally { Directory.Delete(directory, true); }
     }
