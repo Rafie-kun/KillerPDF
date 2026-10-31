@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using KillerPdf.Engine.Syntax;
 using KillerPdf.Engine.Documents;
 using KillerPdf.Engine.Objects;
 using KillerPdf.Engine.Parsing;
@@ -159,7 +160,7 @@ internal static partial class PdfEngineIntegration
     private static DamagedSaveRefusal? FindProtectedContent(PdfDocument recovered, ReadOnlyMemory<byte> source)
     {
         ReadOnlySpan<byte> bytes = source.Span;
-        if (recovered.IsEncrypted || (NamesEncryption(bytes) && !ReadsAsPlainText(recovered)))
+        if (recovered.IsEncrypted || (NamesEncryption(bytes) && (HidesEncryption(source) || !ReadsAsPlainText(recovered))))
             return DamagedSaveRefusal.Encrypted;
         if (bytes.IndexOf("/DocMDP"u8) >= 0) return DamagedSaveRefusal.Certified;
         if (bytes.IndexOf("/UR3"u8) >= 0) return DamagedSaveRefusal.UsageRights;
@@ -308,6 +309,8 @@ internal static partial class PdfEngineIntegration
             _ = PdfDocument.Open(source);
             return false;
         }
+        // The strict read already judged the pages, and more carefully than recovery can.
+        catch (PdfLostEncryptionException) { return true; }
         catch (Exception error) when (error is not OutOfMemoryException) { }
         try
         {

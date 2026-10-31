@@ -156,11 +156,48 @@ public sealed partial class PdfDocument
             : value;
 
     /// <summary>Opens and validates an unencrypted PDF from memory.</summary>
-    public static PdfDocument Open(ReadOnlyMemory<byte> source)
-    {
+    public static PdfDocument Open(ReadOnlyMemory<byte> source) =>
         // Own the bytes so lazy resolution cannot observe caller mutations after validation.
-        byte[] ownedSource = source.ToArray();
-        return new PdfDocument(ownedSource, PdfCrossReferenceTable.Read(ownedSource));
+        OpenOwned(source.ToArray());
+
+    private static PdfDocument OpenOwned(byte[] ownedSource)
+    {
+        var document = new PdfDocument(ownedSource, PdfCrossReferenceTable.Read(ownedSource));
+        if (!document.IsEncrypted && HoldsEncryptionDictionary(ownedSource) && document.PagesReadAsCiphertext())
+            throw new PdfLostEncryptionException();
+        return document;
+    }
+
+    // A trailer rewritten without /Encrypt leaves a sound file whose pages are ciphertext, and a route
+    // that believed it would copy them out as pages nobody can read. Failing here sends such a file
+    // to recovery, where the app refuses it. A leftover dictionary over readable pages is not this.
+    private static bool HoldsEncryptionDictionary(ReadOnlySpan<byte> source) =>
+        FollowsFilterKey(source, "/Standard"u8) || FollowsFilterKey(source, "/Adobe.PubSec"u8);
+
+    private static bool FollowsFilterKey(ReadOnlySpan<byte> source, ReadOnlySpan<byte> handler)
+    {
+        for (int from = 0, index; (index = source[from..].IndexOf(handler)) >= 0; from += index + handler.Length)
+            if (source[Math.Max(0, from + index - 16)..(from + index)].IndexOf("/Filter"u8) >= 0) return true;
+        return false;
+    }
+
+    // The first page with content decides. Ciphertext fails to decode or reads as long runs of high
+    // bytes, and a file with nothing to read proves nothing.
+    private bool PagesReadAsCiphertext()
+    {
+        try
+        {
+            var reader = new PdfPageContentReader(this);
+            for (int pageIndex = 0; pageIndex < reader.PageCount; pageIndex++)
+            {
+                IReadOnlyList<PdfContentInstruction> instructions = reader.ReadInstructions(pageIndex);
+                if (instructions.Count != 0)
+                    return instructions.Count(instruction => instruction.Operator.Length <= 3
+                        && instruction.Operator.All(letter => char.IsAsciiLetterOrDigit(letter) || letter is '*' or '\'' or '"')) * 2 <= instructions.Count;
+            }
+            return false;
+        }
+        catch (Exception error) when (error is not OutOfMemoryException) { return true; }
     }
 
     /// <summary>
@@ -196,11 +233,7 @@ public sealed partial class PdfDocument
     /// Opens the remaining bytes of a readable stream into document-owned memory.
     /// The stream remains open and is consumed from its current position.
     /// </summary>
-    public static PdfDocument Open(Stream source)
-    {
-        byte[] ownedSource = ReadSource(source);
-        return new PdfDocument(ownedSource, PdfCrossReferenceTable.Read(ownedSource));
-    }
+    public static PdfDocument Open(Stream source) => OpenOwned(ReadSource(source));
 
     /// <summary>
     /// Opens the remaining stream bytes using bounded compatibility recovery.

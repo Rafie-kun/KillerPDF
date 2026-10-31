@@ -75,6 +75,32 @@ public sealed class ProtectedRouteTests : IDisposable
         Assert.False(File.Exists(Path.Combine(_directory, "out.pdf")));
     }
 
+    // The trailer is sound and only /Encrypt is gone, so nothing used to stop the ciphertext being copied.
+    [Fact]
+    public void AnEncryptedFileWithASoundTrailerThatLostItsEntryIsRefusedOnEveryRoute()
+    {
+        byte[] encrypted = PdfDocumentEncryptionWriter.EncryptWithPasswords(
+            PdfDocument.Open(new PdfDocumentBuilder().AddPage(200, 200, new PdfContentStreamBuilder()
+                .DrawImage(PdfImage.FromBitonal(2, 1, new byte[] { 0, 255 }), 0, 0, 100, 100)).Build()),
+            new PdfPasswordEncryptionOptions { UserPassword = "secret", OwnerPassword = "owner" });
+        string text = Encoding.Latin1.GetString(encrypted);
+        int entry = text.IndexOf("/Encrypt", text.LastIndexOf("trailer", StringComparison.Ordinal), StringComparison.Ordinal);
+        int end = text.IndexOf(" R", entry, StringComparison.Ordinal) + 2;
+        byte[] source = Encoding.Latin1.GetBytes(text[..entry] + new string(' ', end - entry) + text[end..]);
+        string lost = Write("sound.pdf", source);
+        string healthy = Write("healthy.pdf", new PdfDocumentBuilder().AddBlankPage().Build());
+        string output = Path.Combine(_directory, "out.pdf");
+
+        Assert.True(PdfEngineIntegration.HidesEncryption(source));
+        Assert.Equal(DamagedSaveRefusal.Encrypted, RefusalOf(() => PdfEngineIntegration.MergeFiles([healthy, lost])));
+        Assert.Equal(DamagedSaveRefusal.Encrypted, RefusalOf(() => PdfEngineIntegration.MergeFiles([lost, healthy])));
+        Assert.Equal(DamagedSaveRefusal.Encrypted, RefusalOf(() => PdfEngineIntegration.RepairHarmlessSaveArtifacts(lost)));
+        Assert.Throws<DamagedSaveRefusedException>(() => PdfEngineIntegration.ProtectWithPasswords(
+            lost, output, Passwords(), allowSignatureInvalidation: false));
+        Assert.False(File.Exists(output));
+        Assert.Equal(source, File.ReadAllBytes(lost));
+    }
+
     // RepairViaImportToFile is RebuildDocument behind a catch that returns null, and PdfImport is not linked
     // into this project, so the call it makes is the one tested.
     [Fact]
