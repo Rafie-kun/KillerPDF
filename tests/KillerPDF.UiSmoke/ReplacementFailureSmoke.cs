@@ -15,7 +15,7 @@ internal static class ReplacementFailureSmoke
     internal static int RunFallback(Window owner, string folder)
         => FormWorkflowFailureSmoke.WithCleanup(owner, () => VerifyFallback(owner, folder));
 
-    private static int VerifyFallback(Window owner, string folder)
+    internal static int VerifyFallback(Window owner, string folder)
     {
         const string content = "BT /F 12 Tf 3 Tr 20 100 Td (Name) Tj ET";
         string[] objects = ["<< /Type /Catalog /Pages 2 0 R >>",

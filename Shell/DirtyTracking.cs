@@ -33,7 +33,7 @@ namespace KillerPDF.Shell
 
         private void MarkDirty(bool dirty = true)
         {
-            if (dirty) _documentEditRevision++;
+            _documentEditRevision++;
             _isDirty = dirty;
             UpdateStampIndicator();
             ActiveViewer.NotifyReadingTextChanged();

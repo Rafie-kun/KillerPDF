@@ -2000,4 +2000,5 @@ KillerPDF 不會建立兩個已安裝的複本。</sys:String>
 編輯、儲存及其他部分功能可能無法正常運作。</sys:String>
     <sys:String x:Key="Str_Macro_OutputNameDrift">巨集輸出名稱與已核准的計畫不一致。</sys:String>
     <sys:String x:Key="Str_About_UpdateNotVerified">無法驗證已下載的更新，已將其捨棄。未安裝任何內容。</sys:String>
+    <sys:String x:Key="Str_Redact_SourceChanged">文件已變更。請清除這些遮蔽標記，然後重新搜尋。</sys:String>
 </ResourceDictionary>

@@ -7,6 +7,8 @@ namespace KillerPDF.Services;
 internal sealed class PdfEngineDocumentSession
 {
     private readonly Lazy<PdfLinkReader> _linkReader;
+    private readonly Lazy<PdfFormWidgetReader> _formReader;
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<int, Lazy<IReadOnlyList<PdfFormWidgetInfo>>> _formWidgets = new();
 
     private PdfEngineDocumentSession(string path, PdfDocument document,
         IReadOnlyList<PdfPageInformation> pages)
@@ -15,6 +17,7 @@ internal sealed class PdfEngineDocumentSession
         Document = document;
         Pages = pages;
         _linkReader = new Lazy<PdfLinkReader>(() => new PdfLinkReader(document));
+        _formReader = new Lazy<PdfFormWidgetReader>(() => new PdfFormWidgetReader(document));
     }
 
     internal string Path { get; }
@@ -22,6 +25,12 @@ internal sealed class PdfEngineDocumentSession
     internal IReadOnlyList<PdfPageInformation> Pages { get; }
     internal PdfLinkReader LinkReader => _linkReader.Value;
     internal int PageCount => Pages.Count;
+    internal IReadOnlyList<PdfFormWidgetInfo> ReadFormWidgets(int pageIndex, bool forDisplay = false)
+    {
+        var widgets = _formWidgets.GetOrAdd(pageIndex,
+            page => new Lazy<IReadOnlyList<PdfFormWidgetInfo>>(() => _formReader.Value.Read(page))).Value;
+        return forDisplay ? [.. widgets.Where(widget => (widget.AnnotationFlags & 34) == 0)] : widgets;
+    }
 
     internal static PdfEngineDocumentSession Open(string path)
     {

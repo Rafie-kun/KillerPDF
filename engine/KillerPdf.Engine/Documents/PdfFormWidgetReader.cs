@@ -5,8 +5,22 @@ using KillerPdf.Engine.Objects;
 namespace KillerPdf.Engine.Documents;
 
 /// <summary>Reads page widgets with inherited AcroForm field state.</summary>
-public static class PdfFormWidgetReader
+public sealed class PdfFormWidgetReader
 {
+    private readonly PdfDocument _document;
+    private readonly PdfPageTree _tree;
+
+    /// <summary>Creates a widget reader with one page-tree snapshot for an authenticated document.</summary>
+    public PdfFormWidgetReader(PdfDocument document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        _document = document;
+        _tree = PdfPageTree.Read(document);
+    }
+
+    /// <summary>Reads a page using the reader's captured page tree.</summary>
+    public IReadOnlyList<PdfFormWidgetInfo> Read(int pageIndex) => ReadPageCore(_document, _tree, pageIndex);
+
     private static readonly PdfName AnnotsName = Name("Annots");
     private static readonly PdfName SubtypeName = Name("Subtype");
     private static readonly PdfName WidgetName = Name("Widget");
@@ -39,7 +53,11 @@ public static class PdfFormWidgetReader
     public static IReadOnlyList<PdfFormWidgetInfo> ReadPage(PdfDocument document, int pageIndex)
     {
         ArgumentNullException.ThrowIfNull(document);
-        PdfPageTree tree = PdfPageTree.Read(document);
+        return ReadPageCore(document, PdfPageTree.Read(document), pageIndex);
+    }
+
+    private static IReadOnlyList<PdfFormWidgetInfo> ReadPageCore(PdfDocument document, PdfPageTree tree, int pageIndex)
+    {
         if (pageIndex < 0 || pageIndex >= tree.Pages.Count)
             throw new ArgumentOutOfRangeException(nameof(pageIndex));
         PdfPageTreeEntry page = tree.Pages[pageIndex];

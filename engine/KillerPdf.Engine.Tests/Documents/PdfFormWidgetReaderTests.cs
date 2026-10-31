@@ -8,6 +8,21 @@ namespace KillerPdf.Engine.Tests.Documents;
 public sealed class PdfFormWidgetReaderTests
 {
     [Fact]
+    public void CapturedReaderKeepsPagesAndDocumentRevisionsIndependent()
+    {
+        PdfDocument source = PdfDocument.Open(new PdfDocumentBuilder().AddBlankPage().AddBlankPage()
+            .AddTextField(0, "first", 20, 20, 120, 24, "John")
+            .AddTextField(1, "second", 40, 40, 120, 24, "Other").Build());
+        var original = new PdfFormWidgetReader(source);
+        Assert.Equal("John", Assert.Single(original.Read(0)).Value);
+        Assert.Equal("second", Assert.Single(original.Read(1)).FieldName);
+        PdfDocument changed = PdfDocument.Open(new PdfIncrementalPageEditor(source).SetTextFieldValue("first", "Jane").Build());
+        Assert.Equal("Jane", Assert.Single(new PdfFormWidgetReader(changed).Read(0)).Value);
+        Assert.Equal("John", Assert.Single(original.Read(0)).Value);
+        Assert.Throws<ArgumentOutOfRangeException>(() => original.Read(-1));
+    }
+
+    [Fact]
     public void ReadPage_ExposesInheritedNamesFlagsValuesGeometryAndOptions()
     {
         byte[] authored = new PdfDocumentBuilder()

@@ -19,6 +19,8 @@ namespace KillerPDF.Features
         // controller's UI-thread code starts or cancels it, and results land back on the UI thread.
         private readonly LatestSearchRunner _runner = new();
         private string? _searchedFile;
+        private long _resultRevision = -1;
+        internal bool ResultsCurrent => _searchedFile == _host.CurrentFile && _resultRevision == _host.SearchRevision;
 
         internal SearchController(ISearchHost host) => _host = host;
 
@@ -141,12 +143,14 @@ namespace KillerPDF.Features
                 // Read here rather than on the worker, so nothing holds the working file open while an
                 // edit rewrites it and the worker searches one version from start to end.
                 FileRevision? revision = Revision(file);
-                byte[] source = System.IO.File.ReadAllBytes(file);
+                CurrentSearchSnapshot source = _host.CaptureSearchSnapshot();
+                long editRevision = _host.SearchRevision;
                 _searchedFile = file;
                 SearchResult? found = await _runner.RunAsync(
                     token => SearchService.Search(source, query, matchCase, wholeWord, token),
-                    () => _host.CurrentFile == file && Revision(file) == revision);
+                    () => _host.CurrentFile == file && Revision(file) == revision && _host.SearchRevision == editRevision);
                 if (found is null) return;
+                _resultRevision = editRevision;
                 ShowResults(query, matchCase, wholeWord, found);
             }
             catch
@@ -184,19 +188,20 @@ namespace KillerPDF.Features
             UnreadablePages = [.. sr.UnreadablePages];
 
             // Text hidden under an edit, such as a replaced line, no longer counts as a match.
-            foreach (var kvp in sr.PageRects)
+            foreach (var group in sr.Hits.GroupBy(hit => hit.page))
             {
-                var visible = kvp.Value.Where(r => !_host.IsCovered(kvp.Key, r.Left, r.Bottom, r.Right, r.Top)).ToList();
+                var visible = group.Where(hit => hit.Source is not null || !_host.IsCovered(hit.page, hit.left, hit.bottom, hit.right, hit.top))
+                    .Select(hit => (hit.left, hit.bottom, hit.right, hit.top)).ToList();
                 if (visible.Count == 0) continue;
-                AllSearchRects[kvp.Key] = visible;
-                ResultPages.Add(kvp.Key);
+                AllSearchRects[group.Key] = visible;
+                ResultPages.Add(group.Key);
             }
             ResultPages.Sort();
 
             // Flatten every match into one reading-ordered list (page asc, then top-to-bottom,
             // then left-to-right) so navigation steps word-by-word across the whole document.
             foreach (SearchHit hit in sr.Hits.OrderBy(hit => hit.page).ThenByDescending(hit => hit.top).ThenBy(hit => hit.left))
-                if (!_host.IsCovered(hit.page, hit.left, hit.bottom, hit.right, hit.top)) _matches.Add(hit);
+                if (hit.Source is not null || !_host.IsCovered(hit.page, hit.left, hit.bottom, hit.right, hit.top)) _matches.Add(hit);
 
             if (_matches.Count == 0)
             {

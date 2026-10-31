@@ -1998,4 +1998,5 @@ KillerPDF কি মেরামতের চেষ্টা করবে? এ�
 সম্পাদনা, সংরক্ষণ এবং আরও কিছু বৈশিষ্ট্য ঠিকমতো কাজ নাও করতে পারে।</sys:String>
     <sys:String x:Key="Str_Macro_OutputNameDrift">ম্যাক্রোর আউটপুট নাম অনুমোদিত পরিকল্পনা থেকে আলাদা।</sys:String>
     <sys:String x:Key="Str_About_UpdateNotVerified">ডাউনলোড করা আপডেটটি যাচাই করা যায়নি এবং এটি বাতিল করা হয়েছে। কিছুই ইনস্টল করা হয়নি।</sys:String>
+    <sys:String x:Key="Str_Redact_SourceChanged">নথিটি পরিবর্তিত হয়েছে। এই রিড্যাকশন চিহ্নগুলো মুছে আবার অনুসন্ধান করুন।</sys:String>
 </ResourceDictionary>

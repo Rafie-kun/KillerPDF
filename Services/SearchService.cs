@@ -5,8 +5,40 @@ namespace KillerPDF.Services
     internal sealed record SearchHit(int page, double left, double bottom, double right, double top,
         int Start, int Length)
     {
+        internal SearchTextSource? Source { get; init; }
         internal (int page, double left, double bottom, double right, double top) Rectangle =>
             (page, left, bottom, right, top);
+    }
+
+    internal sealed record SearchTextSource(int Page, double Left, double Bottom, double Right, double Top,
+        string Content, Guid AnnotationId, string? FieldName = null, bool Editable = true)
+    {
+        internal string? WidgetId { get; init; }
+        internal bool Findable { get; init; } = true;
+        internal int MaximumLength { get; init; }
+        internal KillerPdf.Engine.Documents.PdfContentBounds? RedactionBounds { get; init; }
+    }
+
+    internal sealed record CurrentSearchSnapshot(byte[] Bytes, IReadOnlyList<SearchTextSource> Text)
+    {
+        internal IReadOnlyList<SearchTextSource> Covers { get; init; } = [];
+        internal IReadOnlyList<int> UnreadablePages { get; init; } = [];
+        internal string Fingerprint()
+        {
+            using var hash = System.Security.Cryptography.IncrementalHash.CreateHash(System.Security.Cryptography.HashAlgorithmName.SHA256);
+            hash.AppendData(Bytes);
+            object Describe(SearchTextSource source) => new { source.Page, source.Left, source.Bottom, source.Right, source.Top,
+                source.Content, source.AnnotationId, source.FieldName, source.Editable, source.WidgetId, source.RedactionBounds, source.Findable, source.MaximumLength };
+            hash.AppendData(System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(new
+                { Text = Text.Select(Describe), Covers = Covers.Select(Describe), UnreadablePages }));
+            return Convert.ToHexString(hash.GetHashAndReset());
+        }
+        internal bool SameContent(CurrentSearchSnapshot other) => Bytes.AsSpan().SequenceEqual(other.Bytes)
+            && Text.SequenceEqual(other.Text) && Covers.SequenceEqual(other.Covers) && UnreadablePages.SequenceEqual(other.UnreadablePages);
+        internal bool IsCovered(int page, KillerPdf.Engine.Documents.PdfContentBounds bounds) => Covers.Any(cover =>
+            cover.Page == page && Math.Max(0, Math.Min(bounds.Right, cover.Right) - Math.Max(bounds.Left, cover.Left))
+                * Math.Max(0, Math.Min(bounds.Top, cover.Top) - Math.Max(bounds.Bottom, cover.Bottom))
+                > bounds.Width * bounds.Height * .5);
     }
 
     internal sealed class SearchResult
@@ -100,6 +132,54 @@ namespace KillerPDF.Services
 
     internal sealed class SearchService
     {
+        internal static (IReadOnlyList<KillerPdf.Engine.Documents.PdfRedactionMatch> Matches, IReadOnlyList<int> Unreadable)
+            FindCurrentRedaction(CurrentSearchSnapshot snapshot, KillerPdf.Engine.Documents.PdfRedactionSearchOptions options)
+        {
+            var (pages, unreadable) = LoadPagesForReview(snapshot.Bytes);
+            var result = KillerPdf.Engine.Documents.PdfRedactionSearch.Find(pages, options).Matches
+                .Where(match => !(match.Areas.Count > 0 ? match.Areas : [match.Bounds])
+                    .Any(area => snapshot.IsCovered(match.PageIndex, area))).ToList();
+            var annotations = KillerPdf.Engine.Documents.PdfRedactionSearch.FindInAnnotations(
+                PdfEngineIntegration.OpenForReading(snapshot.Bytes), options);
+            result.AddRange(annotations.Matches.Where(match => !snapshot.Text.Any(source => source.WidgetId == match.Id)
+                && !snapshot.IsCovered(match.PageIndex, match.Bounds)));
+            foreach (SearchTextSource source in snapshot.Text)
+                foreach (var match in KillerPdf.Engine.Documents.PdfRedactionSearch.FindInText(source.Content, options))
+                    result.Add(new KillerPdf.Engine.Documents.PdfRedactionMatch(
+                        $"current:{source.WidgetId ?? source.AnnotationId.ToString()}:{source.Page}:{match.Start}:{match.Length}",
+                        source.Page, match.Value, source.RedactionBounds ?? new(source.Left, source.Bottom, source.Right, source.Top),
+                        -1, 0, options.ReasonCode, options.OverlayText,
+                        source.FieldName is null ? KillerPdf.Engine.Documents.PdfRedactionTargetKind.Text
+                            : KillerPdf.Engine.Documents.PdfRedactionTargetKind.FormField));
+            return (result.AsReadOnly(), unreadable.Concat(annotations.UnreadableAnnotationPages)
+                .Concat(snapshot.UnreadablePages).Distinct().Order().ToArray());
+        }
+
+        internal static SearchResult Search(CurrentSearchSnapshot snapshot, string query, bool matchCase,
+            bool wholeWord, CancellationToken cancellationToken)
+        {
+            SearchResult result = Search(snapshot.Bytes, query, matchCase, wholeWord, cancellationToken);
+            foreach (int page in snapshot.UnreadablePages)
+                if (!result.UnreadablePages.Contains(page)) result.UnreadablePages.Add(page);
+            foreach (SearchTextSource source in snapshot.Text.Where(source => source.Findable))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                foreach (var span in TextReplacePlanner.FindSpans(source.Content, query, matchCase, wholeWord))
+                {
+                    result.Hits.Add(new SearchHit(source.Page, source.Left, source.Bottom, source.Right, source.Top,
+                        span.Start, span.Length) { Source = source });
+                    if (!result.PageRects.TryGetValue(source.Page, out var rects))
+                    {
+                        result.PageRects[source.Page] = rects = [];
+                        result.ResultPages.Add(source.Page);
+                    }
+                    rects.Add((source.Left, source.Bottom, source.Right, source.Top));
+                    result.TotalHits++;
+                }
+            }
+            return result;
+        }
+
         // The reader's notes on a page that lost content to a stream nothing could decode: missing when
         // recovery read the stream as empty, truncated when it gave up on the streams after it. The engine
         // keeps its constants internal; the tests in SearchRedactionCallersTests fail if these drift.
@@ -319,7 +399,7 @@ namespace KillerPDF.Services
         internal static (IReadOnlyList<KillerPdf.Engine.Documents.PdfPageContent?> Pages, IReadOnlyList<int> Unreadable)
             LoadPagesForReview(string filePath) => LoadPagesForReview(System.IO.File.ReadAllBytes(filePath));
 
-        private static (IReadOnlyList<KillerPdf.Engine.Documents.PdfPageContent?> Pages, IReadOnlyList<int> Unreadable)
+        internal static (IReadOnlyList<KillerPdf.Engine.Documents.PdfPageContent?> Pages, IReadOnlyList<int> Unreadable)
             LoadPagesForReview(byte[] source)
         {
             using var doc = PdfDocument.Open(source);

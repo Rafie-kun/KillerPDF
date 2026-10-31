@@ -10,6 +10,18 @@ namespace KillerPdf.Engine.Tests.Documents;
 public sealed class PdfRedactionSearchTests
 {
     [Fact]
+    public void EditableTextSearchKeepsRawSpansAndValidatesPatterns()
+    {
+        var exact = PdfRedactionSearch.FindInText("O\uFB00ner O\uFB00ner", new() { Query = "Offner" });
+        Assert.Equal(new[] { (0, 5, "Offner"), (6, 5, "Offner") }, exact);
+        var cards = PdfRedactionSearch.FindInText("4111 1111 1111 1111 and 4111 1111 1111 1112",
+            new() { Kind = PdfRedactionSearchKind.PaymentCardNumber });
+        Assert.Single(cards);
+        Assert.Equal("4111 1111 1111 1111", cards[0].Value);
+        Assert.Empty(PdfRedactionSearch.FindInText("word", new() { Kind = PdfRedactionSearchKind.RegularExpression, Query = "^" }));
+    }
+
+    [Fact]
     public void FindsPhraseAcrossWordsAndSupportsReviewExclusion()
     {
         PdfPageContent page = Read("Account number 12345 remains");

@@ -2021,4 +2021,5 @@ KillerPDF не будет создавать две установленные �
 Редактирование, сохранение и некоторые другие функции могут работать неправильно.</sys:String>
     <sys:String x:Key="Str_Macro_OutputNameDrift">Имя выходного файла макроса отличается от утверждённого плана.</sys:String>
     <sys:String x:Key="Str_About_UpdateNotVerified">Не удалось проверить загруженное обновление, поэтому оно было удалено. Ничего не установлено.</sys:String>
+    <sys:String x:Key="Str_Redact_SourceChanged">Документ изменился. Удалите эти отметки удаления содержимого и выполните поиск заново.</sys:String>
 </ResourceDictionary>

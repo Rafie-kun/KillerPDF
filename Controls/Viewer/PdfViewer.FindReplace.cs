@@ -23,8 +23,42 @@ namespace KillerPDF.Controls
             => ReplaceText(find, replace, matchCase, wholeWord, onlyMatch);
 
         internal TextReplaceResult ReplaceTextOccurrenceExt(string find, string replace, bool matchCase,
-            bool wholeWord, SearchHit occurrence) =>
-            ReplaceText(find, replace, matchCase, wholeWord, occurrence.Rectangle, occurrence.Start);
+            bool wholeWord, SearchHit occurrence)
+        {
+            if (occurrence.Source is not { } source)
+                return ReplaceText(find, replace, matchCase, wholeWord, occurrence.Rectangle, occurrence.Start);
+            if (source.FieldName is not null)
+            {
+                SearchTextSource? current = CaptureCurrentSearchSnapshot().Text.FirstOrDefault(item => item.FieldName == source.FieldName);
+                if (!source.Editable) return default;
+                if (current?.Content != source.Content) return new TextReplaceResult(0, 0, 0, Failed: true);
+                var matches = TextReplacePlanner.FindSpans(source.Content, find, matchCase, wholeWord)
+                    .Where(span => span.Start == occurrence.Start && span.Length == occurrence.Length).ToArray();
+                if (matches.Length != 1 || CaptureDocumentUndo() is not { } undo)
+                    return new TextReplaceResult(0, 0, 0, Failed: true);
+                string value = TextReplacePlanner.ReplaceSpans(source.Content, matches, replace);
+                if (!AcceptFormReplacement(current!, value)) return new TextReplaceResult(0, 0, 0, Failed: true);
+                _formTextValues[source.FieldName] = value;
+                RecalculateFormFields();
+                PushUndo(undo);
+                MarkDirty();
+                RenderAnnotationsOnAllVisiblePages();
+                return new TextReplaceResult(1, 1, 0);
+            }
+            if (!_annotations.TryGetValue(source.Page, out var annotations)
+                || annotations.OfType<TextAnnotation>().FirstOrDefault(item => item.HistoryId == source.AnnotationId) is not { } text
+                || text.Content != source.Content) return new TextReplaceResult(0, 0, 0, Failed: true);
+            var spans = TextReplacePlanner.FindSpans(text.Content, find, matchCase, wholeWord)
+                .Where(span => span.Start == occurrence.Start && span.Length == occurrence.Length).ToArray();
+            if (spans.Length != 1) return new TextReplaceResult(0, 0, 0, Failed: true);
+            var snapshot = new Dictionary<int, List<PageAnnotation>> { [source.Page] = [.. annotations] };
+            ApplyAnnotationEdits([(source.Page, text, TextReplacePlanner.ReplaceSpans(text.Content, spans, replace))]);
+            PushUndo(new UndoEntry(UndoKind.PageSnapshot, WasDirty: _isDirty, AnnotSnapshot: snapshot));
+            MarkDirty();
+            ClearSelection();
+            RenderAllAnnotations(source.Page);
+            return new TextReplaceResult(1, 1, 0);
+        }
 
         /// <summary>True when an existing cover already hides this part of the page, so the text
         /// under it is no longer what the reader sees. Rects are unrotated page points.</summary>
@@ -127,8 +161,26 @@ namespace KillerPDF.Controls
                     }
                 }
             }
+            var formEdits = new List<(string Name, string Value)>();
+            if (onlyMatch is null)
+                foreach (var field in CaptureCurrentSearchSnapshot().Text.Where(source => source.FieldName is not null && source.Editable)
+                    .DistinctBy(source => source.FieldName, StringComparer.Ordinal))
+                {
+                    var matches = TextReplacePlanner.FindSpans(field.Content, find, matchCase, wholeWord);
+                    if (matches.Count == 0) continue;
+                    string value = TextReplacePlanner.ReplaceSpans(field.Content, matches, replace);
+                    if (!AcceptFormReplacement(field, value)) return new TextReplaceResult(0, 0, 0, Failed: true);
+                    formEdits.Add((field.FieldName!, value));
+                    occurrences += matches.Count;
+                    lines++;
+                }
+            void ApplyFormEdits()
+            {
+                foreach (var (name, value) in formEdits) _formTextValues[name] = value;
+                if (formEdits.Count > 0) RecalculateFormFields();
+            }
             var result = new TextReplaceResult(occurrences, lines, skippedTurned);
-            if (direct.Count == 0 && annotationEdits.Count == 0) return result;
+            if (direct.Count == 0 && annotationEdits.Count == 0 && formEdits.Count == 0) return result;
 
             if (direct.Count > 0)
             {
@@ -144,7 +196,8 @@ namespace KillerPDF.Controls
                 try
                 {
                     SaveTempAndReload(keepAnnotations: true, preserveZoom: true,
-                        finalizeSavedFile: path => failed = PdfEngineIntegration.ReplaceTextLines(path, edits));
+                        finalizeSavedFile: path => failed = PdfEngineIntegration.ReplaceTextLines(path, edits),
+                        onPublished: ApplyFormEdits);
                 }
                 catch (Exception ex) when (ex is not OutOfMemoryException)
                 {
@@ -162,6 +215,19 @@ namespace KillerPDF.Controls
                 ClearSelection();
                 foreach (int page in direct.Select(item => item.Page).Concat(annotationEdits.Select(edit => edit.Page)).Distinct())
                     RenderAllAnnotations(page);
+                if (formEdits.Count > 0) RenderAnnotationsOnAllVisiblePages();
+                return result;
+            }
+
+            if (formEdits.Count > 0)
+            {
+                if (CaptureDocumentUndo() is not { } undo) return new TextReplaceResult(0, 0, 0, Failed: true);
+                ApplyAnnotationEdits(annotationEdits);
+                ApplyFormEdits();
+                PushUndo(undo);
+                MarkDirty();
+                ClearSelection();
+                RenderAnnotationsOnAllVisiblePages();
                 return result;
             }
 
@@ -174,6 +240,13 @@ namespace KillerPDF.Controls
             ClearSelection();
             foreach (int page in snapshot.Keys) RenderAllAnnotations(page);
             return result;
+        }
+
+        private bool AcceptFormReplacement(SearchTextSource field, string value)
+        {
+            if (FormTextLimit.Accepts(value, field.Content, field.MaximumLength)) return true;
+            ReportEditFailure(new ArgumentException(string.Format(Loc("Str_St_FieldMaxLength"), field.MaximumLength)));
+            return false;
         }
 
         // A matched line of page text, with what its fallback edit needs if the page content cannot take it.

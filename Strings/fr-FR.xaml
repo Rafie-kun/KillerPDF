@@ -2018,4 +2018,5 @@ Remarque : les fichiers réparés peuvent manquer de signets, de formulaires et 
 La modification, l'enregistrement et certaines autres fonctions peuvent ne pas fonctionner correctement.</sys:String>
     <sys:String x:Key="Str_Macro_OutputNameDrift">Le nom de sortie de la macro diffère du plan approuvé.</sys:String>
     <sys:String x:Key="Str_About_UpdateNotVerified">La mise à jour téléchargée n'a pas pu être vérifiée et a été supprimée. Rien n'a été installé.</sys:String>
+    <sys:String x:Key="Str_Redact_SourceChanged">Le document a changé. Effacez ces marques de caviardage et relancez la recherche.</sys:String>
 </ResourceDictionary>

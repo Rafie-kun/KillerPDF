@@ -395,6 +395,24 @@ public static class PdfRedactionSearch
         return new PdfRedactionReview(results);
     }
 
+    /// <summary>Searches current editable text with the same normalization and pattern validation as page redaction.</summary>
+    public static IReadOnlyList<(int Start, int Length, string Value)> FindInText(string text,
+        PdfRedactionSearchOptions options, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+        Regex expression = Expression(options);
+        string folded = PdfSearchText.Fold(text, out int[] origin);
+        var result = new List<(int, int, string)>();
+        foreach (Match match in expression.Matches(folded))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (match.Length == 0 || !Accepted(options.Kind, match.Value)) continue;
+            int start = origin[match.Index];
+            result.Add((start, origin[match.Index + match.Length - 1] + 1 - start, match.Value));
+        }
+        return result.AsReadOnly();
+    }
+
     /// <summary>
     /// Searches text that a page shows through its annotations instead of its content: form field
     /// values and annotation contents such as FreeText notes. Each match proposes the whole annotation,
@@ -412,11 +430,12 @@ public static class PdfRedactionSearch
         IReadOnlyList<PdfPageInformation> pages = PdfPageInformation.Read(document);
         var results = new List<PdfRedactionMatch>();
         var unreadablePages = new SortedSet<int>();
+        var widgetReader = new Lazy<PdfFormWidgetReader>(() => new PdfFormWidgetReader(document));
         for (int pageIndex = 0; pageIndex < pages.Count; pageIndex++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             IReadOnlyList<PdfFormWidgetInfo> widgets;
-            try { widgets = PdfFormWidgetReader.ReadPage(document, pageIndex); }
+            try { widgets = widgetReader.Value.Read(pageIndex); }
             catch (Exception error) when (error is InvalidOperationException or FormatException)
             {
                 unreadablePages.Add(pageIndex);

@@ -2007,4 +2007,5 @@ Hinweis: Reparierten Dateien können Lesezeichen, Formulare und andere interakti
 Bearbeiten, Speichern und einige andere Funktionen funktionieren möglicherweise nicht richtig.</sys:String>
     <sys:String x:Key="Str_Macro_OutputNameDrift">Der Name der Makroausgabe weicht vom genehmigten Plan ab.</sys:String>
     <sys:String x:Key="Str_About_UpdateNotVerified">Das heruntergeladene Update konnte nicht überprüft werden und wurde verworfen. Es wurde nichts installiert.</sys:String>
+    <sys:String x:Key="Str_Redact_SourceChanged">Das Dokument wurde geändert. Entfernen Sie diese Schwärzungsmarkierungen und suchen Sie erneut.</sys:String>
 </ResourceDictionary>

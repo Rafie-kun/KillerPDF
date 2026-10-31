@@ -87,6 +87,7 @@ namespace KillerPDF.Controls
             // Unapplied redaction marks. They stay with the document until applied, cleared or
             // saved into the file as /Redact annotations.
             public List<RedactionMark> RedactionMarks = [];
+            public string? RedactionSourceFingerprint;
             public Stack<UndoEntry> UndoStack = new();
             public Stack<UndoEntry> RedoStack = new();
             public Dictionary<int, List<(double left, double bottom, double right, double top)>> AllSearchRects = [];
@@ -240,6 +241,7 @@ namespace KillerPDF.Controls
             s.FormCheckValues  = _formCheckValues;
             s.FormRadioValues  = _formRadioValues;
             s.RedactionMarks   = _redactMarks;
+            s.RedactionSourceFingerprint = _redactionSourceFingerprint;
             s.FormFontSizes    = _formFontSizes;
             s.UndoStack        = _undoStack;
             s.RedoStack        = _redoStack;
@@ -369,6 +371,7 @@ namespace KillerPDF.Controls
             _formCheckValues  = s.FormCheckValues;
             _formRadioValues  = s.FormRadioValues;
             _redactMarks      = s.RedactionMarks;
+            _redactionSourceFingerprint = s.RedactionSourceFingerprint;
             _formFontSizes    = s.FormFontSizes;
             _undoStack        = s.UndoStack;
             _redoStack        = s.RedoStack;

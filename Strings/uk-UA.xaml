@@ -2018,4 +2018,5 @@ KillerPDF не створюватиме двох установлених коп
 Редагування, збереження та деякі інші функції можуть працювати неправильно.</sys:String>
     <sys:String x:Key="Str_Macro_OutputNameDrift">Назва виходу макросу відрізняється від затвердженого плану.</sys:String>
     <sys:String x:Key="Str_About_UpdateNotVerified">Не вдалося перевірити завантажене оновлення, тому його відхилено. Нічого не встановлено.</sys:String>
+    <sys:String x:Key="Str_Redact_SourceChanged">Документ змінився. Очистьте ці позначки вилучення вмісту та повторіть пошук.</sys:String>
 </ResourceDictionary>

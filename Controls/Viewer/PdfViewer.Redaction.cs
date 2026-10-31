@@ -22,12 +22,14 @@ namespace KillerPDF.Controls
         private static string? _redactOverlayDefault;
         private static bool _redactDefaultsLoaded;
         private List<RedactionMark> _redactMarks = [];
+        private string? _redactionSourceFingerprint;
 
-        internal RedactionMarkSnapshot CaptureRedactionMarksExt() => new(_redactMarks);
+        internal RedactionMarkSnapshot CaptureRedactionMarksExt() => new(_redactMarks, _redactionSourceFingerprint);
 
         internal void RestoreRedactionMarksExt(RedactionMarkSnapshot snapshot)
         {
             _redactMarks = [.. snapshot.Marks];
+            _redactionSourceFingerprint = snapshot.SourceFingerprint;
             UpdateRedactionCount();
             RepaintRedactionMarks();
         }
@@ -382,18 +384,46 @@ namespace KillerPDF.Controls
                 SetStatus(Loc("Str_Redact_NoSearch"));
                 return;
             }
+            if (!Search.ResultsCurrent)
+            {
+                Search.Run(Search.LastQuery);
+                return;
+            }
             // Mark only the matched characters, not the whole words the search highlights.
             // The options are the ones these results were found with, so Match case and Whole word keep
             // the marks to what was highlighted and off the same letters inside other words.
             // A page that cannot be read is not searched, and a redaction that skips it must say so.
             Dictionary<int, List<(double Left, double Bottom, double Right, double Top)>> matches;
             List<int> unreadable;
-            try { matches = SearchService.FindExactMatches(_currentFile!, Search.LastQuery, Search.LastMatchCase, Search.LastWholeWord, out unreadable); }
-            catch (Exception) { matches = []; unreadable = [.. Search.UnreadablePages]; }
-            if (matches.Count == 0)
-                matches = Search.PagesWithResults.ToDictionary(page => page,
-                    page => Search.TryGetPageRects(page, out var found)
-                        ? found.Select(r => (r.left, r.bottom, r.right, r.top)).ToList() : []);
+            try
+            {
+                string query = PdfSearchText.Fold(Search.LastQuery);
+                var options = new PdfRedactionSearchOptions
+                {
+                    Query = Search.LastWholeWord ? @"(?<![\p{L}\p{Nd}_])" + System.Text.RegularExpressions.Regex.Escape(query)
+                        + @"(?![\p{L}\p{Nd}_])" : query,
+                    Kind = Search.LastWholeWord ? PdfRedactionSearchKind.RegularExpression : PdfRedactionSearchKind.ExactText,
+                    MatchCase = Search.LastMatchCase
+                };
+                var snapshot = CaptureCurrentSearchSnapshot();
+                string fingerprint = snapshot.Fingerprint();
+                if (_redactionSourceFingerprint is not null && _redactionSourceFingerprint != fingerprint)
+                {
+                    SetStatus(Loc("Str_Redact_SourceChanged"));
+                    return;
+                }
+                var current = SearchService.FindCurrentRedaction(snapshot, options);
+                if (current.Matches.Count > 0) _redactionSourceFingerprint = fingerprint;
+                unreadable = [.. current.Unreadable];
+                matches = current.Matches.GroupBy(match => match.PageIndex).ToDictionary(group => group.Key,
+                    group => group.SelectMany(match => match.Areas.Count > 0 ? match.Areas : [match.Bounds])
+                        .Select(area => (area.Left, area.Bottom, area.Right, area.Top)).ToList());
+            }
+            catch (Exception)
+            {
+                SetStatus(Loc("Str_Search_Error"));
+                return;
+            }
             int added = 0;
             foreach (var (page, rects) in matches)
             {
@@ -424,10 +454,23 @@ namespace KillerPDF.Controls
         private void FindTextForRedaction()
         {
             if (_doc is null || _currentFile is null || Window.GetWindow(this) is not Window owner) return;
-            string path = _currentFile;
-            var dialog = new RedactionFindDialog(owner, () => SearchService.LoadPagesForReview(path),
-                () => PdfEngineIntegration.OpenForReading(System.IO.File.ReadAllBytes(path)));
+            CurrentSearchSnapshot snapshot = CaptureCurrentSearchSnapshot();
+            string fingerprint = snapshot.Fingerprint();
+            if (_redactionSourceFingerprint is not null && _redactionSourceFingerprint != fingerprint)
+            {
+                SetStatus(Loc("Str_Redact_SourceChanged"));
+                return;
+            }
+            var dialog = new RedactionFindDialog(owner, () => SearchService.LoadPagesForReview(snapshot.Bytes),
+                () => PdfEngineIntegration.OpenForReading(snapshot.Bytes),
+                options => SearchService.FindCurrentRedaction(snapshot, options));
             if (dialog.ShowDialog() != true) return;
+            if (!snapshot.SameContent(CaptureCurrentSearchSnapshot()))
+            {
+                SetStatus(Loc("Str_Redact_SourceChanged"));
+                return;
+            }
+            _redactionSourceFingerprint = fingerprint;
             int added = 0;
             foreach (PdfRedactionMatch match in dialog.Checked)
             {
@@ -502,6 +545,7 @@ namespace KillerPDF.Controls
         {
             if (_redactMarks.Count > 0) MarkDirty();
             _redactMarks.Clear();
+            _redactionSourceFingerprint = null;
             UpdateRedactionCount();
             RepaintRedactionMarks();
         }
@@ -509,6 +553,11 @@ namespace KillerPDF.Controls
         private void ApplyRedaction()
         {
             if (_doc is null || _currentFile is null) return;
+            if (_redactionSourceFingerprint is not null && _redactionSourceFingerprint != CaptureCurrentSearchSnapshot().Fingerprint())
+            {
+                SetStatus(Loc("Str_Redact_SourceChanged"));
+                return;
+            }
             if (_redactMarks.Count == 0)
             {
                 SetStatus(Loc("Str_Redact_NoMarks"));
@@ -538,6 +587,18 @@ namespace KillerPDF.Controls
             }
 
             List<(int Page, PageAnnotation Annotation)> covered = CoveredAnnotations(regions);
+            var retiredFields = new HashSet<string>(StringComparer.Ordinal);
+            foreach (int page in regions.Select(region => region.PageIndex).Distinct())
+                foreach (var field in PdfEngineIntegration.ReadPageFormWidgets(session.Document, page))
+                {
+                    var bounds = new PdfContentBounds(field.Left - field.PageBoxLeft, field.Bottom - field.PageBoxBottom,
+                        field.Right - field.PageBoxLeft, field.Top - field.PageBoxBottom);
+                    if (!double.IsFinite(bounds.Left) || !double.IsFinite(bounds.Bottom) || !double.IsFinite(bounds.Right)
+                        || !double.IsFinite(bounds.Top) || bounds.Width < 0 || bounds.Height < 0
+                        || regions.Any(region => region.PageIndex == page && region.Bounds.Left <= bounds.Right
+                            && region.Bounds.Right >= bounds.Left && region.Bounds.Bottom <= bounds.Top && region.Bounds.Top >= bounds.Bottom))
+                        retiredFields.Add(field.FieldName);
+                }
 
             Exception? failure = null;
             PdfContentRedactionResult? result = null;
@@ -549,6 +610,21 @@ namespace KillerPDF.Controls
                 SaveTempAndReload(keepAnnotations: true, preserveZoom: true, finalizeSavedFile: path =>
                 {
                     result = PdfEngineIntegration.ApplyRedaction(path, regions, approved);
+                }, onPublished: () =>
+                {
+                    foreach (var (page, annotation) in covered)
+                        if (_annotations.TryGetValue(page, out var list))
+                            list.RemoveAll(item => item.HistoryId == annotation.HistoryId);
+                    foreach (string field in retiredFields)
+                    {
+                        _formTextValues.Remove(field);
+                        _formChoiceValues.Remove(field);
+                        _formMultiChoiceValues.Remove(field);
+                        _formCheckValues.Remove(field);
+                        _formRadioValues.Remove(field);
+                        _formFontSizes.Remove(field);
+                    }
+                    _redactMarks.RemoveAll(mark => !skipped.Contains(mark.PageIndex));
                 });
             }
             catch (Exception ex) { failure ??= ex; }
@@ -561,13 +637,15 @@ namespace KillerPDF.Controls
                 ReportResult(string.Format(Loc("Str_Redact_Failed"), reason));
                 return;
             }
-            foreach (var (page, annotation) in covered)
-                if (_annotations.TryGetValue(page, out var list)) list.Remove(annotation);
-            // The applied marks are gone with their content; marks on skipped pages stay for later.
-            _redactMarks.RemoveAll(mark => !skipped.Contains(mark.PageIndex));
             UpdateRedactionCount();
             RepaintRedactionMarks();
             int pages = regions.Select(region => region.PageIndex).Distinct().Count();
+            if (_redactMarks.Count == 0) _redactionSourceFingerprint = null;
+            else
+            {
+                try { _redactionSourceFingerprint = CaptureCurrentSearchSnapshot().Fingerprint(); }
+                catch (Exception error) when (error is not OutOfMemoryException) { }
+            }
             string status = approved.Count == 0
                 ? string.Format(Loc("Str_Redacted"), regions.Count, pages)
                 : string.Format(Loc("Str_RedactedRaster"), regions.Count, pages, approved.Count);

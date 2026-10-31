@@ -76,7 +76,7 @@ namespace KillerPDF.Controls
             }
             catch (Exception exception) when (exception is InvalidOperationException
                 or KeyNotFoundException or ArgumentException or NotSupportedException
-                or IOException)
+                or IOException or FormatException)
             {
                 // A form the safe subset cannot read stays editable; it simply does not recalculate.
                 _formHasScripts = false;

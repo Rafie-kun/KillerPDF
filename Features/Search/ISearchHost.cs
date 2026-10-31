@@ -9,6 +9,8 @@ namespace KillerPDF.Features
     {
         /// <summary>Path of the working (temp) file the search reads. Null when no document.</summary>
         string? CurrentFile { get; }
+        long SearchRevision { get; }
+        Services.CurrentSearchSnapshot CaptureSearchSnapshot();
 
         /// <summary>The page currently selected in the sidebar/page list.</summary>
         int CurrentPageIndex { get; }

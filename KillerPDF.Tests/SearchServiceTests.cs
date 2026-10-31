@@ -236,7 +236,7 @@ namespace KillerPDF.Tests
             string dialog = ReadSource("Controls/RedactionFindDialog.cs");
             Assert.Contains("Str_Search_PagesSkipped", dialog);
             Assert.Contains("UnreadableAnnotationPages", dialog);
-            Assert.Contains("SearchService.LoadPagesForReview(path)", ReadSource("Controls/Viewer/PdfViewer.Redaction.cs"));
+            Assert.Contains("SearchService.LoadPagesForReview(snapshot.Bytes)", ReadSource("Controls/Viewer/PdfViewer.Redaction.cs"));
             Assert.Contains("SearchService.LoadPagesForReview(snapshot)", ReadSource("Shell/GuidedTasks.cs"));
         }
 
@@ -257,9 +257,9 @@ namespace KillerPDF.Tests
             string source = ReadSource("Controls/Viewer/PdfViewer.Redaction.cs");
             int start = source.IndexOf("private void MarkSearchResultsForRedaction", StringComparison.Ordinal);
             Assert.True(start >= 0);
-            string body = source[start..Math.Min(source.Length, start + 3500)];
+            string body = source[start..source.IndexOf("private void FindTextForRedaction", start, StringComparison.Ordinal)];
             Assert.DoesNotContain("catch (Exception) { matches = []; }", body);
-            Assert.Contains("out unreadable", body);
+            Assert.Contains("unreadable = [.. current.Unreadable]", body);
             Assert.Contains("Search.SkippedPagesMessage(unreadable)", body);
             Assert.Contains("KillerDialog.Show(", body);
         }

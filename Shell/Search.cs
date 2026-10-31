@@ -33,6 +33,8 @@ namespace KillerPDF.Shell
         // Shell/About.cs.)
 
         string? ISearchHost.CurrentFile => _currentFile;
+        long ISearchHost.SearchRevision => _documentEditRevision;
+        CurrentSearchSnapshot ISearchHost.CaptureSearchSnapshot() => ActiveViewer.CaptureCurrentSearchSnapshot();
         int ISearchHost.CurrentPageIndex => PageList.SelectedIndex;
         void ISearchHost.GoToPage(int pageIdx) => PageList.SelectedIndex = pageIdx;
 
@@ -489,7 +491,7 @@ namespace KillerPDF.Shell
             if (!EnsureEditable()) return;
             // The match on show belongs to the older results until the running search lands.
             if (Search.IsSearching) return;
-            if (Search.LastQuery != find || Search.CurrentMatch is null)
+            if (!Search.ResultsCurrent || Search.LastQuery != find || Search.CurrentMatch is null)
             {
                 _searchDebounce?.Stop();
                 Search.Run(find);

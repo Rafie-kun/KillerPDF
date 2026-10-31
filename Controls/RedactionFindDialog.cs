@@ -27,6 +27,7 @@ internal sealed class RedactionFindDialog : Window
     // Form field values and annotation text are shown from their own appearances, not the page content,
     // so the search also reads them from the document.
     private readonly Func<PdfDocument>? _loadDocument;
+    private readonly Func<PdfRedactionSearchOptions, (IReadOnlyList<PdfRedactionMatch> Matches, IReadOnlyList<int> Unreadable)>? _searchCurrent;
     private PdfDocument? _document;
 
     /// <summary>The results the user left checked, in page order.</summary>
@@ -34,10 +35,12 @@ internal sealed class RedactionFindDialog : Window
 
     internal RedactionFindDialog(Window owner,
         Func<(IReadOnlyList<PdfPageContent?> Pages, IReadOnlyList<int> Unreadable)> loadPages,
-        Func<PdfDocument>? loadDocument = null)
+        Func<PdfDocument>? loadDocument = null,
+        Func<PdfRedactionSearchOptions, (IReadOnlyList<PdfRedactionMatch> Matches, IReadOnlyList<int> Unreadable)>? searchCurrent = null)
     {
         _loadPages = loadPages;
         _loadDocument = loadDocument;
+        _searchCurrent = searchCurrent;
         Title = "KillerPDF - " + L("Str_RedactFind_Title");
         Width = 520;
         SizeToContent = SizeToContent.Height;
@@ -202,6 +205,13 @@ internal sealed class RedactionFindDialog : Window
                     MatchCase = _matchCase.IsChecked == true,
                     Timeout = TimeSpan.FromSeconds(2)
                 };
+                if (_searchCurrent is not null)
+                {
+                    var current = _searchCurrent(options);
+                    foreach (var match in current.Matches) found.TryAdd(match.Id, match);
+                    skipped.UnionWith(current.Unreadable);
+                    continue;
+                }
                 foreach (PdfRedactionMatch match in PdfRedactionSearch.Find(_pages, options).Matches)
                     found.TryAdd(match.Id, match);
                 if (_document is null) continue;

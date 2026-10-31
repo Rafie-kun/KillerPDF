@@ -293,7 +293,10 @@ public sealed class SearchRedactionCallersTests : IDisposable
     {
         string body = Between(ReadSource("Controls", "Viewer", "PdfViewer.Redaction.cs"), "private void MarkSearchResultsForRedaction", "private void FindTextForRedaction");
 
-        Assert.Contains("Search.LastQuery, Search.LastMatchCase, Search.LastWholeWord, out unreadable", body);
+        Assert.Contains("PdfSearchText.Fold(Search.LastQuery)", body);
+        Assert.Contains("Search.LastWholeWord", body);
+        Assert.Contains("MatchCase = Search.LastMatchCase", body);
+        Assert.Contains("SearchService.FindCurrentRedaction(snapshot, options)", body);
     }
 
     // ---- A search belongs to the tab that ran it (R3C-020) --------------------------------------

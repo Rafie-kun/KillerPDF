@@ -2018,4 +2018,5 @@ Observação: os arquivos reparados podem perder marcadores, formulários e outr
 A edição, o salvamento e alguns outros recursos podem não funcionar corretamente.</sys:String>
     <sys:String x:Key="Str_Macro_OutputNameDrift">O nome de saída da macro é diferente do plano aprovado.</sys:String>
     <sys:String x:Key="Str_About_UpdateNotVerified">Não foi possível verificar a atualização baixada, e ela foi descartada. Nada foi instalado.</sys:String>
+    <sys:String x:Key="Str_Redact_SourceChanged">O documento mudou. Limpe estas marcações de ocultação e pesquise novamente.</sys:String>
 </ResourceDictionary>

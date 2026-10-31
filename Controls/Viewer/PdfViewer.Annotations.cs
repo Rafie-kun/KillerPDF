@@ -2674,7 +2674,7 @@ namespace KillerPDF.Controls
             => new(UndoKind.Document, DocBytes: bytes, WasDirty: _isDirty,
                 AnnotSnapshot: CaptureAllAnnotationState(),
                 PageRotations: new Dictionary<int, int>(_pageRotations),
-                RedactionSnapshot: new(_redactMarks),
+                RedactionSnapshot: CaptureRedactionMarksExt(),
                 FormSnapshot: SnapshotFormValuesForPrint());
 
         private PageAnnotation? CloneHistoryAnnotation(PageAnnotation annotation)

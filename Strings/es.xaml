@@ -1998,4 +1998,5 @@ Nota: los archivos reparados pueden carecer de marcadores, formularios y otras f
 Es posible que la edición, el guardado y algunas otras funciones no funcionen correctamente.</sys:String>
     <sys:String x:Key="Str_Macro_OutputNameDrift">El nombre de salida de la macro difiere del plan aprobado.</sys:String>
     <sys:String x:Key="Str_About_UpdateNotVerified">No se pudo verificar la actualización descargada y se ha descartado. No se ha instalado nada.</sys:String>
+    <sys:String x:Key="Str_Redact_SourceChanged">El documento cambió. Borre estas marcas de censura y vuelva a buscar.</sys:String>
 </ResourceDictionary>
