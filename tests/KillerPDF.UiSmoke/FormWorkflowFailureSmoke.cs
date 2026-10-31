@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Threading;
 using static DocumentStateSmoke;
 
@@ -14,7 +15,10 @@ internal static class FormWorkflowFailureSmoke
     private static readonly string[] Pending = ["_formTextValues", "_formChoiceValues", "_formMultiChoiceValues",
         "_formCheckValues", "_formRadioValues", "_formFontSizes"];
 
-    internal static int Run(Window owner, string folder)
+    internal static int Run(Window owner, string folder, bool deletion = false)
+        => WithCleanup(owner, () => deletion ? RunDeletion(owner, folder) : RunCore(owner, folder));
+
+    internal static int WithCleanup(Window owner, Func<int> run)
     {
         var dialogs = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(30) };
         dialogs.Tick += (_, _) =>
@@ -30,7 +34,7 @@ internal static class FormWorkflowFailureSmoke
             }
         };
         dialogs.Start();
-        try { return RunCore(owner, folder); }
+        try { return run(); }
         finally
         {
             try { owner.Close(); }
@@ -100,19 +104,79 @@ internal static class FormWorkflowFailureSmoke
     }
 
     private static string State(object value) => JsonSerializer.Serialize(value, value.GetType());
+
+
+    private static int RunDeletion(Window owner, string folder)
+    {
+        const string name = "answer_001";
+        const string sensitive = "Deleted sensitive value";
+        string source = Path.Combine(folder, "delete-recreate.pdf");
+        File.WriteAllBytes(source, Fixture(name));
+        owner.GetType().GetMethod("OpenFromExternal", Members)!.Invoke(owner, [source]);
+        owner.Opacity = 1;
+        owner.Activate();
+        Wait(() => Descendants<TextBox>(owner).Any(box => Equals(box.ToolTip, name)), "field to delete rendered");
+        object viewer = Get(owner, "ActiveViewer");
+        TextBox field = Descendants<TextBox>(owner).Single(box => Equals(box.ToolTip, name));
+        field.Focus();
+        field.Text = sensitive;
+        Pump();
+        ((IDictionary)Get(viewer, "_formFontSizes"))[name] = 18d;
+        field.RaiseEvent(new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Left)
+            { RoutedEvent = UIElement.PreviewMouseLeftButtonDownEvent });
+        field.RaiseEvent(new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Left)
+            { RoutedEvent = UIElement.PreviewMouseLeftButtonUpEvent });
+        Call(viewer, "DeleteSelectedFormField");
+        Pump();
+        if (Descendants<TextBox>(owner).Any(box => Equals(box.ToolTip, name)))
+            throw new InvalidOperationException("The selected field was not deleted.");
+        string[] retained = Pending.Where(key => ((IDictionary)Get(viewer, key)).Contains(name)).ToArray();
+        Console.WriteLine("CONTROL deleted field pending entries: " + string.Join(", ", retained));
+        if (retained.Length != 0) throw new InvalidOperationException("Deleting the field retained its sensitive pending state.");
+        Type integration = owner.GetType().Assembly.GetType("KillerPDF.Services.PdfEngineIntegration", true)!;
+        string? created = null;
+        Action<string> add = path => created = (string)integration.GetMethod("AddTextField", BindingFlags.Static | BindingFlags.NonPublic)!
+            .Invoke(null, [path, 0, 20d, 20d, 180d, 25d, null])!;
+        MethodInfo reload = owner.GetType().GetMethod("SaveTempAndReload", Members)!;
+        object?[] arguments = reload.GetParameters().Select(parameter => parameter.DefaultValue).ToArray();
+        arguments[0] = true;
+        arguments[1] = true;
+        arguments[2] = add;
+        arguments[4] = 0;
+        arguments[6] = true;
+        reload.Invoke(owner, arguments);
+        if (created != name) throw new InvalidOperationException("Recreation did not exercise reuse of the deleted field name.");
+        Pump();
+        Wait(() => Descendants<TextBox>(owner).Any(box => Equals(box.ToolTip, "Answer 1")), "recreated field rendered");
+        if (Descendants<TextBox>(owner).Single(box => Equals(box.ToolTip, "Answer 1")).Text != "")
+            throw new InvalidOperationException("A recreated field resurrected deleted text.");
+        Wait(() => ((Button)owner.FindName("UndoBtn")).IsEnabled, "creation undo ready");
+        Click(owner, "UndoBtn"); Pump();
+        Click(owner, "UndoBtn"); Pump();
+        Wait(() => Descendants<TextBox>(owner).Any(box => Equals(box.ToolTip, name) && box.Text == sensitive), "undo deletion restores entered text");
+        if (!((IDictionary)Get(viewer, "_formFontSizes")).Contains(name))
+            throw new InvalidOperationException("Undo deletion lost pending formatting.");
+        Click(owner, "RedoBtn"); Pump();
+        Click(owner, "RedoBtn"); Pump();
+        Wait(() => Descendants<TextBox>(owner).Any(box => Equals(box.ToolTip, "Answer 1") && box.Text == ""), "redo creation remains empty");
+        if (Pending.Any(key => ((IDictionary)Get(viewer, key)).Contains(name)))
+            throw new InvalidOperationException("Redo rebound retired state to the recreated field.");
+        Console.WriteLine("PASS delete/recreate retires sensitive state and preserves value/formatting through undo/redo.");
+        return 0;
+    }
     private static object Get(object target, string name) => target.GetType().GetProperty(name, Members)?.GetValue(target)
         ?? target.GetType().GetField(name, Members)?.GetValue(target)
         ?? throw new InvalidOperationException("Missing workflow state: " + name);
     private static object? Call(object target, string name, params object[] arguments) =>
         target.GetType().GetMethod(name, Members)!.Invoke(target, arguments);
 
-    private static byte[] Fixture()
+    private static byte[] Fixture(string fieldName = "answer")
     {
         string[] objects = [
             "<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields [4 0 R 5 0 R 6 0 R 7 0 R 8 0 R] /DA (/Helv 12 Tf 0 g) /DR << /Font << /Helv 12 0 R >> >> >> >>",
             "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
             "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 300] /Annots [4 0 R 5 0 R 6 0 R 7 0 R 9 0 R 10 0 R] >>",
-            "<< /Type /Annot /Subtype /Widget /FT /Tx /T (answer) /V (Original) /Rect [20 240 260 265] /P 3 0 R >>",
+            $"<< /Type /Annot /Subtype /Widget /FT /Tx /T ({fieldName}) /V (Original) /Rect [20 240 260 265] /P 3 0 R >>",
             "<< /Type /Annot /Subtype /Widget /FT /Ch /T (choice) /Opt [(A) (B)] /V (A) /Rect [20 200 160 225] /P 3 0 R >>",
             "<< /Type /Annot /Subtype /Widget /FT /Ch /T (multi) /Ff 2097152 /Opt [(A) (B)] /V [(A)] /Rect [20 140 160 190] /P 3 0 R >>",
             "<< /Type /Annot /Subtype /Widget /FT /Btn /T (check) /V /Off /AS /Off /AP << /N << /Off 11 0 R /Yes 11 0 R >> >> /Rect [20 100 40 120] /P 3 0 R >>",

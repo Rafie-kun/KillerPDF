@@ -171,10 +171,11 @@ namespace KillerPDF.Controls
             Action<Dictionary<int, int>>? remapRotations = null,
             int? selectedPageAfterReload = null,
             UndoEntry? documentUndo = null,
-            bool preserveRenderedPages = false)
+            bool preserveRenderedPages = false,
+            Action? onPublished = null)
             => Host!.SaveTempAndReload(
                 keepAnnotations, preserveZoom, finalizeSavedFile, remapRotations,
-                selectedPageAfterReload, documentUndo, preserveRenderedPages);
+                selectedPageAfterReload, documentUndo, preserveRenderedPages, onPublished: onPublished);
         private void RecordNavJump() => Host!.RecordNavJump();
         private PageAnnotation? CloneAnnotation(PageAnnotation a) => Host!.CloneAnnotation(a);
         private PageAnnotation? PairPartner(PageAnnotation a) => Host!.PairPartner(a);

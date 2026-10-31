@@ -275,7 +275,16 @@ namespace KillerPDF.Controls
                     preserveZoom: true,
                     finalizeSavedFile: path => PdfEngineIntegration.RemoveFormField(path, fieldName),
                     selectedPageAfterReload: pageIndex,
-                    preserveRenderedPages: true);
+                    preserveRenderedPages: true,
+                    onPublished: () =>
+                    {
+                        _formTextValues.Remove(fieldName);
+                        _formChoiceValues.Remove(fieldName);
+                        _formMultiChoiceValues.Remove(fieldName);
+                        _formCheckValues.Remove(fieldName);
+                        _formRadioValues.Remove(fieldName);
+                        _formFontSizes.Remove(fieldName);
+                    });
             }
             catch (Exception ex) when (ex is not OutOfMemoryException)
             {

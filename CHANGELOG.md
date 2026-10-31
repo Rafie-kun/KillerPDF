@@ -10,6 +10,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 
 ### Fixed
 
+- Deleting a form field retires its pending text and formatting, so a recreated field cannot inherit them. Undo restores the deleted field's values.
 - A failed form conversion or flattening keeps pending field values and formatting intact.
 - Redacting a shared image preserves the transparency and colors of untouched pages that use a different mask or color settings.
 - Search and redaction find a word set with a ligature, so a name like Offner in a typeset paper is redacted instead of staying on the page while verification passed. A soft hyphen, zero-width character or unidentified code inside a word no longer hides it either, and redaction finds a word hyphenated across a line break.

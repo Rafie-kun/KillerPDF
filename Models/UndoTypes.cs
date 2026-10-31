@@ -27,5 +27,6 @@ namespace KillerPDF
         List<PageAnnotation>? AnnotGroup = null,
         Dictionary<int, int>? PageRotations = null,
         Controls.RedactionMarkSnapshot? RedactionSnapshot = null,
-        StampSpec? StampSnapshot = null);
+        StampSpec? StampSnapshot = null,
+        Services.PdfEngineIntegration.FormEdits? FormSnapshot = null);
 }

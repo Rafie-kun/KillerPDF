@@ -2674,7 +2674,8 @@ namespace KillerPDF.Controls
             => new(UndoKind.Document, DocBytes: bytes, WasDirty: _isDirty,
                 AnnotSnapshot: CaptureAllAnnotationState(),
                 PageRotations: new Dictionary<int, int>(_pageRotations),
-                RedactionSnapshot: new(_redactMarks));
+                RedactionSnapshot: new(_redactMarks),
+                FormSnapshot: SnapshotFormValuesForPrint());
 
         private PageAnnotation? CloneHistoryAnnotation(PageAnnotation annotation)
         {
@@ -2901,6 +2902,16 @@ namespace KillerPDF.Controls
                     foreach (var pair in entry.PageRotations)
                         _pageRotations[pair.Key] = pair.Value;
                 RestoreRedactionMarksExt(entry.RedactionSnapshot ?? new([]));
+                if (entry.FormSnapshot is { } forms)
+                {
+                    _formTextValues = new(forms.TextValues);
+                    _formChoiceValues = new(forms.ChoiceValues);
+                    _formMultiChoiceValues = forms.MultiChoiceValues.ToDictionary(pair => pair.Key,
+                        pair => (IReadOnlyList<string>)[.. pair.Value]);
+                    _formCheckValues = new(forms.CheckBoxValues);
+                    _formRadioValues = new(forms.RadioValues);
+                    _formFontSizes = new(forms.TextFontSizes);
+                }
                 _renderDims.Clear();
                 InvalidateRenderCache(_active);
                 ClearSelection();
@@ -2949,6 +2960,15 @@ namespace KillerPDF.Controls
             if (entry.AnnotGroup is not null) bytes += (long)entry.AnnotGroup.Count * 4096;
             if (entry.RedactionSnapshot is not null)
                 bytes += entry.RedactionSnapshot.Marks.Sum(mark => 96L + (mark.OverlayText?.Length ?? 0) * 2L);
+            if (entry.FormSnapshot is { } forms)
+            {
+                bytes += forms.TextValues.Concat(forms.ChoiceValues).Concat(forms.RadioValues)
+                    .Sum(pair => 64L + 2L * (pair.Key.Length + pair.Value.Length));
+                bytes += forms.MultiChoiceValues.Sum(pair => 64L + 2L * pair.Key.Length
+                    + pair.Value.Sum(value => 24L + 2L * value.Length));
+                bytes += forms.CheckBoxValues.Keys.Concat(forms.TextFontSizes.Keys)
+                    .Sum(key => 64L + 2L * key.Length);
+            }
             return Math.Max(1, bytes);
         }
 

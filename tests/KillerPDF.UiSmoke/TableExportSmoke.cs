@@ -224,6 +224,8 @@ internal static class TableExportSmoke
                 return RestrictedFormFillSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-form-workflow-failure")
                 return FormWorkflowFailureSmoke.Run(owner, folder);
+            if (windowSessionCase == "--verify-page-navigation-form-delete-recreate")
+                return FormWorkflowFailureSmoke.Run(owner, folder, deletion: true);
             if (windowSessionCase == "--verify-page-navigation-other-pane-save")
                 return OtherPaneSaveSmoke.Run(owner, folder);
             if (windowSessionCase == "--verify-page-navigation-dialog-buttons-theme")
