@@ -38,6 +38,23 @@ public sealed class PdfPageRasterInformationTests
             PdfPageRasterInformation.ReadScanSizes(PdfDocument.Open(source)));
     }
 
+    // A logo's resolution says nothing about the page around it, and a picture page's is the page's.
+    [Fact]
+    public void ReadPageImageSize_OnlyAnswersForAPageOneImageCovers()
+    {
+        PdfImage image = PdfImage.FromBitonal(500, 500, new byte[250000]);
+        byte[] source = new PdfDocumentBuilder()
+            .AddPage(340, 340, new PdfContentStreamBuilder().DrawImage(image, 0, 0, 340, 340))
+            .AddPage(340, 340, new PdfContentStreamBuilder().DrawImage(image, 0, 0, 50, 50))
+            .AddBlankPage()
+            .Build();
+        PdfDocument document = PdfDocument.Open(source);
+
+        Assert.Equal((500, 500), PdfPageRasterInformation.ReadPageImageSize(document, 0));
+        Assert.Null(PdfPageRasterInformation.ReadPageImageSize(document, 1));
+        Assert.Null(PdfPageRasterInformation.ReadPageImageSize(document, 2));
+    }
+
     [Fact]
     public void ReadJpegImagePageHints_DistinguishesJpegAndLosslessPages()
     {

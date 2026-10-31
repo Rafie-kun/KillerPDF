@@ -27,7 +27,7 @@ namespace KillerPDF
     internal sealed class TransformWindow : Window
     {
         internal sealed record PagePreview(BitmapSource Source, double WidthPoints,
-            double HeightPoints, int DocumentPageNumber);
+            double HeightPoints, int DocumentPageNumber, (int Width, int Height)? ImagePixels = null);
 
         public bool Applied { get; private set; }
         public double Angle { get; private set; }     // total = quarter turns + fine
@@ -69,6 +69,7 @@ namespace KillerPDF
         private double _srcH;
         private double _pageWpt;
         private double _pageHpt;
+        private (int Width, int Height)? _imagePixels;
         private int _previewPageIndex;
         private readonly TextBlock _pageCounter = null!;
         private readonly Button _previousPage = null!;
@@ -120,6 +121,7 @@ namespace KillerPDF
             _srcH = _src.PixelHeight;
             _pageWpt = pages[0].WidthPoints;
             _pageHpt = pages[0].HeightPoints;
+            _imagePixels = pages[0].ImagePixels;
             string toolName = S(mode == TransformWindowMode.Transform
                 ? "Str_Tf_Suffix" : "Str_ColorCorrection");
             Title = "KillerPDF - " + toolName;
@@ -690,6 +692,7 @@ namespace KillerPDF
             _srcH = _src.PixelHeight;
             _pageWpt = page.WidthPoints;
             _pageHpt = page.HeightPoints;
+            _imagePixels = page.ImagePixels;
             _alignLine.Visibility = Visibility.Collapsed;
             _lineCoords.Text = "";
             UpdatePreview();
@@ -1001,9 +1004,11 @@ namespace KillerPDF
             double dpi = _dpiSlider?.Value ?? 300;
             var (width, height) = OutputPixelDimensions.FromPoints(
                 widthPoints, heightPoints, dpi);
+            var (baseWidth, baseHeight) = OutputPixelDimensions.ScaleBase(
+                b.PixelWidth, b.PixelHeight, _srcW, _srcH, _imagePixels);
             _dpiReadout.Text = $"{dpi:0} DPI  |  " +
                 string.Format(S("Str_OutputPixels"), width, height) + "  |  " +
-                OutputPixelDimensions.ScaleLabel(width, height, b.PixelWidth, b.PixelHeight);
+                OutputPixelDimensions.ScaleLabel(width, height, baseWidth, baseHeight);
         }
 
         // Sizes the page to its TRUE relative scale within the preview box, so "Resize the whole page" makes

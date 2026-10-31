@@ -5,6 +5,19 @@ namespace KillerPDF.Tests;
 
 public sealed class PageSizeFormatterTests
 {
+    // Issue 462: a 500 pixel image read as 708 because every page was sized at 150 DPI.
+    [Fact]
+    public void APictureShowsItsOwnPixelsAndNotAnAssumedResolution()
+    {
+        var size = PageSizeFormatter.Format(340, 340, imagePixels: (500, 500));
+        Assert.Equal("500 x 500 px", size.Pixels);
+        Assert.StartsWith("500 x 500 px | ", size.Details, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void APageThatIsNotOneImageSaysWhatItsPixelsAssume() =>
+        Assert.Equal("708 x 708 px at 150 DPI", PageSizeFormatter.Format(340, 340).Pixels);
+
     [Theory]
     [InlineData(612, 792, "Letter", false)]
     [InlineData(792, 612, "Letter", false)]

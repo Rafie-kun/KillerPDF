@@ -75,12 +75,13 @@ namespace KillerPDF.Controls
         internal string? CurrentFilePathExt => _currentFile;
         internal int PageCountExt => _doc?.PageCount ?? 0;
         internal (string Label, string Details, bool Metric, string Pixels, string Inches,
-            string Millimeters, string Points)? CurrentPageSizeExt(bool? metric = null)
+            string Millimeters, string Points)? CurrentPageSizeExt(bool? metric = null, bool imagePixels = false)
         {
             int page = State.CurrentPage;
             if (_doc is null || page < 0 || page >= _doc.PageCount) return null;
-            var (width, height) = EnsureEngineDocumentSession().VisualPageSize(page, _pageRotations);
-            return PageSizeFormatter.Format(width, height, metric);
+            PdfEngineDocumentSession session = EnsureEngineDocumentSession();
+            var (width, height) = session.VisualPageSize(page, _pageRotations);
+            return PageSizeFormatter.Format(width, height, metric, imagePixels ? session.PageImagePixels(page, _pageRotations) : null);
         }
         internal double ZoomLevelExt => _zoomLevel;
         internal void SetZoomExt(double level) => SetZoom(level);

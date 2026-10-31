@@ -183,7 +183,8 @@ namespace KillerPDF.Shell
 
         private void UpdatePageSizeDisplay()
         {
-            var size = ActiveViewer?.CurrentPageSizeExt();
+            // Only the pixel view needs the page's image, which takes a read of the page to find.
+            var size = ActiveViewer?.CurrentPageSizeExt(imagePixels: FooterPageSizeUnit == "Pixels");
             PageSizeLabel.Content = size is null ? string.Empty : FooterPageSizeUnit switch
             {
                 "Pixels" => size.Value.Pixels,

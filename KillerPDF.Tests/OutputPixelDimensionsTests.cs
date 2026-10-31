@@ -5,6 +5,29 @@ namespace KillerPDF.Tests;
 
 public sealed class OutputPixelDimensionsTests
 {
+    [Theory]
+    [InlineData(500, 300, 612, 792, 300, 500)]
+    [InlineData(500, 300, 792, 612, 500, 300)]
+    [InlineData(500, 500, 612, 792, 500, 500)]
+    public void AnImagesPixelsTurnWithItsPage(int width, int height, double pageWidth, double pageHeight, int expectedWidth, int expectedHeight) =>
+        Assert.Equal((expectedWidth, expectedHeight), OutputPixelDimensions.Oriented((width, height), pageWidth, pageHeight));
+
+    // Issue 462: a 500 pixel image previewed at 1,100 showed 1,099 at x1.
+    [Fact]
+    public void OneTimesMeansTheRealImageNotThePreview()
+    {
+        var (width, height) = OutputPixelDimensions.ScaleBase(1100, 1100, 1100, 1100, (500, 500));
+        Assert.Equal("x1", OutputPixelDimensions.ScaleLabel(500, 500, width, height));
+        Assert.Equal("x2", OutputPixelDimensions.ScaleLabel(1000, 1000, width, height));
+    }
+
+    [Fact]
+    public void APreviewScaledInTheWindowScalesItsBaseWithIt()
+    {
+        Assert.Equal((250d, 250d), OutputPixelDimensions.ScaleBase(550, 550, 1100, 1100, (500, 500)));
+        Assert.Equal((800d, 600d), OutputPixelDimensions.ScaleBase(800, 600, 1100, 1100, null));
+    }
+
     [Fact]
     public void FromPoints_ConvertsLetterPageAtThreeHundredDpi()
     {

@@ -24,7 +24,8 @@ internal static class PageSizeFormatter
     ];
 
     internal static (string Label, string Details, bool Metric, string Pixels, string Inches,
-        string Millimeters, string Points) Format(double widthPoints, double heightPoints, bool? metric = null)
+        string Millimeters, string Points) Format(double widthPoints, double heightPoints, bool? metric = null,
+        (int Width, int Height)? imagePixels = null)
     {
         double inchesWide = widthPoints / 72.0;
         double inchesHigh = heightPoints / 72.0;
@@ -40,8 +41,8 @@ internal static class PageSizeFormatter
             ? $"{FormatNumber(mmWide, 1)} x {FormatNumber(mmHigh, 1)} mm"
             : $"{FormatNumber(inchesWide, 2)} x {FormatNumber(inchesHigh, 2)} in";
         string label = string.IsNullOrEmpty(name) ? primary : $"{name}  {primary}";
-        var (pixelWidth, pixelHeight) = OutputPixelDimensions.FromPoints(widthPoints, heightPoints, 150);
-        string px = $"{pixelWidth} x {pixelHeight} px at 150 DPI";
+        var (pixelWidth, pixelHeight) = imagePixels ?? OutputPixelDimensions.FromPoints(widthPoints, heightPoints, 150);
+        string px = imagePixels is null ? $"{pixelWidth} x {pixelHeight} px at 150 DPI" : $"{pixelWidth} x {pixelHeight} px";
         string inches = $"{FormatNumber(inchesWide, 2)} x {FormatNumber(inchesHigh, 2)} in";
         string millimeters = $"{FormatNumber(mmWide, 1)} x {FormatNumber(mmHigh, 1)} mm";
         string points = $"{FormatNumber(widthPoints, 1)} x {FormatNumber(heightPoints, 1)} pt";

@@ -21,6 +21,19 @@ internal static class OutputPixelDimensions
         return "x" + scale.ToString("0.##", System.Globalization.CultureInfo.CurrentCulture);
     }
 
+    /// <summary>Turns an image's pixel size the way the page it fills is shown.</summary>
+    internal static (int Width, int Height) Oriented((int Width, int Height) pixels, double pageWidth, double pageHeight) =>
+        pageWidth == pageHeight || pixels.Width == pixels.Height || pageWidth > pageHeight == pixels.Width > pixels.Height
+            ? pixels : (pixels.Height, pixels.Width);
+
+    /// <summary>The size "x1" means for a preview: the real image scaled as the preview has been,
+    /// or the preview itself when the page has no one image to compare with.</summary>
+    internal static (double Width, double Height) ScaleBase(double previewWidth, double previewHeight,
+        double sourceWidth, double sourceHeight, (int Width, int Height)? imagePixels) =>
+        imagePixels is { } pixels && sourceWidth > 0 && sourceHeight > 0
+            ? (pixels.Width * previewWidth / sourceWidth, pixels.Height * previewHeight / sourceHeight)
+            : (previewWidth, previewHeight);
+
     internal static bool MatchesDpi(
         int pixelWidth, int pixelHeight, double widthPoints, double heightPoints, double dpi)
     {

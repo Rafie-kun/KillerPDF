@@ -51,7 +51,8 @@ namespace KillerPDF.Shell
                 var src = RenderPageBitmap(selectedPage, 1100, BurnPageAnnotationsToTemp(selectedPage));
                 if (src is null) { SetStatus(Loc("Str_Tf_NoRender")); return; }
                 var (pwpt, phpt) = previewSession.VisualPageSize(selectedPage, _pageRotations);
-                previews.Add(new TransformWindow.PagePreview(src, pwpt, phpt, selectedPage + 1));
+                previews.Add(new TransformWindow.PagePreview(src, pwpt, phpt, selectedPage + 1,
+                    previewSession.PageImagePixels(selectedPage, _pageRotations)));
             }
 
             // First-use warning that a transform rasterizes the page; persists the opt-out.

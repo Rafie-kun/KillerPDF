@@ -44,6 +44,23 @@ internal sealed class PdfEngineDocumentSession
             rotations[index] = Pages[index].Rotation;
     }
 
+    private readonly Dictionary<int, (int Width, int Height)?> _pageImagePixels = [];
+
+    /// <summary>The pixels of the one image that fills a page, turned as the page is shown, or null
+    /// for any other page. Reading a page costs more than a footer update should, so each is read once.</summary>
+    internal (int Width, int Height)? PageImagePixels(int pageIndex, IReadOnlyDictionary<int, int>? rotations = null)
+    {
+        if (!_pageImagePixels.TryGetValue(pageIndex, out (int Width, int Height)? pixels))
+        {
+            try { pixels = PdfPageRasterInformation.ReadPageImageSize(Document, pageIndex); }
+            catch (Exception error) when (error is not OutOfMemoryException) { pixels = null; }
+            _pageImagePixels[pageIndex] = pixels;
+        }
+        if (pixels is not { } size) return null;
+        var (width, height) = VisualPageSize(pageIndex, rotations);
+        return OutputPixelDimensions.Oriented(size, width, height);
+    }
+
     internal (double Width, double Height) VisualPageSize(
         int pageIndex, IReadOnlyDictionary<int, int>? rotations = null)
     {

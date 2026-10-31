@@ -46,20 +46,37 @@ public static class PdfPageRasterInformation
         var reader = new PdfPageContentReader(document);
         IReadOnlyList<PdfPageInformation> pages = PdfPageInformation.Read(document);
         var result = new (int Width, int Height)?[pages.Count];
-        for (int index = 0; index < result.Length; index++)
-        {
-            PdfExtractedImage? image;
-            try { image = reader.Read(index).Images.MaxBy(item => (long)item.PixelWidth * item.PixelHeight); }
-            catch (Exception exception) when (PdfReaderDamage.Is(exception)) { continue; }
-            if (image is null) continue;
-            double drawn = Math.Max(image.BoundingBox.Width, image.BoundingBox.Height);
-            if (drawn <= 0 || image.PixelWidth <= 0 || image.PixelHeight <= 0) continue;
-            double perPoint = Math.Max(image.PixelWidth, image.PixelHeight) / drawn;
-            bool quarterTurn = pages[index].Rotation is 90 or 270;
-            result[index] = ((int)Math.Round((quarterTurn ? pages[index].Height : pages[index].Width) * perPoint),
-                (int)Math.Round((quarterTurn ? pages[index].Width : pages[index].Height) * perPoint));
-        }
+        for (int index = 0; index < result.Length; index++) result[index] = ScanSize(reader, pages[index], index, 0);
         return result;
+    }
+
+    /// <summary>
+    /// Reads a page's size in pixels when one image covers it, as a scan or an imported picture does,
+    /// turned the way the page is shown. A page that is not mostly one image returns null, since
+    /// the resolution of a logo says nothing about the page around it.
+    /// </summary>
+    public static (int Width, int Height)? ReadPageImageSize(PdfDocument document, int pageIndex)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        IReadOnlyList<PdfPageInformation> pages = PdfPageInformation.Read(document);
+        ArgumentOutOfRangeException.ThrowIfNegative(pageIndex);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(pageIndex, pages.Count);
+        return ScanSize(new PdfPageContentReader(document), pages[pageIndex], pageIndex, 0.9);
+    }
+
+    private static (int Width, int Height)? ScanSize(PdfPageContentReader reader, PdfPageInformation page, int index, double minimumCoverage)
+    {
+        PdfExtractedImage? image;
+        try { image = reader.Read(index).Images.MaxBy(item => (long)item.PixelWidth * item.PixelHeight); }
+        catch (Exception exception) when (PdfReaderDamage.Is(exception)) { return null; }
+        if (image is null) return null;
+        double drawn = Math.Max(image.BoundingBox.Width, image.BoundingBox.Height);
+        if (drawn <= 0 || image.PixelWidth <= 0 || image.PixelHeight <= 0) return null;
+        if (image.BoundingBox.Width * image.BoundingBox.Height < minimumCoverage * page.Width * page.Height) return null;
+        double perPoint = Math.Max(image.PixelWidth, image.PixelHeight) / drawn;
+        bool quarterTurn = page.Rotation is 90 or 270;
+        return ((int)Math.Round((quarterTurn ? page.Height : page.Width) * perPoint),
+            (int)Math.Round((quarterTurn ? page.Width : page.Height) * perPoint));
     }
 
     /// <summary>
