@@ -793,7 +793,9 @@ namespace KillerPDF
             ApplyComboStyle(_flipCombo);
             _flipCombo.Items.Add(S("Str_Print_FlipLong"));
             _flipCombo.Items.Add(S("Str_Print_FlipShort"));
-            _flipCombo.SelectedIndex = App.GetSetting("PrintDuplexBinding") == "1" ? 1 : 0;   // restore
+            System.Windows.Automation.AutomationProperties.SetName(_flipCombo, S("Str_Print_FlipOn"));
+            _duplexShort = App.GetSetting("PrintDuplexBinding") == "1";   // restore last binding
+            _flipCombo.SelectedIndex = _duplexShort ? 1 : 0;
             _flipCombo.SelectionChanged += (_, _) =>
             {
                 _duplexShort = _flipCombo.SelectedIndex == 1;
